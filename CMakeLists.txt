@@ -61,9 +61,15 @@ include_directories(
 #    Source/"*.cpp"
 #)
 
-#set(Game_HEAD   Source/main.h)
+set(Game_HEAD   src/main.h
+                src/camera.h
+                src/keyCallback.h
+    )
 
-set(Game_SRC    src/main.cpp)
+set(Game_SRC    src/main.cpp
+                src/camera.cpp
+                src/keyCallback.cpp
+    )
 
 #message(${Game_SRC})
 #message(${Game_HEAD})
