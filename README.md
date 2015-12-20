@@ -1,5 +1,25 @@
 # G.A.T.E.S.
 
+G.A.T.E.S. is a game (demo) in an universe with several different planets. These planets are connected by gates (portals).
+The player will be able to chance the worlds. In a first step - he will only be able to change the height maps of the procedural generated planets.
+
+## Implementation goals
+### World Features
+- Several procedural generated worlds with specific properties
+    - Different gravities, surfaces
+- Connected by astonishing gates, inspired by "Stargates"
+    - Special effects if player is close to the gate
+- Deformable terrain
+
+### Graphics Features
+- Phong shading
+- Skybox
+- Normal mapping
+- Clouds
+- Vegetation
+- Water
+- Tesselation
+
 ## Dependencies:
 - glew
 - glfw3
