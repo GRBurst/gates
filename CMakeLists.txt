@@ -73,7 +73,7 @@ set(Game_SRC    src/main.cpp
 
 #message(${Game_SRC})
 #message(${Game_HEAD})
-#add_executable(game ${Game_SRC} ${Game_H})
-add_executable(game ${Game_SRC})
-target_link_libraries(game ${LIBRARIES} )
+add_executable(gates ${Game_SRC} ${Game_H})
+#add_executable(game ${Game_SRC})
+target_link_libraries(gates ${LIBRARIES} )
 
