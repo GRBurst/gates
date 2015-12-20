@@ -20,6 +20,9 @@
 
         ccmake ..
 
+    - After choosing compiler and build type, run configure by typing "c"
+    - Generate makefiles by typing "g" for generation
+
 ## Compile G.A.T.E.S.
 Compile by simply running make in the build folder
 
