@@ -124,7 +124,7 @@ int main(){
         exit(-1);
     }
 
-    glewExperimental=true; // Needed in core profile
+    glewExperimental = true; // Needed in core profile
     if (glewInit() != GLEW_OK) {
         fprintf(stderr, "Failed to initialize GLEW\n");
         return -1;
