@@ -13,11 +13,11 @@ class Shader
         Shader();
         enum ShaderType
         {
-            Fragment = 0,
-            Vertex,
-            TesselationControl,
-            TesselationEvaluation,
-            Geometry
+            FRAGMENT = 0,
+            VERTEX,
+            TESS_CONTROL,
+            TESS_EVAL,
+            GEOMETRY
         };
 
         GLint loadShader(const char* shaderPath, ShaderType type);
@@ -25,9 +25,9 @@ class Shader
 
 
     private:
-        void printProgramSuccess(GLint program);
-        void printShaderSuccess(GLint shader);
-        string readFile(const char *filePath);
+        bool programSuccess(GLint program);
+        bool shaderSuccess(GLint shader);
+        std::string readFile(const char *filePath);
 
         GLint shaderArray[5] = {0};
 };

@@ -23,7 +23,8 @@ string Shader::readFile(const char *filePath){
 	return content;
 }
 
-bool Shader::shaderSuccess(GLint shader){
+bool Shader::shaderSuccess(GLint shader)
+{
 	GLint success;
 	GLchar infoLog[512];
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
@@ -35,14 +36,16 @@ bool Shader::shaderSuccess(GLint shader){
     return true;
 }
 
-void Shader::printProgramSuccess(GLint program){
+bool Shader::programSuccess(GLint program){
 	GLint success;
 	GLchar infoLog[512];
 	glGetProgramiv(program, GL_LINK_STATUS, &success);
 	if(!success){
 		glGetProgramInfoLog(program, 512, NULL, infoLog);
 		cerr << "Fehler ShaderProgram: " << infoLog << endl;
+        return false;
 	}
+    return true;
 }
 
 GLint Shader::loadShader(const char *shaderPath, ShaderType type)
@@ -51,11 +54,11 @@ GLint Shader::loadShader(const char *shaderPath, ShaderType type)
     GLenum glShaderType;
     switch(type)
     {
-        case ShaderType.Fragment                : glShaderType = GL_FRAGMENT_SHADER; break;
-        case ShaderType.Vertex                  : glShaderType = GL_VERTEX_SHADER; break;
-        case ShaderType.TesselationControl      : glShaderType = GL_TESS_CONTROL_SHADER; break;
-        case ShaderType.TesselationEvaluation   : glShaderType = GL_TESS_EVALUATION_SHADER; break;
-        case ShaderType.Geometry                : glShaderType = GL_GEOMETRY_SHADER; break;
+        case FRAGMENT       : glShaderType = GL_FRAGMENT_SHADER; break;
+        case VERTEX         : glShaderType = GL_VERTEX_SHADER; break;
+        case TESS_CONTROL   : glShaderType = GL_TESS_CONTROL_SHADER; break;
+        case TESS_EVAL      : glShaderType = GL_TESS_EVALUATION_SHADER; break;
+        case GEOMETRY       : glShaderType = GL_GEOMETRY_SHADER; break;
     }
     GLint shaderRef     = glCreateShader( glShaderType );
 
@@ -70,20 +73,22 @@ GLint Shader::loadShader(const char *shaderPath, ShaderType type)
     return shaderRef;
 }
 
-GLint Shader::linkShader(){
+GLint Shader::linkShaders(){
 
 	GLint shaderProgram;
 	shaderProgram = glCreateProgram();
 
     // Attach shaders
     for(GLint shaderElement : shaderArray)
-	    if(shader != 0) glAttachShader(shaderProgram, shaderElement);
+	    if(shaderElement != 0) glAttachShader(shaderProgram, shaderElement);
 	
     glLinkProgram(shaderProgram);
 
+    programSuccess(shaderProgram);
+
     // Delete Shaders
     for(GLint shaderElement : shaderArray)
-	    if(shader != 0) glDeleteShader(shaderProgram, shaderElement);
+	    if(shaderElement != 0) glDeleteShader(shaderElement);
 
     return shaderProgram;
 }
