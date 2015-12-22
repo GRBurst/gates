@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-
+#include "Shader.h"
 #include "keyCallback.h"
 
 using namespace glm;
@@ -97,6 +97,7 @@ void initOpenGL()
     glClearColor( 0.0, 0.0, 0.0, 1.0 );
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LESS );
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void resizeCallback( GLFWwindow* p, int newWidth, int newHeight )
@@ -129,19 +130,27 @@ int main(){
         fprintf(stderr, "Failed to initialize GLEW\n");
         return -1;
     }
+
     initOpenGL();
 
-
+    Shader shader;
+    shader.loadShader("../src/shader/triangle.vs", Shader::VERTEX);
+    shader.loadShader("../src/shader/triangle.fs", Shader::FRAGMENT);
+    GLint prog = shader.linkShaders();
+    glUseProgram(prog);
     // Ensure we can capture the escape key being pressed below
     glfwSetKeyCallback( window, key_callback );
     glfwSetWindowSizeCallback( window, resizeCallback );
 
     while(!(glfwWindowShouldClose(window)))
     {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(0.0, 0.0, 0.0, 1.0);
         // Draw nothing, see you in tutorial 2 !
         // Swap buffers
-        glfwSwapBuffers(window);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
         glfwPollEvents();
+        glfwSwapBuffers( window );
     }
 
 }

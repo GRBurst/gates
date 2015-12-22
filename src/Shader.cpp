@@ -1,12 +1,10 @@
-/*
- * readFile.cpp
- *
- *  Created on: Apr 25, 2015
- *      Author: adrian
- */
 #include "Shader.h"
 
 using namespace std;
+
+Shader::Shader(){
+
+}
 
 string Shader::readFile(const char *filePath){
 	string content;
@@ -30,7 +28,7 @@ bool Shader::shaderSuccess(GLint shader)
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 	if(!success){
 		glGetShaderInfoLog(shader, 512, NULL, infoLog);
-		cerr << "Fehler VertexShader: " << endl << infoLog << endl;
+		cerr << "Fehler: " << shader << endl << infoLog << endl;
         return false;
 	}
     return true;
@@ -50,16 +48,23 @@ bool Shader::programSuccess(GLint program){
 
 GLint Shader::loadShader(const char *shaderPath, ShaderType type)
 {
-    const GLchar* file  = readFile(shaderPath).c_str();
+    string tmpFile = readFile(shaderPath);
+
+    const GLchar* file  = tmpFile.c_str();
     GLenum glShaderType;
+
+    cout << "shader filedata: " << readFile(shaderPath) << endl;
+    printf("Load shader from %s\n", shaderPath);
     switch(type)
     {
-        case FRAGMENT       : glShaderType = GL_FRAGMENT_SHADER; break;
-        case VERTEX         : glShaderType = GL_VERTEX_SHADER; break;
-        case TESS_CONTROL   : glShaderType = GL_TESS_CONTROL_SHADER; break;
-        case TESS_EVAL      : glShaderType = GL_TESS_EVALUATION_SHADER; break;
-        case GEOMETRY       : glShaderType = GL_GEOMETRY_SHADER; break;
+        case FRAGMENT       : glShaderType = GL_FRAGMENT_SHADER; printf("Detected FRAGMENT shader!\n"); break;
+        case VERTEX         : glShaderType = GL_VERTEX_SHADER; printf("Detected VERTEX shader!\n"); break;
+        case TESS_CONTROL   : glShaderType = GL_TESS_CONTROL_SHADER; printf("Detected TESS_CONTROL shader!\n"); break;
+        case TESS_EVAL      : glShaderType = GL_TESS_EVALUATION_SHADER; printf("Detected TESS_EVAL shader!\n"); break;
+        case GEOMETRY       : glShaderType = GL_GEOMETRY_SHADER; printf("Detected GEOMETRY shader!\n"); break;
     }
+
+
     GLint shaderRef     = glCreateShader( glShaderType );
 
 	glShaderSource(shaderRef, 1, &file, NULL);
@@ -76,7 +81,7 @@ GLint Shader::loadShader(const char *shaderPath, ShaderType type)
 GLint Shader::linkShaders(){
 
 	GLint shaderProgram;
-	shaderProgram = glCreateProgram();
+    shaderProgram = glCreateProgram();
 
     // Attach shaders
     for(GLint shaderElement : shaderArray)
