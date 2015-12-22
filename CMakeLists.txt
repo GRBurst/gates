@@ -64,11 +64,13 @@ include_directories(
 set(Game_HEAD   src/main.h
                 src/camera.h
                 src/keyCallback.h
+                src/Shader.h
     )
 
 set(Game_SRC    src/main.cpp
                 src/camera.cpp
                 src/keyCallback.cpp
+                src/Shader.cpp
     )
 
 #message(${Game_SRC})
