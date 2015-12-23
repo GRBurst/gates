@@ -27,6 +27,7 @@ class Shader
     private:
         bool programSuccess(GLint program);
         bool shaderSuccess(GLint shader);
+        bool shaderReady();
         std::string readFile(const char *filePath);
 
         GLint shaderArray[5] = {0};

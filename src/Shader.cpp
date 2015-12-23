@@ -51,10 +51,10 @@ GLint Shader::loadShader(const char *shaderPath, ShaderType type)
     string tmpFile = readFile(shaderPath);
 
     const GLchar* file  = tmpFile.c_str();
-    GLenum glShaderType;
+    GLenum glShaderType = 0;
 
-    cout << "shader filedata: " << readFile(shaderPath) << endl;
-    printf("Load shader from %s\n", shaderPath);
+    cout << "shader filedata: " << endl << readFile(shaderPath) << endl;
+
     switch(type)
     {
         case FRAGMENT       : glShaderType = GL_FRAGMENT_SHADER; printf("Detected FRAGMENT shader!\n"); break;
@@ -64,9 +64,10 @@ GLint Shader::loadShader(const char *shaderPath, ShaderType type)
         case GEOMETRY       : glShaderType = GL_GEOMETRY_SHADER; printf("Detected GEOMETRY shader!\n"); break;
     }
 
+    if(glShaderType == 0)
+        return 0;
 
-    GLint shaderRef     = glCreateShader( glShaderType );
-
+    GLint shaderRef = glCreateShader( glShaderType );
 	glShaderSource(shaderRef, 1, &file, NULL);
 	glCompileShader(shaderRef);
 
@@ -78,7 +79,21 @@ GLint Shader::loadShader(const char *shaderPath, ShaderType type)
     return shaderRef;
 }
 
+bool Shader::shaderReady()
+{
+    for(GLint shaderElement : shaderArray)
+	    if(shaderElement != 0) return true;
+
+    return false;
+}
+
 GLint Shader::linkShaders(){
+
+    if(!shaderReady())
+    {
+        cerr << "Can not link shader(s). None loaded yet!" << endl;
+        return 0;
+    }
 
 	GLint shaderProgram;
     shaderProgram = glCreateProgram();
