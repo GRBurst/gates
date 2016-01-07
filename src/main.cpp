@@ -95,9 +95,9 @@ void initOpenGL()
 
     glViewport(0, 0, wWidth, wHeight);
     glClearColor( 0.0, 0.0, 0.0, 1.0 );
-    glEnable( GL_DEPTH_TEST );
-    glDepthFunc( GL_LESS );
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    //glEnable( GL_DEPTH_TEST );
+    //glDepthFunc( GL_LESS );
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void resizeCallback( GLFWwindow* p, int newWidth, int newHeight )
@@ -137,21 +137,56 @@ int main(){
     shader.loadShader("../src/shader/triangle.vs", Shader::VERTEX);
     shader.loadShader("../src/shader/triangle.fs", Shader::FRAGMENT);
     GLint prog = shader.linkShaders();
-    glUseProgram(prog);
+    //Outsource
+
+    GLuint posAttrib = glGetAttribLocation(prog, "vPosition");
+    GLuint VAO;
+
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    GLfloat vertexBuffer[] = {
+    		-1.0f, -1.0f, 0.0f,
+			1.0f, -1.0f, 0.0f,
+   		    0.0f,  1.0f, 0.0f,
+    };
+
+    GLuint VBO;
+    glGenBuffers(1, &VBO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexBuffer), vertexBuffer, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(posAttrib);
+    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*) 0);
+    glBindVertexArray(0);
+    //set Uniforms
+    //GLint mvpMat = glGetUniformLocation(prog, "ModelViewProjectionMatrix");
     // Ensure we can capture the escape key being pressed below
     glfwSetKeyCallback( window, key_callback );
     glfwSetWindowSizeCallback( window, resizeCallback );
 
     while(!(glfwWindowShouldClose(window)))
     {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    	glUseProgram(prog);
+        glClear(GL_COLOR_BUFFER_BIT);
         glClearColor(0.0, 0.0, 0.0, 1.0);
-
+        //neu
+        glEnableVertexAttribArray(0);
+        glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
-
+        //neu
+        glBindVertexArray(0);
+        glDisableVertexAttribArray(0);
+        //processInput
         glfwPollEvents();
 
         glfwSwapBuffers( window );
+
     }
+    // Cleanup VBO
+	glDeleteBuffers(1, &VBO);
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteProgram(prog);
 
 }
