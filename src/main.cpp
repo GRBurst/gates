@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <chrono>
 #include "Shader.h"
 #include "keyCallback.h"
 
@@ -10,6 +11,14 @@ using namespace glm;
 
 unsigned int wWidth = 1024, wHeight = 768;
 GLFWwindow* window;
+
+const int UPDATES_PER_SECOND = 60;
+const int MAX_FRAMESKIP = 10;
+const float frameTime = 1.0 / UPDATES_PER_SECOND;
+//std::chrono::time_point<std::chrono::steady_clock, std::chrono::milliseconds> oldTime;
+//std::chrono::time_point<std::chrono::steady_clock, std::chrono::milliseconds> newTime = std::chrono::steady_clock::now();;
+float oldTime, newTime;
+int loops;
 
 void debugCallback(GLenum source, GLenum type, GLuint id,
                    GLenum severity, GLsizei length,
@@ -97,7 +106,7 @@ void initOpenGL()
     glClearColor( 0.0, 0.0, 0.0, 1.0 );
     //glEnable( GL_DEPTH_TEST );
     //glDepthFunc( GL_LESS );
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void resizeCallback( GLFWwindow* p, int newWidth, int newHeight )
@@ -107,6 +116,14 @@ void resizeCallback( GLFWwindow* p, int newWidth, int newHeight )
 
     //resizeCallback( wWidth, wHeight );glViewport( 0, 0, newWidth, newHeight );
     glViewport( 0, 0, newWidth, newHeight );
+
+}
+
+void updateGame(){
+
+}
+
+void displayFrame(){
 
 }
 
@@ -146,9 +163,9 @@ int main(){
     glBindVertexArray(VAO);
 
     GLfloat vertexBuffer[] = {
-    		-1.0f, -1.0f, 0.0f,
-			1.0f, -1.0f, 0.0f,
-   		    0.0f,  1.0f, 0.0f,
+    		-1.0f, -1.0f, -0.5f,
+			1.0f, -1.0f, -0.6f,
+   		    0.0f,  1.0f, -1.0f,
     };
 
     GLuint VBO;
@@ -166,8 +183,19 @@ int main(){
     glfwSetKeyCallback( window, key_callback );
     glfwSetWindowSizeCallback( window, resizeCallback );
 
+    oldTime = glfwGetTime();
     while(!(glfwWindowShouldClose(window)))
     {
+    	loops = 0;
+    	//Update game logic
+    	//newTime = std::chrono::steady_clock::now();
+    	newTime = glfwGetTime();
+    	while (oldTime < newTime && loops < MAX_FRAMESKIP){
+    		//here update game
+    		newTime += frameTime;
+    		loops++;
+    	}
+    	//update Frame
     	glUseProgram(prog);
         glClear(GL_COLOR_BUFFER_BIT);
         glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -182,6 +210,7 @@ int main(){
         glfwPollEvents();
 
         glfwSwapBuffers( window );
+
 
     }
     // Cleanup VBO
