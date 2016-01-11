@@ -5,6 +5,7 @@
 #include <chrono>
 #include "Shader.h"
 #include "keyCallback.h"
+#include "Noise.h"
 
 
 using namespace glm;
@@ -184,6 +185,12 @@ int main(){
     glfwSetWindowSizeCallback( window, resizeCallback );
 
     oldTime = glfwGetTime();
+    //Noise Test
+    Noise noise(50, 30, Noise::PERLIN);
+    noise.generateNoise(2);
+    noise.saveToFile("texture.tga");
+
+    //
     while(!(glfwWindowShouldClose(window)))
     {
     	loops = 0;
