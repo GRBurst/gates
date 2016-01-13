@@ -33,7 +33,7 @@ class Noise
 		float getTexture();
 		bool saveToFile(const char* filename);
 	private:
-		int mSampleSize = 8;
+		int mSampleSize = 256;
 		int mWidth, mHeight, mSeed, mOctaves;
 		bool mStart = true;
 		double mFrequency, mAmplitude;

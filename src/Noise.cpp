@@ -78,8 +78,12 @@ void Noise::generateNoiseImage(){
 double Noise::perlinNoise2D(double x, double y){
 	double result = 0.0;
 	double amp = mAmplitude;
+	x = x / (double)mWidth;
+	y = y / (double)mHeight;
+	x *= mFrequency;
+	y *= mFrequency;
 	for(int i = 0; i < mOctaves; i++){
-		result += calculateNoiseValue(x / (double)mWidth, y / (double) mHeight);
+		result += calculateNoiseValue(x, y) * amp;
 		x *= 2.0;
 		y *= 2.0;
 		amp *= 0.5;
@@ -96,11 +100,14 @@ double Noise::calculateNoiseValue(double x, double y){
 	glm::ivec2 bx, by, b0, b1;
 	glm::dvec2 t, rx, ry, s, q;
 	t = inputVector + glm::dvec2(N, N);
+	//std::cout << t.x << ", " << t.y << std::endl;
 	bx.x = ((int)t.x) & (mSampleSize - 1);
 	bx.y = (bx.x + 1) & (mSampleSize - 1);
+	//std::cout << bx.x << ", " << bx.y << std::endl;
 	rx.x = t.x - (int)t.x;
 	rx.y = rx.x - 1.0;
-
+	//std::cout << rx.x << ", " << rx.y << std::endl;
+	//std::cin.get();
 	by.x = ((int)t.y) & (mSampleSize - 1);
 	by.y = (by.x + 1) & (mSampleSize - 1);
 	ry.x = t.y - (int)t.x;
@@ -110,8 +117,8 @@ double Noise::calculateNoiseValue(double x, double y){
 	j = mPermutationTable[bx.y];
 
 	b0.x = mPermutationTable[i + by.x];
-	b0.y = mPermutationTable[j + by.x];
-	b1.x = mPermutationTable[i + by.y];
+	b1.x = mPermutationTable[j + by.x];
+	b0.y = mPermutationTable[i + by.y];
 	b1.y = mPermutationTable[j + by.y];
 
 	s = interpolationPolynomial2D(glm::dvec2(rx.x, ry.x));
@@ -126,33 +133,30 @@ double Noise::calculateNoiseValue(double x, double y){
 	u = glm::dot(q, glm::dvec2(rx.x, ry.y));
 	q = glm::dvec2(mGradientTable2d.at(b1.y));
 	v = glm::dot(q, glm::dvec2(rx.y, ry.y));
-	b = lerp(s.y, u, v);
+	b = lerp(s.x, u, v);
 
 	return lerp(s.y, a, b);
 }
 
 glm::dvec2 Noise::interpolationPolynomial2D(glm::dvec2 vec){
-	double x, y;
-	//x = vec.x * vec.x * (3.0 -2.0 * vec.x)
 	return vec * vec * (3.0 - 2.0 * vec);
 }
 
 void Noise::initPermutationTable(){
 	std::default_random_engine generator(mSeed);
-	std::uniform_real_distribution<double> distribution (-1.0, 1.0);
 	iota(mPermutationTable.begin(), mPermutationTable.end(), 0);
 	std::cout << mPermutationTable.size() << std::endl;
-	for(std::vector<int>::iterator it = mPermutationTable.begin(); it != mPermutationTable.end(); it++){
-		std::cout << *it << std::endl;
-	}
+//	for(std::vector<int>::iterator it = mPermutationTable.begin(); it != mPermutationTable.end(); it++){
+//		std::cout << *it << std::endl;
+//	}
 	std::shuffle(mPermutationTable.begin(), mPermutationTable.end(), generator);
-	for(std::vector<int>::iterator it = mPermutationTable.begin(); it != mPermutationTable.end(); it++){
-		std::cout << *it << std::endl;
-	}
+//	for(std::vector<int>::iterator it = mPermutationTable.begin(); it != mPermutationTable.end(); it++){
+//		std::cout << *it << std::endl;
+//	}
 	mPermutationTable.insert(std::end(mPermutationTable), std::begin(mPermutationTable), std::end(mPermutationTable));
-	for(std::vector<int>::iterator it = mPermutationTable.begin(); it != mPermutationTable.end(); it++){
-		std::cout << *it << std::endl;
-	}
+//	for(std::vector<int>::iterator it = mPermutationTable.begin(); it != mPermutationTable.end(); it++){
+//		std::cout << *it << std::endl;
+//	}
 	std::cout << "XXXXXXXXXXXXXXX" << std::endl;
 
 }
@@ -201,7 +205,7 @@ void Noise::initGradientTable(){
 		return lerp(sy, a, b);*/
 
 
-double Noise::lerp(double x0, double x1, double alpha){
+double Noise::lerp(double alpha, double x0, double x1){
 	return x0 + alpha * (x1 - x0);
 }
 bool Noise:: saveToFile(const char* filename){
@@ -211,7 +215,8 @@ bool Noise:: saveToFile(const char* filename){
 		for (int x = 0; x < this-> mWidth; x++){
 			*it = (char)(mNoise[x][y] * 255);
 			it++;
-			std::cout<< (y + x) + y * mWidth << std::endl;
+			//std::cout<< (y + x) + y * mWidth << std::endl;
+			std::cout << mNoise[x][y] << std::endl;
 		}
 	}
 
