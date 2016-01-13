@@ -1,5 +1,7 @@
+#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <math.h>
 
 class Camera
 {
@@ -22,11 +24,11 @@ class Camera
         float getAspectRatio();
         void setAspectRatio(float aspectRatio);
 
-        glm::mat4 getFrustum();
-        void setFrustum(glm::mat4 frustum);
-        glm::mat4 getViewMatrix();
+        /* glm::mat4 getFrustum(); */
+        /* void setFrustum(glm::mat4 frustum); */
+        glm::mat4& getViewMatrix();
         void setViewMatrix(glm::mat4 viewMatrix);
-        glm::mat4 getProjectionMatrix();
+        glm::mat4& getProjectionMatrix();
         void setProjectionMatrix(glm::mat4 projectionMatrix);
 
         // Functions
@@ -35,13 +37,19 @@ class Camera
                         , const glm::vec3 &up = glm::vec3(0.0f, 1.0f, 0.0f)
                         );
 
+        // Adrian
+        void moveCamera(double &xpos, double &ypos, GLFWwindow* window);
+        void setDeltaTime(double &time);
+
     private:
 	    void buildFrustum(float fov, float ratio, float near, float far);
 
         glm::vec3   mCamPos;
         glm::vec3   mViewDirection;
+        glm::vec3   mUp;
+        glm::vec3   mRight;
 
-        glm::mat4   mFrustum;
+        /* glm::mat4   mFrustum; */
         glm::mat4   mViewMatrix;
         glm::mat4   mProjectionMatrix;
 
@@ -49,6 +57,11 @@ class Camera
         float       mFarPlane;
         float       mFieldOfViewHorizontal;
         float       mAspectRatio;
+        float       mHorizontalAngle;
+        float       mVerticalAngle;
 
+        double      mDeltaTime;
+        float       mMouseSpeed;
+        float       mCamSpeed;
 
 };
