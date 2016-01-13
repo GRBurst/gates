@@ -29,22 +29,26 @@ class Noise
 		virtual ~Noise();
 
 		void generate(int seed);
-		void generateNoise();
+		void generateNoiseImage();
 		float getTexture();
 		bool saveToFile(const char* filename);
 	private:
 		int mSampleSize = 8;
 		int mWidth, mHeight, mSeed, mOctaves;
+		bool mStart = true;
 		double mFrequency, mAmplitude;
+		glm::dvec2 interpolationPolynomial2D(glm::dvec2 vec);
 		std::vector<int> mPermutationTable;
 		std::vector<glm::dvec2> mGradientTable2d;
 		double** mGradientNoise;
 		double** mNoise;
-		void perlin(double x, double y);
-		void blend();
+		double perlinNoise2D(double x, double y);
+		double calculateNoiseValue(double x, double y);
+		void initPermutationTable();
+		void initGradientTable();
 
 		double gradient();
-		double lerp(double x0, double x1, double alpha);
+		double lerp(double alpha, double x0, double x1);
 
 };
 
