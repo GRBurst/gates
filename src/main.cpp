@@ -6,6 +6,7 @@
 #include "Shader.h"
 #include "keyCallback.h"
 #include "Noise.h"
+#include "camera.h"
 
 
 using namespace glm;
@@ -15,7 +16,7 @@ GLFWwindow* window;
 
 const int UPDATES_PER_SECOND = 60;
 const int MAX_FRAMESKIP = 10;
-const float frameTime = 1.0 / UPDATES_PER_SECOND;
+double frameTime = 1.0 / UPDATES_PER_SECOND;
 //std::chrono::time_point<std::chrono::steady_clock, std::chrono::milliseconds> oldTime;
 //std::chrono::time_point<std::chrono::steady_clock, std::chrono::milliseconds> newTime = std::chrono::steady_clock::now();;
 float oldTime, newTime;
@@ -105,8 +106,8 @@ void initOpenGL()
 
     glViewport(0, 0, wWidth, wHeight);
     glClearColor( 0.0, 0.0, 0.0, 1.0 );
-    //glEnable( GL_DEPTH_TEST );
-    //glDepthFunc( GL_LESS );
+    glEnable( GL_DEPTH_TEST );
+    glDepthFunc( GL_LESS );
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
@@ -191,6 +192,8 @@ int main(){
     noise.saveToFile("texture.tga");
 
     //
+    Camera camera;
+
     while(!(glfwWindowShouldClose(window)))
     {
     	loops = 0;
@@ -198,9 +201,15 @@ int main(){
     	//newTime = std::chrono::steady_clock::now();
     	newTime = glfwGetTime();
     	while (oldTime < newTime && loops < MAX_FRAMESKIP){
-    		//here update game
+    		//here update game   glfwPollEvents();
+    	   	double xpos, ypos;
+    	   	glfwGetCursorPos(window, &xpos, &ypos);
+
+    		camera.moveCamera(xpos, ypos, window);
     		newTime += frameTime;
+    		camera.setDeltaTime(frameTime);
     		loops++;
+    		std::cout << "Pos(x, y): " << camera.getCamPos().x <<", " << camera.getCamPos().y << std::endl;
     	}
     	//update Frame
     	glUseProgram(prog);
