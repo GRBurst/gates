@@ -34,6 +34,9 @@ public:
 	void draw();
 	void draw(GLuint &locations);
 	void setProjection(mat4 &projection);
+	void setView(mat4 &view);
+	void setMVP();
+	void scale(vec3 &scale);
 private:
 	GLuint VBO, VAO, modelLocation, projectionLocation, viewLocation, MVPLocation, MVLocation, MV3Location, lightLoc, cameraLoc;
 	GLint shaderProgram;
@@ -61,7 +64,7 @@ private:
 	/* Texture *heightmap; */
 	void setVerticesAsArray();
 	void setStride();
-	void setMVP();
+
 	void calculateTangents();
 	vector<vec3> getVertices();
 	vector<vec2> getUVs();
@@ -70,11 +73,11 @@ private:
 
 	void changeShader(GLint &shaderProgram);
 	/* void loadTexture(); */
-	void setView(mat4 &view);
+	GLenum err = GL_NO_ERROR;
 
 	void translate(vec3 &trans);
 	void rotateAroundSelf(float &angle, vec3 &axis);
-	void scale(vec3 &scale);
+
 	void rotateAroundAxis(float &angle, vec3 &axis);
 	void backToCenter();
 	/* int vertexCount, normalCount, uvCount, faces, textureCount; */

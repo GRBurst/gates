@@ -65,7 +65,7 @@ bool createWindow()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //No old OpenGL 
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); //Make MacOS happy
+   // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); //Make MacOS happy
 
 
     // 4x antialiasing
@@ -152,21 +152,27 @@ int main(){
     }
 
     initOpenGL();
-
+    GLenum err = GL_NO_ERROR;
     Shader shader;
     Camera camera;
+
     /* shader.loadShader("../src/shader/triangle.vs", Shader::VERTEX); */
     /* shader.loadShader("../src/shader/triangle.fs", Shader::FRAGMENT); */
     shader.loadShader("../src/shader/main.vs", Shader::VERTEX);
+    shader.loadShader("../src/shader/main.fs", Shader::FRAGMENT);
     GLint prog = shader.linkShaders();
+
     //Outsource
 
     ModelLoader *model = new ModelLoader("../objects/sphere.obj", prog);
 	model->loadFile();
-
+	model->setProjection(camera.getProjectionMatrix());
 	model->setBuffers();
 	model->setStandardUniformLocations();
-	model->setProjection(camera.getProjectionMatrix());
+	glm::vec3 scal(25,25,25);
+	model->scale(scal);
+	//model->setView(glm::mat4(1.0f));
+
 //    GLuint posAttrib = glGetAttribLocation(prog, "vPosition");
 //    GLuint VAO;
 //
@@ -222,10 +228,17 @@ int main(){
     	}
     	//update Frame
 //    	glUseProgram(prog);
-        glClear(GL_COLOR_BUFFER_BIT);
+    	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(0.0, 0.0, 0.0, 1.0);
+        err = glGetError();
+           if (err != GL_NO_ERROR)
+           	std::cout << "Fehler: " << err << std::endl;
         //neu
         model->draw();
+
+        err = glGetError();
+           if (err != GL_NO_ERROR)
+           	std::cout << "Fehler: " << err << std::endl;
         //processInput
         glfwPollEvents();
 
