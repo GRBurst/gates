@@ -35,16 +35,16 @@ include_directories(${GLEW_INCLUDE_DIRS})
 #target_link_libraries(${PROJECT_NAME} ${GLEW_LIBRARIES})
 
 # SOIL
-#include(FindSOIL.cmake)
-#if(NOT SOIL_FOUND)
-    #message(FATAL_ERROR "SOIL not found!")
-    #endif(NOT SOIL_FOUND)
-#include_directories(${SOIL_INCLUDE_DIR})
+include(cmake/FindSOIL.cmake)
+if(NOT SOIL_FOUND)
+    message(FATAL_ERROR "SOIL not found!")
+    endif(NOT SOIL_FOUND)
+include_directories(${SOIL_INCLUDE_DIR})
 #target_link_libraries(${PROJECT_NAME} ${SOIL_LIBRARY})
 
 # Set Libraries
-#set(LIBRARIES ${GLEW_LIBRARIES} ${SOIL_LIBRARY} ${GLFW_LIBRARIES} ${OPENGL_LIBRARY})
-set(LIBRARIES ${GLEW_LIBRARIES} ${GLFW_LIBRARIES} ${OPENGL_LIBRARY})
+set(LIBRARIES ${GLEW_LIBRARIES} ${SOIL_LIBRARY} ${GLFW_LIBRARIES} ${OPENGL_LIBRARY})
+#set(LIBRARIES ${GLEW_LIBRARIES} ${GLFW_LIBRARIES} ${OPENGL_LIBRARY})
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/src
