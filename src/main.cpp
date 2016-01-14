@@ -187,7 +187,7 @@ int main(){
 
     oldTime = glfwGetTime();
     //Noise Test
-    Noise noise(500, 500, Noise::PERLIN, 99, 4, 4.0, 1.0);
+    Noise noise(500, 500, Noise::PERLIN, 1231, 8, 2.0, 1.0);
     noise.generateNoiseImage();
     noise.saveToFile("texture.tga");
 

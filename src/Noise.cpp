@@ -91,6 +91,14 @@ double Noise::perlinNoise2D(double x, double y){
 	return result;
 }
 
+double Noise::clamp(double x, double min, double max){
+	if (x > max)
+		x = max;
+	if (x < min)
+		x = min;
+	return x;
+}
+
 double Noise::calculateNoiseValue(double x, double y){
 	int N = 4096;
 	glm::dvec2 inputVector(x, y);
@@ -141,11 +149,15 @@ double Noise::calculateNoiseValue(double x, double y){
 	b = lerp(s.x, u, v);
 
 
-	return (lerp(s.y, a, b) + 1) / 2;
+	return clamp(lerp(s.y, a, b), 0.0 , 1.0 ) ;
 }
 
+
+
 glm::dvec2 Noise::interpolationPolynomial2D(glm::dvec2 vec){
-	return vec * vec * (3.0 - 2.0 * vec);
+	double x = interpolationPolynomial2D(vec.x);
+	double y = interpolationPolynomial2D(vec.y);
+	return glm::dvec2(x, y);
 }
 
 double Noise::interpolationPolynomial2D(double t){
