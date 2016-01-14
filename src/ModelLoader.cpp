@@ -13,6 +13,7 @@ ModelLoader::ModelLoader(const char* filePath, GLint shaderProgram) : VBO(0), VA
 	cout << "Successfully loaded" << endl;
 }
 
+<<<<<<< HEAD
 ModelLoader::ModelLoader(const char* filePath, const char* imagePath,  GLint shaderProgram) : ModelLoader::ModelLoader(filePath, shaderProgram){
 	texture = new Texture(imagePath);
 	textureCount = 1;
@@ -29,6 +30,28 @@ ModelLoader::ModelLoader(const char* filePath, const char* imagePath, const char
 	heightmap = new Texture(heightMapPath);
 	textureCount = 3;
 }
+=======
+/* ModelLoader::ModelLoader(const char* filePath, const char* imagePath,  GLint shaderProgram) : */
+/*     ModelLoader::ModelLoader(filePath, shaderProgram) */
+/* { */
+/* 	texture = new Texture(imagePath); */
+/* 	textureCount = 1; */
+/* } */
+
+/* ModelLoader::ModelLoader(const char* filePath, const char* imagePath, const char* normalMapPath, GLint shaderProgram) : */
+/*     ModelLoader::ModelLoader(filePath, imagePath, shaderProgram) */
+/* { */
+/* 	normalmap = new Texture(normalMapPath); */
+/* 	textureCount = 2; */
+/* } */
+
+/* ModelLoader::ModelLoader(const char* filePath, const char* imagePath, const char* normalMapPath, const char* heightMapPath, GLint shaderProgram) : */
+/*     ModelLoader::ModelLoader(filePath, imagePath, normalMapPath, shaderProgram) */
+/* { */
+/* 	heightmap = new Texture(heightMapPath); */
+/* 	textureCount = 3; */
+/* } */
+>>>>>>> d9082f9e9c64692061f34e4f5c4b42ba85a67707
 
 
 ModelLoader::~ModelLoader(){

@@ -22,9 +22,9 @@ class ModelLoader
 friend class GameObject;
 public:
 	ModelLoader(const char* filePath, GLint shaderProgram);
-	ModelLoader(const char* filePath, const char* imagePath, GLint shaderProgram);
-	ModelLoader(const char* filePath, const char* imagePath, const char* normalMapPath, GLint shaderProgram);
-	ModelLoader(const char* filePath, const char* imagePath, const char* normalMapPath, const char* heightMapPath, GLint shaderProgram);
+	/* ModelLoader(const char* filePath, const char* imagePath, GLint shaderProgram); */
+	/* ModelLoader(const char* filePath, const char* imagePath, const char* normalMapPath, GLint shaderProgram); */
+	/* ModelLoader(const char* filePath, const char* imagePath, const char* normalMapPath, const char* heightMapPath, GLint shaderProgram); */
 	~ModelLoader();
 
 
