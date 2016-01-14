@@ -47,7 +47,7 @@ class Noise
 		double calculateNoiseValue(double x, double y);
 		void initPermutationTable();
 		void initGradientTable();
-
+		double clamp(double x, double min, double max);
 		double gradient();
 		double lerp(double alpha, double x0, double x1);
 
