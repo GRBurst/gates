@@ -12,7 +12,7 @@
 #include <iostream>
 #include <fstream>
 #include <SOIL/SOIL.h>
-#include "Texture.h"
+/* #include "Texture.h" */
 
 using namespace std;
 using namespace glm;
@@ -51,9 +51,9 @@ private:
 	mat4 invMV;
 	ifstream *fileStream;
 	GLfloat *vertexBuffer;
-	Texture *texture;
-	Texture *normalmap;
-    	Texture *heightmap;
+	/* Texture *texture; */
+	/* Texture *normalmap; */
+	/* Texture *heightmap; */
 	void setVerticesAsArray();
 	void setStride();
 	void setStandardUniforms();
@@ -70,7 +70,7 @@ private:
 	void changeShader(GLint &shaderProgram);
 	void setStandardUniformLocations();
 	void setStandardTexAttribLocations();
-	void loadTexture();
+	/* void loadTexture(); */
 	void setView(mat4 &view);
 	void setProjection(mat4 &projection);
 	void translate(vec3 &trans);
@@ -78,7 +78,8 @@ private:
 	void scale(vec3 &scale);
 	void rotateAroundAxis(float &angle, vec3 &axis);
 	void backToCenter();
-	int vertexCount, normalCount, uvCount, faces, textureCount;
+	/* int vertexCount, normalCount, uvCount, faces, textureCount; */
+	int vertexCount, normalCount, uvCount, faces;
 };
 
 
