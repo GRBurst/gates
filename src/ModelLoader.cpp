@@ -182,11 +182,11 @@ vector<vec3> ModelLoader::getVertices(){
 	return fileVertices;
 }
 void ModelLoader::setStride(){
-
-	if (!this->fileVertices.empty() && !this->fileNormals.empty() && !this->fileUvs.empty()){
+	std::cout << vertexIndices.size() << std::endl;
+	if (!this->fileVertices.empty() && !this->fileUvs.empty()){// && !this->fileNormals.empty()
 
 		for(unsigned long i = 0; i < vertexIndices.size(); i++){
-			//std::cout << "HIERE" << std::endl;
+			//std::cout << i << std::endl;
 			vertices.push_back(this->fileVertices.at(vertexIndices.at(i)-1));
 		}
 
@@ -201,7 +201,7 @@ void ModelLoader::setStride(){
 		}
 		GLfloat *saveBuffer;
 
-		this->calculateTangents();
+		//this->calculateTangents();
 
 		vertexBuffer = new GLfloat[vertices.size() * 3 + uvs.size() * 2];// + tangents.size() * 3 + bitangents.size() * 3+ normals.size() * 3 ];
 		saveBuffer = vertexBuffer;
@@ -212,6 +212,7 @@ void ModelLoader::setStride(){
 			saveBuffer++;
 			*saveBuffer = vertices.at(i).z;
 			saveBuffer++;
+			//std::cout << vertices.at(i).x << ", " << vertices.at(i).y << ", " << vertices.at(i).z << std::endl;
 //			*saveBuffer = normals.at(i).x;
 //			saveBuffer++;
 //			*saveBuffer = normals.at(i).y;
@@ -261,12 +262,12 @@ void ModelLoader::setVerticesAsArray(){
 
 }
 void ModelLoader::setBuffers(){
-	this->setVerticesAsArray();
+	this->setStride();
 	cout << "Buffers for "<< shaderProgram << " set" << endl;
 
 	GLint posAttrib = glGetAttribLocation(shaderProgram, "vPosition");
 	/* GLint normAttrib = glGetAttribLocation(shaderProgram, "normal"); */
-	//GLint uvAttrib = glGetAttribLocation(shaderProgram, "vUV");
+	GLint uvAttrib = glGetAttribLocation(shaderProgram, "vUV");
 
 	/* GLint tanAttrib = glGetAttribLocation(shaderProgram, "tangent"); */
 	/* GLint bitAttrib = glGetAttribLocation(shaderProgram, "bitangent"); */
@@ -278,13 +279,13 @@ void ModelLoader::setBuffers(){
 
 	//Binde VBO an VAO
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, (vertexCount * 3) * sizeof(GLfloat), vertexBuffer, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, (vertices.size() * 3 + vertices.size() * 2) * sizeof(GLfloat), vertexBuffer, GL_STATIC_DRAW);
 	//location, attribute size vec3, data type, bool normalized?, stride size, offset to first dataobject in array
 //	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 //	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), elementBuffer, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*) 0);
+	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*) 0);
 
 	/* glEnableVertexAttribArray(normAttrib); */
 	/* glVertexAttribPointer(normAttrib, 3, GL_FLOAT, GL_TRUE, 14 * sizeof(GLfloat), (GLvoid*) (3 * sizeof(GLfloat))); */
@@ -292,8 +293,8 @@ void ModelLoader::setBuffers(){
 	/* glVertexAttribPointer(tanAttrib, 3, GL_FLOAT, GL_TRUE, 14 * sizeof(GLfloat), (GLvoid*) (6 * sizeof(GLfloat))); */
 	/* glEnableVertexAttribArray(bitAttrib); */
 	/* glVertexAttribPointer(bitAttrib, 3, GL_FLOAT, GL_TRUE, 14 * sizeof(GLfloat), (GLvoid*) (9 * sizeof(GLfloat))); */
-//	glEnableVertexAttribArray(uvAttrib);
-//	glVertexAttribPointer(uvAttrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*) (3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(uvAttrib);
+	glVertexAttribPointer(uvAttrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*) (3 * sizeof(GLfloat)));
 
 	//Unbind VBO
 	//Setze Texture in ShaderProgram an TEXTURE0
@@ -320,6 +321,7 @@ void ModelLoader::setBuffers(){
 //Besser zu GameObject draw Call bewegen
 void ModelLoader::draw(){
 	glUseProgram(shaderProgram);
+
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, value_ptr(model));
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, value_ptr(view));
 	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, value_ptr(projection));
@@ -329,7 +331,7 @@ void ModelLoader::draw(){
 	glUniform3f(lightLoc, lightPosition.x, lightPosition.y, lightPosition.z);
 	glUniform3f(cameraLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+	glDrawArrays(GL_TRIANGLES, 0, vertexCount );
 
 	/* if (textureCount >= 1) */
 	/* 	texture->bind(); */
@@ -345,6 +347,7 @@ void ModelLoader::draw(){
 
 void ModelLoader::setStandardUniformLocations(){
 	cout << "Uniform locations for "<< shaderProgram << " set" << endl;
+
 	modelLocation = glGetUniformLocation(shaderProgram, "M");
 	viewLocation = glGetUniformLocation(shaderProgram, "V");
 	projectionLocation = glGetUniformLocation(shaderProgram, "P");
@@ -353,6 +356,7 @@ void ModelLoader::setStandardUniformLocations(){
 	MV3Location = glGetUniformLocation(shaderProgram, "MV3");
 	lightLoc = glGetUniformLocation(shaderProgram, "light_position");
 	cameraLoc = glGetUniformLocation(shaderProgram, "camera_position");
+
 	cout <<  MVPLocation << endl;
 }
 
