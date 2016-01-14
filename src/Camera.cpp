@@ -11,7 +11,7 @@ Camera::Camera() :
     , mVerticalAngle(0.0f)
     /* , mDeltaTime(0.0) */
     , mMouseSpeed(0.001f)
-    , mCamSpeed(0.05f)
+    , mCamSpeed(1.0f)
 {
 }
 
@@ -93,54 +93,3 @@ void Camera::processMouse(float rotH, float rotV)
     std::cout << "mPos: x = " << mPos.x << ", y = " << mPos.y << ", z = " << mPos.z << std::endl;
     std::cout << "mHorizontalAngle = " << mHorizontalAngle << ", mVerticalAngle = " << mVerticalAngle << std::endl;
 }
-
-
-
-
-
-
-
-// Deprecated
-
-/* void Camera::moveCamera(double &xpos, double &ypos, GLFWwindow* window){ */
-
-/* 	int width, height; */
-
-/* 	glfwGetWindowSize(window, &width, &height); */
-/* 	glfwSetCursorPos(window, width/2, height/2); */
-/* 	mHorizontalAngle += mMouseSpeed * float( width/2 - xpos ); */
-/* 	mVerticalAngle   += mMouseSpeed * float( height/2 - ypos ); */
-/*     mViewDirection = glm::vec3( */
-/* 				cos(mVerticalAngle) * sin(mHorizontalAngle), */
-/* 				sin(mVerticalAngle), */
-/* 				cos(mVerticalAngle) * cos(mHorizontalAngle) */
-/* 				); */
-/*     // Right vector */
-/* 	mRight = glm::vec3( */
-/* 			sin(mHorizontalAngle - 3.14f/2.0f), */
-/* 			0, */
-/* 			cos(mHorizontalAngle - 3.14f/2.0f) */
-/* 	); */
-/* 	// Up vector */
-/* 	mUp = cross( mRight, mViewDirection ); */
-/* 	// Move forward */
-/* 	if (glfwGetKey( window, GLFW_KEY_W ) == GLFW_PRESS){ */
-/* 			mPos += mViewDirection * (float)mDeltaTime * mCamSpeed; */
-/* 	} */
-/* 	// Move backward */
-/* 	if (glfwGetKey( window, GLFW_KEY_S ) == GLFW_PRESS){ */
-/* 			mPos -= mViewDirection * (float)mDeltaTime * mCamSpeed; */
-/* 	} */
-/* 	// Strafe right */
-/* 	if (glfwGetKey( window, GLFW_KEY_D ) == GLFW_PRESS){ */
-/* 			mPos += mRight * (float)mDeltaTime * mCamSpeed; */
-/* 	} */
-/* 	// Strafe left */
-/* 	if (glfwGetKey( window, GLFW_KEY_A ) == GLFW_PRESS){ */
-/* 			mPos -= mRight * (float)mDeltaTime * mCamSpeed; */
-/* 	} */
-/* } */
-
-/* void Camera::setDeltaTime(double &time){ */
-/* 	mDeltaTime = time; */
-/* } */
