@@ -182,11 +182,11 @@ vector<vec3> ModelLoader::getVertices(){
 	return fileVertices;
 }
 void ModelLoader::setStride(){
-
-	if (!this->fileVertices.empty() && !this->fileNormals.empty() && !this->fileUvs.empty()){
+	std::cout << vertexIndices.size() << std::endl;
+	if (!this->fileVertices.empty() && !this->fileUvs.empty()){// && !this->fileNormals.empty()
 
 		for(unsigned long i = 0; i < vertexIndices.size(); i++){
-			//std::cout << "HIERE" << std::endl;
+			//std::cout << i << std::endl;
 			vertices.push_back(this->fileVertices.at(vertexIndices.at(i)-1));
 		}
 
@@ -201,7 +201,7 @@ void ModelLoader::setStride(){
 		}
 		GLfloat *saveBuffer;
 
-		this->calculateTangents();
+		//this->calculateTangents();
 
 		vertexBuffer = new GLfloat[vertices.size() * 3 + uvs.size() * 2];// + tangents.size() * 3 + bitangents.size() * 3+ normals.size() * 3 ];
 		saveBuffer = vertexBuffer;
@@ -212,6 +212,7 @@ void ModelLoader::setStride(){
 			saveBuffer++;
 			*saveBuffer = vertices.at(i).z;
 			saveBuffer++;
+			std::cout << vertices.at(i).x << ", " << vertices.at(i).y << ", " << vertices.at(i).z << std::endl;
 //			*saveBuffer = normals.at(i).x;
 //			saveBuffer++;
 //			*saveBuffer = normals.at(i).y;

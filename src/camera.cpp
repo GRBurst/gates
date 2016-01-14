@@ -146,7 +146,8 @@ glm::mat4& Camera::getViewMatrix(){
             mCamPos+mViewDirection, // and looks here : at the same position, plus "direction"
             mUp                  // Head is up (set to 0,-1,0 to look upside-down)
 			);
-;
+//	std::cout << "view: " << mViewMatrix[0][0] << "< " << mViewMatrix[0][1] << "< " << mViewMatrix[0][2] << std::endl;
+	        //processInput
 	return mViewMatrix;
 }
 
