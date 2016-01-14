@@ -33,7 +33,7 @@ public:
 	void setStandardTexAttribLocations();
 	void draw();
 	void draw(GLuint &locations);
-
+	void setProjection(mat4 &projection);
 private:
 	GLuint VBO, VAO, modelLocation, projectionLocation, viewLocation, MVPLocation, MVLocation, MV3Location, lightLoc, cameraLoc;
 	GLint shaderProgram;
@@ -71,7 +71,7 @@ private:
 	void changeShader(GLint &shaderProgram);
 	/* void loadTexture(); */
 	void setView(mat4 &view);
-	void setProjection(mat4 &projection);
+
 	void translate(vec3 &trans);
 	void rotateAroundSelf(float &angle, vec3 &axis);
 	void scale(vec3 &scale);
