@@ -33,8 +33,8 @@ public:
 	void setStandardTexAttribLocations();
 	void draw();
 	void draw(GLuint &locations);
-	void setProjection(mat4 &projection);
-	void setView(mat4 &view);
+	void setProjection(mat4 projection);
+	void setView(mat4 view);
 	void setMVP();
 	void scale(vec3 &scale);
 	void translate(vec3 &trans);

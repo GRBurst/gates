@@ -37,7 +37,6 @@ glm::mat4 Camera::getViewMatrix()
 // Functions
 glm::mat4 Camera::lookAt(const glm::vec3 &viewPos)
 {
-    setViewDirection(viewPos);
     return glm::lookAt(
             this->mPos,
             viewPos,
@@ -65,7 +64,7 @@ glm::vec3 Camera::getViewDirection() const
 
 glm::vec3 Camera::getUp() const
 {
-    return glm::normalize(glm::cross(getRight(), getViewMatrix()));
+    return glm::normalize(glm::cross(getRight(), getViewDirection()));
 }
 
 
@@ -76,14 +75,14 @@ void Camera::move( const glm::vec3 &dist )
 
 void Camera::rotate( const glm::vec2 &degree )
 {
-    this->mHorizontalAngle    =   (this->mHorizontalAngle   + glm::radians(degree.x)) % 314;
-    this->mVerticalAngle      =   (this->mVerticalAngle     + glm::radians(degree.y)) % 314;
+    this->mHorizontalAngle    =   fmodf(this->mHorizontalAngle   + glm::radians(degree.x), 314.0f);
+    this->mVerticalAngle      =   fmodf(this->mVerticalAngle     + glm::radians(degree.y), 314.0f);
 }
 
 void Camera::processMouse(float rotH, float rotV)
 {
-    this->mHorizontalAngle = (mMouseSpeed * (this->mHorizontalAngle + rotH)) % 314;
-    this->mVerticalAngle = (mMouseSpeed * (this->mVerticalAngle + rotV)) % 314;
+    this->mHorizontalAngle  = fmodf(mMouseSpeed * (this->mHorizontalAngle   + rotH), 314.0f);
+    this->mVerticalAngle    = fmodf(mMouseSpeed * (this->mVerticalAngle     + rotV), 314.0f);
 }
 
 

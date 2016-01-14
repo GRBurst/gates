@@ -11,30 +11,30 @@ class Camera
 	    ~Camera() {};
 
         // Getters & Setters
-        glm::vec3 Camera::getPos() const { return this->mPos; };
-        void Camera::setPos(const glm::vec3 &position) { this->mPos = position; };
+        glm::vec3 getPos() const { return this->mPos; };
+        void setPos(const glm::vec3 &position) { this->mPos = position; };
 
-        float Camera::getNearPlane() const { return this->mNearPlane; };
-        void Camera::setNearPlane(float nearPlane) { this->mNearPlane = nearPlane; };
+        float getNearPlane() const { return this->mNearPlane; };
+        void setNearPlane(float nearPlane) { this->mNearPlane = nearPlane; };
 
-        float Camera::getFarPlane() const { return this->mFarPlane; };
-        void Camera::setFarPlane(float farPlane) { this->mFarPlane = farPlane; };
+        float getFarPlane() const { return this->mFarPlane; };
+        void setFarPlane(float farPlane) { this->mFarPlane = farPlane; };
 
-        float Camera::getHFoV() const { return this->mHFoV; };
-        void Camera::setHFoV(float fov) { this->mHFoV = fov; };
+        float getHFoV() const { return this->mHFoV; };
+        void setHFoV(float fov) { this->mHFoV = fov; };
 
-        float Camera::getAspectRatio() const { return this->mAspectRatio; };
-        void Camera::setAspectRatio(float aspectRatio) { this->mAspectRatio = aspectRatio; }
+        float getAspectRatio() const { return this->mAspectRatio; };
+        void setAspectRatio(float aspectRatio) { this->mAspectRatio = aspectRatio; }
 
-        float Camera::getHorizontalAngle() const { return this->mHorizontalAngle; };
-        void Camera::setHorizontalAngle(float angle) { this->mHorizontalAngle = angle; }
+        float getHorizontalAngle() const { return this->mHorizontalAngle; };
+        void setHorizontalAngle(float angle) { this->mHorizontalAngle = angle; }
 
-        float Camera::getVerticalAngle() const { return this->mVerticalAngle; };
-        void Camera::setVerticalAngle(float angle) { this->mVerticalAngle = angle; }
+        float getVerticalAngle() const { return this->mVerticalAngle; };
+        void setVerticalAngle(float angle) { this->mVerticalAngle = angle; }
 
         // Calculatable matrizes from camera
-        glm::mat4& getViewMatrix();
-        glm::mat4& getProjectionMatrix();
+        glm::mat4 getViewMatrix();
+        glm::mat4 getProjectionMatrix();
 
         // Functions
         glm::mat4 lookAt(const glm::vec3 &viewPos = glm::vec3(0.0f, 0.0f, 0.0f));

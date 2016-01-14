@@ -7,7 +7,7 @@
 #include "Noise.h"
 #include "Camera.h"
 #include "ModelLoader.h"
-#include "inputCallback.h"
+/* #include "inputCallback.h" */
 
 
 using namespace glm;
@@ -22,6 +22,12 @@ double frameTime = 1.0 / UPDATES_PER_SECOND;
 //std::chrono::time_point<std::chrono::steady_clock, std::chrono::milliseconds> newTime = std::chrono::steady_clock::now();;
 float oldTime, newTime;
 int loops;
+
+Camera camera;
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
 void debugCallback(GLenum source, GLenum type, GLuint id,
                    GLenum severity, GLsizei length,
@@ -155,7 +161,6 @@ int main(){
     GLenum err = GL_NO_ERROR;
     err = glGetError();
     Shader shader;
-    Camera camera;
 
     /* shader.loadShader("../src/shader/triangle.vs", Shader::VERTEX); */
     /* shader.loadShader("../src/shader/triangle.fs", Shader::FRAGMENT); */
@@ -226,9 +231,9 @@ int main(){
 
     	   	glfwGetCursorPos(window, &xpos, &ypos);
 
-    		camera.moveCamera(xpos, ypos, window);
+    		/* camera.moveCamera(xpos, ypos, window); */
     		newTime += frameTime;
-    		camera.setDeltaTime(frameTime);
+    		/* camera.setDeltaTime(frameTime); */
     		loops++;
     		//std::cout << "Pos(x, y): " << camera.getCamPos().x <<", " << camera.getCamPos().y << std::endl;
     	}
@@ -257,4 +262,53 @@ int main(){
 //	glDeleteVertexArrays(1, &VAO);
 	glDeleteProgram(prog);
 
+}
+
+
+
+/* void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode, const Camera &camera, float deltaTime) */
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
+{
+    switch(key)
+    {
+        case GLFW_KEY_ESCAPE :
+            if(action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
+            break;
+        case GLFW_KEY_Q :
+            if(action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
+            break;
+        case GLFW_KEY_W :
+            if(action == GLFW_PRESS) camera.moveForward( float(frameTime) );
+            break;
+        case GLFW_KEY_S :
+            if(action == GLFW_PRESS) camera.moveBack( float(frameTime) );
+            break;
+        case GLFW_KEY_A :
+            if(action == GLFW_PRESS) camera.moveLeft( float(frameTime) );
+            break;
+        case GLFW_KEY_D :
+            if(action == GLFW_PRESS) camera.moveRight( float(frameTime) );
+            break;
+        default: std::cout << "Key has no function!" << std::endl;
+            break;
+    }
+        //mRight * (float)mDeltaTime * mCamSpeed
+}
+
+/* void mouse_callback(GLFWwindow* window, double xpos, double ypos, const Camera &camera) */
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    int width, height;
+
+    glfwGetWindowSize(window, &width, &height);
+    glfwSetCursorPos(window, width/2, height/2);
+
+    camera.processMouse(float( width/2 - xpos ), float( height/2 - ypos ));
+
+}
+
+/* void scroll_callback(GLFWwindow* window, double xoffset, double yoffset, const Camera &camera) */
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    // TODO
 }

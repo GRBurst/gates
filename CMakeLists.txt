@@ -62,7 +62,7 @@ include_directories(
 #)
 
 set(Game_HEAD   src/main.h
-                src/inputCallback.h
+    #src/inputCallback.h
                 src/Camera.h
                 src/Shader.h
                 src/Noise.h
@@ -70,7 +70,7 @@ set(Game_HEAD   src/main.h
     )
 
 set(Game_SRC    src/main.cpp
-                src/inputCallback.cpp
+    #src/inputCallback.cpp
                 src/Camera.cpp
                 src/Shader.cpp
                 src/Noise.cpp

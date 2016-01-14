@@ -364,12 +364,12 @@ void ModelLoader::changeShader(GLint &shaderProgram){
 	this->shaderProgram = shaderProgram;
 }
 
-void ModelLoader::setView(mat4 &view){
+void ModelLoader::setView(mat4 view){
 	this->view = view;
 	this->setMVP();
 }
 
-void ModelLoader::setProjection(mat4 &projection){
+void ModelLoader::setProjection(mat4 projection){
 	this->projection = projection;
 	this->setMVP();
 }

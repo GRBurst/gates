@@ -1,6 +1,7 @@
 #include "inputCallback.h"
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode, const Camera &camera)
+/* void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode, const Camera &camera, float deltaTime) */
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
     switch(key)
     {
@@ -11,16 +12,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             if(action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
             break;
         case GLFW_KEY_W :
-            if(action == GLFW_PRESS) camera.moveForward( float(mDeltaTime) );
+            if(action == GLFW_PRESS) camera.moveForward( float(deltaTime) );
             break;
         case GLFW_KEY_S :
-            if(action == GLFW_PRESS) camera.moveBack( float(mDeltaTime) );
+            if(action == GLFW_PRESS) camera.moveBack( float(deltaTime) );
             break;
         case GLFW_KEY_A :
-            if(action == GLFW_PRESS) camera.moveLeft( float(mDeltaTime) );
+            if(action == GLFW_PRESS) camera.moveLeft( float(deltaTime) );
             break;
         case GLFW_KEY_D :
-            if(action == GLFW_PRESS) camera.moveRight( float(mDeltaTime) );
+            if(action == GLFW_PRESS) camera.moveRight( float(deltaTime) );
             break;
         default: std::cout << "Key has no function!" << std::endl;
             break;
@@ -28,7 +29,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         //mRight * (float)mDeltaTime * mCamSpeed
 }
 
-void mouse_callback(GLFWwindow* window, double xpos, double ypos, const Camera &camera)
+/* void mouse_callback(GLFWwindow* window, double xpos, double ypos, const Camera &camera) */
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
     int width, height;
 
@@ -39,7 +41,8 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos, const Camera &
 
 }
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset, const Camera &camera)
+/* void scroll_callback(GLFWwindow* window, double xoffset, double yoffset, const Camera &camera) */
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     // TODO
 }
