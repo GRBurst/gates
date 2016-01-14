@@ -71,13 +71,7 @@ glm::vec3 Camera::getUp() const
 
 void Camera::move( const glm::vec3 &dist )
 {
-    glm::vec3 vd = getViewDirection();
-    std::cout << "mPos: x = " << mPos.x << ", y = " << mPos.y << ", z = " << mPos.z << std::endl;
     this->mPos += getViewDirection() * mCamSpeed * dist;
-    std::cout << "viewDirection: x = " << vd.x << ", y = " << vd.y << ", z = " << vd.z << std::endl;
-    std::cout << "camera speed = " << mCamSpeed << std::endl;
-    std::cout << "dist.x = " << dist.x << ", dist.y = " << dist.y << ", dist.z = " << dist.z << std::endl;
-    std::cout << "new mPos: x = " << mPos.x << ", y = " << mPos.y << ", z = " << mPos.z << std::endl;
 }
 
 void Camera::rotate( const glm::vec2 &degree )
@@ -90,6 +84,4 @@ void Camera::processMouse(float rotH, float rotV)
 {
     this->mHorizontalAngle  = fmodf(this->mHorizontalAngle   + (mMouseSpeed * rotH), 314.0f);
     this->mVerticalAngle    = fmodf(this->mVerticalAngle     + (mMouseSpeed * rotV), 314.0f);
-    std::cout << "mPos: x = " << mPos.x << ", y = " << mPos.y << ", z = " << mPos.z << std::endl;
-    std::cout << "mHorizontalAngle = " << mHorizontalAngle << ", mVerticalAngle = " << mVerticalAngle << std::endl;
 }
