@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include <iostream>
 
 Camera::Camera() :
     mPos(glm::vec3(0.0f, 0.0f, 0.0f))
@@ -10,7 +11,7 @@ Camera::Camera() :
     , mVerticalAngle(0.0f)
     /* , mDeltaTime(0.0) */
     , mMouseSpeed(0.001f)
-    , mCamSpeed(1.0f)
+    , mCamSpeed(0.05f)
 {
 }
 
@@ -70,19 +71,27 @@ glm::vec3 Camera::getUp() const
 
 void Camera::move( const glm::vec3 &dist )
 {
+    glm::vec3 vd = getViewDirection();
+    std::cout << "mPos: x = " << mPos.x << ", y = " << mPos.y << ", z = " << mPos.z << std::endl;
     this->mPos += getViewDirection() * mCamSpeed * dist;
+    std::cout << "viewDirection: x = " << vd.x << ", y = " << vd.y << ", z = " << vd.z << std::endl;
+    std::cout << "camera speed = " << mCamSpeed << std::endl;
+    std::cout << "dist.x = " << dist.x << ", dist.y = " << dist.y << ", dist.z = " << dist.z << std::endl;
+    std::cout << "new mPos: x = " << mPos.x << ", y = " << mPos.y << ", z = " << mPos.z << std::endl;
 }
 
 void Camera::rotate( const glm::vec2 &degree )
 {
-    this->mHorizontalAngle    =   fmodf(this->mHorizontalAngle   + glm::radians(degree.x), 314.0f);
-    this->mVerticalAngle      =   fmodf(this->mVerticalAngle     + glm::radians(degree.y), 314.0f);
+    this->mHorizontalAngle    = fmodf(this->mHorizontalAngle   + glm::radians(degree.x), 314.0f);
+    this->mVerticalAngle      = fmodf(this->mVerticalAngle     + glm::radians(degree.y), 314.0f);
 }
 
 void Camera::processMouse(float rotH, float rotV)
 {
-    this->mHorizontalAngle  = fmodf(mMouseSpeed * (this->mHorizontalAngle   + rotH), 314.0f);
-    this->mVerticalAngle    = fmodf(mMouseSpeed * (this->mVerticalAngle     + rotV), 314.0f);
+    this->mHorizontalAngle  = fmodf(this->mHorizontalAngle   + (mMouseSpeed * rotH), 314.0f);
+    this->mVerticalAngle    = fmodf(this->mVerticalAngle     + (mMouseSpeed * rotV), 314.0f);
+    std::cout << "mPos: x = " << mPos.x << ", y = " << mPos.y << ", z = " << mPos.z << std::endl;
+    std::cout << "mHorizontalAngle = " << mHorizontalAngle << ", mVerticalAngle = " << mVerticalAngle << std::endl;
 }
 
 

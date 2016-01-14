@@ -45,12 +45,12 @@ class Camera
 
         // Movements & rotations
         void move( const glm::vec3 &dist );
-        void moveRight( float dist = 1.0f ) { move( glm::vec3(dist,0,0) ); }
-        void moveLeft( float dist = 1.0f ) { move( glm::vec3(-dist,0,0) ); }
-        void moveUp( float dist = 1.0f ) { move( glm::vec3(0,dist,0) ); }
-        void moveDown( float dist = 1.0f ) { move( glm::vec3(0,-dist,0) ); }
-        void moveForward( float dist = 1.0f ) { move( glm::vec3(0,0,-dist) ); }
-        void moveBack( float dist = 1.0f ) { move( glm::vec3(0,0,dist) ); }
+        void moveRight( float dist = 1.0f ) { move( dist*getRight() ); }
+        void moveLeft( float dist = 1.0f ) { move( -dist*getRight() ); }
+        void moveUp( float dist = 1.0f ) { move( dist*getUp() ); }
+        void moveDown( float dist = 1.0f ) { move( -dist*getUp() ); }
+        void moveForward( float dist = 1.0f ) { move( glm::vec3(1,1,-1) ); }
+        void moveBack( float dist = 1.0f ) { move( glm::vec3(1,1,1) ); }
 
         void rotate( const glm::vec2 &degree );
         void turnRight( float degree ) { rotate( glm::vec2(degree,0) ); }

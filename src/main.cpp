@@ -278,16 +278,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             if(action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
             break;
         case GLFW_KEY_W :
-            if(action == GLFW_PRESS) camera.moveForward( float(frameTime) );
+            if(action == GLFW_REPEAT) camera.moveForward( float(frameTime) );
             break;
         case GLFW_KEY_S :
-            if(action == GLFW_PRESS) camera.moveBack( float(frameTime) );
+            if(action == GLFW_REPEAT) camera.moveBack( float(frameTime) );
             break;
         case GLFW_KEY_A :
-            if(action == GLFW_PRESS) camera.moveLeft( float(frameTime) );
+            if(action == GLFW_REPEAT) camera.moveLeft( float(frameTime) );
             break;
         case GLFW_KEY_D :
-            if(action == GLFW_PRESS) camera.moveRight( float(frameTime) );
+            if(action == GLFW_REPEAT) camera.moveRight( float(frameTime) );
             break;
         default: std::cout << "Key has no function!" << std::endl;
             break;
@@ -301,9 +301,9 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     int width, height;
 
     glfwGetWindowSize(window, &width, &height);
-    glfwSetCursorPos(window, width/2, height/2);
+    glfwSetCursorPos(window, width/2.0, height/2.0);
 
-    camera.processMouse(float( width/2 - xpos ), float( height/2 - ypos ));
+    camera.processMouse(float( width/2.0 - xpos ), float( height/2.0 - ypos ));
 
 }
 
