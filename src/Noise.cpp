@@ -97,49 +97,59 @@ double Noise::calculateNoiseValue(double x, double y){
 	int bx0, bx1, by0, by1, b00, b10, b01, b11;
 	double rx0, rx1, ry0, ry1, a, b, u, v;
 	int i, j;
-	glm::ivec2 bx, by, b0, b1;
+	glm::ivec2 bx, by;
 	glm::dvec2 t, rx, ry, s, q;
 	t = inputVector + glm::dvec2(N, N);
 	//std::cout << t.x << ", " << t.y << std::endl;
 	bx.x = ((int)t.x) & (mSampleSize - 1);
 	bx.y = (bx.x + 1) & (mSampleSize - 1);
-	//std::cout << bx.x << ", " << bx.y << std::endl;
+
 	rx.x = t.x - (int)t.x;
 	rx.y = rx.x - 1.0;
-	//std::cout << rx.x << ", " << rx.y << std::endl;
-	//std::cin.get();
+//	std::cout << bx.x << ", " << bx.y << std::endl;
+//	std::cout << rx.x << ", " << rx.y << std::endl;
+
 	by.x = ((int)t.y) & (mSampleSize - 1);
 	by.y = (by.x + 1) & (mSampleSize - 1);
-	ry.x = t.y - (int)t.x;
-	ry.y = ry.x - 1.0;
 
+	ry.x = t.y - (int)t.y;
+	ry.y = ry.x - 1.0;
+//	std::cout << by.x << ", " << by.y << std::endl;
+//	std::cout << ry.x << ", " << ry.y << std::endl;
+//	std::cin.get();
 	i = mPermutationTable[bx.x];
 	j = mPermutationTable[bx.y];
 
-	b0.x = mPermutationTable[i + by.x];
-	b1.x = mPermutationTable[j + by.x];
-	b0.y = mPermutationTable[i + by.y];
-	b1.y = mPermutationTable[j + by.y];
+	b00 = mPermutationTable[i + by.x];
+	b10 = mPermutationTable[j + by.x];
+	b01 = mPermutationTable[i + by.y];
+	b11 = mPermutationTable[j + by.y];
 
 	s = interpolationPolynomial2D(glm::dvec2(rx.x, ry.x));
 
-	q = glm::dvec2(mGradientTable2d.at(b0.x));
+	q = glm::dvec2(mGradientTable2d.at(b00));
 	u = glm::dot(q, glm::dvec2(rx.x, ry.x));
-	q = glm::dvec2(mGradientTable2d.at(b0.y));
+	q = glm::dvec2(mGradientTable2d.at(b10));
 	v = glm::dot(q, glm::dvec2(rx.y, ry.x));
 	a = lerp(s.x, u, v);
 
-	q = glm::dvec2(mGradientTable2d.at(b1.x));
+
+	q = glm::dvec2(mGradientTable2d.at(b01));
 	u = glm::dot(q, glm::dvec2(rx.x, ry.y));
-	q = glm::dvec2(mGradientTable2d.at(b1.y));
+	q = glm::dvec2(mGradientTable2d.at(b11));
 	v = glm::dot(q, glm::dvec2(rx.y, ry.y));
 	b = lerp(s.x, u, v);
 
-	return lerp(s.y, a, b);
+
+	return (lerp(s.y, a, b) + 1) / 2;
 }
 
 glm::dvec2 Noise::interpolationPolynomial2D(glm::dvec2 vec){
 	return vec * vec * (3.0 - 2.0 * vec);
+}
+
+double Noise::interpolationPolynomial2D(double t){
+	return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
 void Noise::initPermutationTable(){
@@ -169,7 +179,9 @@ void Noise::initGradientTable(){
 		for (int j = 0; j < 2; j++)
 			mGradientTable2d.at(i)[j] = distribution(generator);
 		mGradientTable2d.at(i) = glm::normalize(mGradientTable2d.at(i));
+		//std::cout << mGradientTable2d.at(i).x << ", b0  " <<  mGradientTable2d.at(i).y << std::endl;
 	}
+	//std::cin.get();
 	mGradientTable2d.insert(std::end(mGradientTable2d), std::begin(mGradientTable2d), std::end(mGradientTable2d));
 }
 /*

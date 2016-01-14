@@ -187,7 +187,7 @@ int main(){
 
     oldTime = glfwGetTime();
     //Noise Test
-    Noise noise(20, 20, Noise::PERLIN, 99, 2, 1.0, 1.0);
+    Noise noise(500, 500, Noise::PERLIN, 99, 4, 4.0, 1.0);
     noise.generateNoiseImage();
     noise.saveToFile("texture.tga");
 
@@ -209,7 +209,7 @@ int main(){
     		newTime += frameTime;
     		camera.setDeltaTime(frameTime);
     		loops++;
-    		std::cout << "Pos(x, y): " << camera.getCamPos().x <<", " << camera.getCamPos().y << std::endl;
+    		//std::cout << "Pos(x, y): " << camera.getCamPos().x <<", " << camera.getCamPos().y << std::endl;
     	}
     	//update Frame
     	glUseProgram(prog);

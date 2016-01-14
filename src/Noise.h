@@ -38,6 +38,7 @@ class Noise
 		bool mStart = true;
 		double mFrequency, mAmplitude;
 		glm::dvec2 interpolationPolynomial2D(glm::dvec2 vec);
+		double interpolationPolynomial2D(double t);
 		std::vector<int> mPermutationTable;
 		std::vector<glm::dvec2> mGradientTable2d;
 		double** mGradientNoise;
