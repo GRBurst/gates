@@ -96,6 +96,7 @@ void Camera::setViewMatrix(glm::mat4 viewMatrix)
 
 glm::mat4& Camera::getProjectionMatrix()
 {
+	 mProjectionMatrix = glm::perspective(mFieldOfViewHorizontal, mAspectRatio, mNearPlane, mFarPlane);
     return mProjectionMatrix;
 }
 void Camera::setProjectionMatrix(glm::mat4 projectionMatrix)
@@ -140,11 +141,12 @@ glm::mat4 Camera::lookAt(const glm::vec3 &camPos, const glm::vec3 &viewDirection
 
 // Adrian
 glm::mat4& Camera::getViewMatrix(){
-	mViewMatrix = lookAt(
+	mViewMatrix = glm::lookAt(
             mCamPos,           // Camera is here
             mCamPos+mViewDirection, // and looks here : at the same position, plus "direction"
             mUp                  // Head is up (set to 0,-1,0 to look upside-down)
 			);
+;
 	return mViewMatrix;
 }
 

@@ -153,6 +153,7 @@ int main(){
 
     initOpenGL();
     GLenum err = GL_NO_ERROR;
+    err = glGetError();
     Shader shader;
     Camera camera;
 
@@ -169,9 +170,8 @@ int main(){
 	model->setProjection(camera.getProjectionMatrix());
 	model->setBuffers();
 	model->setStandardUniformLocations();
-	glm::vec3 scal(25,25,25);
-	model->scale(scal);
-	//model->setView(glm::mat4(1.0f));
+	glm::vec3 trans(1.0, 0.0, -1.0);
+	model->translate(trans);
 
 //    GLuint posAttrib = glGetAttribLocation(prog, "vPosition");
 //    GLuint VAO;
@@ -206,8 +206,8 @@ int main(){
     noise.generateNoiseImage();
     noise.saveToFile("texture.tga");
 
-    //
 
+    //model->setView(camera.getViewMatrix());
 
     while(!(glfwWindowShouldClose(window)))
     {
@@ -230,15 +230,15 @@ int main(){
 //    	glUseProgram(prog);
     	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(0.0, 0.0, 0.0, 1.0);
-        err = glGetError();
-           if (err != GL_NO_ERROR)
-           	std::cout << "Fehler: " << err << std::endl;
-        //neu
-        model->draw();
 
+        //neu
+        model->setProjection(camera.getProjectionMatrix());
+        model->setView(camera.getViewMatrix());
+
+        model->draw();
         err = glGetError();
-           if (err != GL_NO_ERROR)
-           	std::cout << "Fehler: " << err << std::endl;
+        	        if (err != GL_NO_ERROR)
+        	        	std::cout << "Fehler: " << err << std::endl;
         //processInput
         glfwPollEvents();
 

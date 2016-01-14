@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <math.h>
+#include <iostream>
 
 class Camera
 {
@@ -53,10 +54,10 @@ class Camera
         glm::mat4   mViewMatrix;
         glm::mat4   mProjectionMatrix;
 
-        float       mNearPlane;
-        float       mFarPlane;
-        float       mFieldOfViewHorizontal;
-        float       mAspectRatio;
+        float       mNearPlane = 0.0f;
+        float       mFarPlane = 1000.0f;
+        float       mFieldOfViewHorizontal = 45.0f;
+        float       mAspectRatio = 16.0f/9.0f;
         float       mHorizontalAngle;
         float       mVerticalAngle;
 

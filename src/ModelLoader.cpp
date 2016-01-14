@@ -230,10 +230,10 @@ void ModelLoader::setStride(){
 //			saveBuffer++;
 //			*saveBuffer = bitangents.at(i).z;
 //			saveBuffer++;
-			*saveBuffer = uvs.at(i).x;
-			saveBuffer++;
-			*saveBuffer = uvs.at(i).y;
-			saveBuffer++;
+//			*saveBuffer = uvs.at(i).x;
+//			saveBuffer++;
+//			*saveBuffer = uvs.at(i).y;
+//			saveBuffer++;
 		}
 		vertexCount = vertices.size();
 		normalCount = normals.size();
@@ -261,12 +261,14 @@ void ModelLoader::setVerticesAsArray(){
 
 }
 void ModelLoader::setBuffers(){
-	this->setVerticesAsArray();
+	this->setStride();
 	cout << "Buffers for "<< shaderProgram << " set" << endl;
-
+	err = glGetError();
+	        if (err != GL_NO_ERROR)
+	        	std::cout << "Fehler: " << err << std::endl;
 	GLint posAttrib = glGetAttribLocation(shaderProgram, "vPosition");
 	/* GLint normAttrib = glGetAttribLocation(shaderProgram, "normal"); */
-	//GLint uvAttrib = glGetAttribLocation(shaderProgram, "vUV");
+//	GLint uvAttrib = glGetAttribLocation(shaderProgram, "vUV");
 
 	/* GLint tanAttrib = glGetAttribLocation(shaderProgram, "tangent"); */
 	/* GLint bitAttrib = glGetAttribLocation(shaderProgram, "bitangent"); */
@@ -278,14 +280,16 @@ void ModelLoader::setBuffers(){
 
 	//Binde VBO an VAO
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, (vertexCount * 3) * sizeof(GLfloat), vertexBuffer, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, (vertices.size() * 3) * sizeof(GLfloat), vertexBuffer, GL_STATIC_DRAW);
 	//location, attribute size vec3, data type, bool normalized?, stride size, offset to first dataobject in array
 //	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 //	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), elementBuffer, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(posAttrib);
 	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*) 0);
-
+	err = glGetError();
+	        if (err != GL_NO_ERROR)
+	        	std::cout << "Fehler: " << err << std::endl;
 	/* glEnableVertexAttribArray(normAttrib); */
 	/* glVertexAttribPointer(normAttrib, 3, GL_FLOAT, GL_TRUE, 14 * sizeof(GLfloat), (GLvoid*) (3 * sizeof(GLfloat))); */
 	/* glEnableVertexAttribArray(tanAttrib); */
@@ -320,6 +324,7 @@ void ModelLoader::setBuffers(){
 //Besser zu GameObject draw Call bewegen
 void ModelLoader::draw(){
 	glUseProgram(shaderProgram);
+
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, value_ptr(model));
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, value_ptr(view));
 	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, value_ptr(projection));
@@ -329,7 +334,7 @@ void ModelLoader::draw(){
 	glUniform3f(lightLoc, lightPosition.x, lightPosition.y, lightPosition.z);
 	glUniform3f(cameraLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+	glDrawArrays(GL_TRIANGLES, 0, vertexCount );
 
 	/* if (textureCount >= 1) */
 	/* 	texture->bind(); */
@@ -345,6 +350,7 @@ void ModelLoader::draw(){
 
 void ModelLoader::setStandardUniformLocations(){
 	cout << "Uniform locations for "<< shaderProgram << " set" << endl;
+
 	modelLocation = glGetUniformLocation(shaderProgram, "M");
 	viewLocation = glGetUniformLocation(shaderProgram, "V");
 	projectionLocation = glGetUniformLocation(shaderProgram, "P");
@@ -353,6 +359,7 @@ void ModelLoader::setStandardUniformLocations(){
 	MV3Location = glGetUniformLocation(shaderProgram, "MV3");
 	lightLoc = glGetUniformLocation(shaderProgram, "light_position");
 	cameraLoc = glGetUniformLocation(shaderProgram, "camera_position");
+
 	cout <<  MVPLocation << endl;
 }
 

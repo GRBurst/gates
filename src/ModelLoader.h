@@ -37,6 +37,7 @@ public:
 	void setView(mat4 &view);
 	void setMVP();
 	void scale(vec3 &scale);
+	void translate(vec3 &trans);
 private:
 	GLuint VBO, VAO, modelLocation, projectionLocation, viewLocation, MVPLocation, MVLocation, MV3Location, lightLoc, cameraLoc;
 	GLint shaderProgram;
@@ -75,7 +76,7 @@ private:
 	/* void loadTexture(); */
 	GLenum err = GL_NO_ERROR;
 
-	void translate(vec3 &trans);
+
 	void rotateAroundSelf(float &angle, vec3 &axis);
 
 	void rotateAroundAxis(float &angle, vec3 &axis);

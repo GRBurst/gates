@@ -1,6 +1,6 @@
 #version 410 core
 layout (location = 0) in vec3 vPosition;
-layout (location = 1) in vec3 vUV;
+in vec2 vUV;
 
 uniform mat4 M;
 uniform mat4 V;
