@@ -213,7 +213,7 @@ int main(){
 
     oldTime = glfwGetTime();
     //Noise Test
-    Noise noise(500, 500, Noise::PERLIN, 1231, 8, 2.0, 1.0);
+    Noise noise(500, 500, Noise::PERLIN, 546, 4, 1.0, 0.8);
     noise.generateNoiseImage();
     noise.saveToFile("texture.tga");
 
@@ -248,8 +248,8 @@ int main(){
 
         model->draw();
         err = glGetError();
-        	        if (err != GL_NO_ERROR)
-        	        	std::cout << "Fehler: " << err << std::endl;
+			if (err != GL_NO_ERROR)
+				std::cout << "Fehler: " << err << std::endl;
         //processInput
         glfwPollEvents();
 

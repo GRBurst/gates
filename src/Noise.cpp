@@ -27,10 +27,9 @@ Noise::Noise(int x, int y, NoiseType noise, int seed, int octaves, double freque
 	for (int i = 0; i < x; i++){
 		mGradientNoise[i] = new double[y]();
 	}
-	mNoise = new double* [x];
-	for (int i = 0; i < x; i++){
-		mNoise[i] = new double[y]();
-	}
+	mNoise = new double[mWidth * mHeight];
+
+
 }
 
 Noise::~Noise()
@@ -69,7 +68,7 @@ void Noise::generateNoiseImage(){
 
 	for(int x = 0; x < mWidth; x++){
 		for(int y = 0; y < mHeight; y++){
-			mNoise[x][y] += perlinNoise2D(x, y);
+			mNoise[x * mHeight + y] += perlinNoise2D(x, y);
 		}
 	}
 
@@ -148,8 +147,9 @@ double Noise::calculateNoiseValue(double x, double y){
 	v = glm::dot(q, glm::dvec2(rx.y, ry.y));
 	b = lerp(s.x, u, v);
 
-
-	return clamp(lerp(s.y, a, b), 0.0 , 1.0 ) ;
+	double result = lerp(s.y, a, b);//, 0.0 , 1.0;//clamp
+	std::cout
+	return result;
 }
 
 
@@ -235,14 +235,13 @@ double Noise::lerp(double alpha, double x0, double x1){
 bool Noise:: saveToFile(const char* filename){
 	char* bmp = new char[mWidth*mHeight];
 	char* it = bmp;
-	for (int y = 0; y < this->mHeight; y++){
-		for (int x = 0; x < this-> mWidth; x++){
-			*it = (char)(mNoise[x][y] * 255);
-			it++;
+	for (int x = 0; x < this-> mWidth * this->mHeight; x++){
+		*it = (char)(mNoise[x] * 255);
+		it++;
 			//std::cout<< (y + x) + y * mWidth << std::endl;
 			//std::cout << mNoise[x][y] << std::endl;
-		}
 	}
+
 
 	uint16_t header[9] = {0, 3, 0, 0 ,0 ,0, (uint16_t)mWidth, (uint16_t)mHeight, 8};
 	std::ofstream file(filename, std::ios::binary);
@@ -257,3 +256,7 @@ bool Noise:: saveToFile(const char* filename){
 	}
 
 }
+
+//double Noise::getTextureData(){
+//	return mNoise;
+//}

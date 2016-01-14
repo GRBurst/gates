@@ -13,6 +13,7 @@
 #include <fstream>
 #include <algorithm>
 #include <glm/glm.hpp>
+#include <math.h>
 
 class Noise
 {
@@ -30,7 +31,7 @@ class Noise
 
 		void generate(int seed);
 		void generateNoiseImage();
-		float getTexture();
+		double* getTextureData();
 		bool saveToFile(const char* filename);
 	private:
 		int mSampleSize = 256;
@@ -42,7 +43,7 @@ class Noise
 		std::vector<int> mPermutationTable;
 		std::vector<glm::dvec2> mGradientTable2d;
 		double** mGradientNoise;
-		double** mNoise;
+		double* mNoise;
 		double perlinNoise2D(double x, double y);
 		double calculateNoiseValue(double x, double y);
 		void initPermutationTable();
