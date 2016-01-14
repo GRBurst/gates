@@ -7,6 +7,7 @@
 #include "keyCallback.h"
 #include "Noise.h"
 #include "camera.h"
+#include "ModelLoader.h"
 
 
 using namespace glm;
@@ -153,10 +154,17 @@ int main(){
     initOpenGL();
 
     Shader shader;
-    shader.loadShader("../src/shader/triangle.vs", Shader::VERTEX);
-    shader.loadShader("../src/shader/triangle.fs", Shader::FRAGMENT);
+    /* shader.loadShader("../src/shader/triangle.vs", Shader::VERTEX); */
+    /* shader.loadShader("../src/shader/triangle.fs", Shader::FRAGMENT); */
+    shader.loadShader("../src/shader/main.vs", Shader::VERTEX);
     GLint prog = shader.linkShaders();
     //Outsource
+
+    ModelLoader *model = new ModelLoader("../objects/Ring_27.obj", prog);
+	model->loadFile();
+
+	model->setBuffers();
+	model->setStandardUniformLocations();
 
     GLuint posAttrib = glGetAttribLocation(prog, "vPosition");
     GLuint VAO;

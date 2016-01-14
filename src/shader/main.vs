@@ -13,6 +13,6 @@ uniform vec3 camera_position;
 void main()
 {
 
-    gl_Position = mvp * vec4(vPosition, 1.0);
+    gl_Position = MVP * vec4(vPosition, 1.0);
 
 }

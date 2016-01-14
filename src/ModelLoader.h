@@ -25,7 +25,12 @@ public:
 	/* ModelLoader(const char* filePath, const char* imagePath, const char* normalMapPath, GLint shaderProgram); */
 	/* ModelLoader(const char* filePath, const char* imagePath, const char* normalMapPath, const char* heightMapPath, GLint shaderProgram); */
 	~ModelLoader();
-
+	
+    void loadFile();
+	void setStandardUniforms();
+	void setBuffers();
+	void setStandardUniformLocations();
+	void setStandardTexAttribLocations();
 
 
 private:
@@ -55,20 +60,15 @@ private:
 	/* Texture *heightmap; */
 	void setVerticesAsArray();
 	void setStride();
-	void setStandardUniforms();
 	void setMVP();
 	void calculateTangents();
-	void loadFile();
 	vector<vec3> getVertices();
 	vector<vec2> getUVs();
 	vector<vec3> getNormals();
 	vector<int> getVertexIndices(), getNormalIndices(), getUVIndices();
-	void setBuffers();
 	void draw();
 	void draw(GLuint &locations);
 	void changeShader(GLint &shaderProgram);
-	void setStandardUniformLocations();
-	void setStandardTexAttribLocations();
 	/* void loadTexture(); */
 	void setView(mat4 &view);
 	void setProjection(mat4 &projection);
