@@ -1,6 +1,17 @@
 #include "ModelLoader.h"
-ModelLoader::ModelLoader(const char* filePath, GLint shaderProgram) : VBO(0), VAO(0), modelLocation(0),
- projectionLocation(0), viewLocation(0), vertexCount(0), normalCount(0), uvCount(0), faces(0), lightPosition(vec3(0)), cameraPosition(vec3(0)){
+ModelLoader::ModelLoader(const char* filePath, GLint shaderProgram) :
+    VBO(0)
+    , VAO(0)
+    , modelLocation(0)
+    , projectionLocation(0)
+    , viewLocation(0)
+    , vertexCount(0)
+    , normalCount(0)
+    , uvCount(0)
+    , faces(0)
+    , lightPosition(vec3(0))
+    , cameraPosition(vec3(0))
+{
 	fileStream = new ifstream();
 	fileStream->open(filePath, ios::in);
 	if(!fileStream->is_open()){
@@ -8,29 +19,11 @@ ModelLoader::ModelLoader(const char* filePath, GLint shaderProgram) : VBO(0), VA
 		//delete this;
 	}
 	projection = mat4(1.0f);
-	textureCount = 0;
+	/* textureCount = 0; */
 	this->shaderProgram = shaderProgram;
 	cout << "Successfully loaded" << endl;
 }
 
-<<<<<<< HEAD
-ModelLoader::ModelLoader(const char* filePath, const char* imagePath,  GLint shaderProgram) : ModelLoader::ModelLoader(filePath, shaderProgram){
-	texture = new Texture(imagePath);
-	textureCount = 1;
-}
-
-ModelLoader::ModelLoader(const char* filePath, const char* imagePath, const char* normalMapPath, GLint shaderProgram)
-	: ModelLoader::ModelLoader(filePath, imagePath, shaderProgram){
-	normalmap = new Texture(normalMapPath);
-	textureCount = 2;
-}
-
-ModelLoader::ModelLoader(const char* filePath, const char* imagePath, const char* normalMapPath, const char* heightMapPath, GLint shaderProgram)
-	: ModelLoader::ModelLoader(filePath, imagePath, normalMapPath, shaderProgram){
-	heightmap = new Texture(heightMapPath);
-	textureCount = 3;
-}
-=======
 /* ModelLoader::ModelLoader(const char* filePath, const char* imagePath,  GLint shaderProgram) : */
 /*     ModelLoader::ModelLoader(filePath, shaderProgram) */
 /* { */
@@ -51,29 +44,29 @@ ModelLoader::ModelLoader(const char* filePath, const char* imagePath, const char
 /* 	heightmap = new Texture(heightMapPath); */
 /* 	textureCount = 3; */
 /* } */
->>>>>>> d9082f9e9c64692061f34e4f5c4b42ba85a67707
 
-
-ModelLoader::~ModelLoader(){
+ModelLoader::~ModelLoader()
+{
 	if(fileStream->is_open()){
 		fileStream->close();
 	}
 	delete []vertexBuffer;
-	if (textureCount >= 1)
-	{
-		delete texture;
-		if (textureCount >= 2)
-		{
-			delete normalmap;
-			if (textureCount >= 3)
-			{
-				delete heightmap;
-			}
-		}
-	}
+	/* if (textureCount >= 1) */
+	/* { */
+	/* 	delete texture; */
+	/* 	if (textureCount >= 2) */
+	/* 	{ */
+	/* 		delete normalmap; */
+	/* 		if (textureCount >= 3) */
+	/* 		{ */
+	/* 			delete heightmap; */
+	/* 		} */
+	/* 	} */
+	/* } */
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 }
+
 void ModelLoader::loadFile(){
 	string line = "";
 	while (getline(*fileStream, line)){
@@ -264,11 +257,11 @@ void ModelLoader::setVerticesAsArray(){
 void ModelLoader::setBuffers(){
 	this->setStride();
 	cout << "Buffers for "<< shaderProgram << " set" << endl;
-	GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
-	GLint normAttrib = glGetAttribLocation(shaderProgram, "normal");
-	GLint uvAttrib = glGetAttribLocation(shaderProgram, "uv");
-	GLint tanAttrib = glGetAttribLocation(shaderProgram, "tangent");
-	GLint bitAttrib = glGetAttribLocation(shaderProgram, "bitangent");
+	/* GLint posAttrib = glGetAttribLocation(shaderProgram, "position"); */
+	/* GLint normAttrib = glGetAttribLocation(shaderProgram, "normal"); */
+	/* GLint uvAttrib = glGetAttribLocation(shaderProgram, "uv"); */
+	/* GLint tanAttrib = glGetAttribLocation(shaderProgram, "tangent"); */
+	/* GLint bitAttrib = glGetAttribLocation(shaderProgram, "bitangent"); */
 
 	//Erzeuge Vertex Array Object und Vertex Buffer Object
 	glGenVertexArrays(1, &VAO);
@@ -281,34 +274,34 @@ void ModelLoader::setBuffers(){
 //	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 //	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), elementBuffer, GL_STATIC_DRAW);
 
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(GLfloat), (GLvoid*) 0);
-	glEnableVertexAttribArray(normAttrib);
-	glVertexAttribPointer(normAttrib, 3, GL_FLOAT, GL_TRUE, 14 * sizeof(GLfloat), (GLvoid*) (3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(tanAttrib);
-	glVertexAttribPointer(tanAttrib, 3, GL_FLOAT, GL_TRUE, 14 * sizeof(GLfloat), (GLvoid*) (6 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(bitAttrib);
-	glVertexAttribPointer(bitAttrib, 3, GL_FLOAT, GL_TRUE, 14 * sizeof(GLfloat), (GLvoid*) (9 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(uvAttrib);
-	glVertexAttribPointer(uvAttrib, 2, GL_FLOAT, GL_FALSE, 14 * sizeof(GLfloat), (GLvoid*) (12 * sizeof(GLfloat)));
+	/* glEnableVertexAttribArray(posAttrib); */
+	/* glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(GLfloat), (GLvoid*) 0); */
+	/* glEnableVertexAttribArray(normAttrib); */
+	/* glVertexAttribPointer(normAttrib, 3, GL_FLOAT, GL_TRUE, 14 * sizeof(GLfloat), (GLvoid*) (3 * sizeof(GLfloat))); */
+	/* glEnableVertexAttribArray(tanAttrib); */
+	/* glVertexAttribPointer(tanAttrib, 3, GL_FLOAT, GL_TRUE, 14 * sizeof(GLfloat), (GLvoid*) (6 * sizeof(GLfloat))); */
+	/* glEnableVertexAttribArray(bitAttrib); */
+	/* glVertexAttribPointer(bitAttrib, 3, GL_FLOAT, GL_TRUE, 14 * sizeof(GLfloat), (GLvoid*) (9 * sizeof(GLfloat))); */
+	/* glEnableVertexAttribArray(uvAttrib); */
+	/* glVertexAttribPointer(uvAttrib, 2, GL_FLOAT, GL_FALSE, 14 * sizeof(GLfloat), (GLvoid*) (12 * sizeof(GLfloat))); */
 
 	//Unbind VBO
 	//Setze Texture in ShaderProgram an TEXTURE0
-	if (textureCount >= 1)
-	{
-		texture->setTexture(shaderProgram, 0, "mainTexture");
-	}
+	/* if (textureCount >= 1) */
+	/* { */
+	/* 	texture->setTexture(shaderProgram, 0, "mainTexture"); */
+	/* } */
 
-	//Setze Texture in ShaderProgram an TEXTURE1
-	if (textureCount >= 2)
-	{
-		normalmap->setTexture(shaderProgram, 1, "normalMap");
-	}
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
-	if (textureCount >= 3)
-	{
-		heightmap->setTexture(shaderProgram, 2, "heightMap");
-	}
+	/* //Setze Texture in ShaderProgram an TEXTURE1 */
+	/* if (textureCount >= 2) */
+	/* { */
+	/* 	normalmap->setTexture(shaderProgram, 1, "normalMap"); */
+	/* } */
+	/* //glBindBuffer(GL_ARRAY_BUFFER, 0); */
+	/* if (textureCount >= 3) */
+	/* { */
+	/* 	heightmap->setTexture(shaderProgram, 2, "heightMap"); */
+	/* } */
 
 	//Unbinde VAO
 	glBindVertexArray(0);
@@ -327,12 +320,12 @@ void ModelLoader::draw(){
 	glUniform3f(cameraLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 	glBindVertexArray(VAO);
 	glDrawArrays(GL_TRIANGLES, 0, vertexCount);
-	if (textureCount >= 1)
-		texture->bind();
-	if (textureCount >= 2)
-		normalmap->bind();
-	if (textureCount >= 3)
-		heightmap->bind();
+	/* if (textureCount >= 1) */
+	/* 	texture->bind(); */
+	/* if (textureCount >= 2) */
+	/* 	normalmap->bind(); */
+	/* if (textureCount >= 3) */
+	/* 	heightmap->bind(); */
 	//cout << shaderProgram << endl;
 	glBindVertexArray(0);
 	//glUseProgram(0);
