@@ -66,6 +66,7 @@ set(Game_HEAD   src/main.h
                 src/keyCallback.h
                 src/Shader.h
                 src/Noise.h
+                src/ModelLoader.h
     )
 
 set(Game_SRC    src/main.cpp
@@ -73,6 +74,7 @@ set(Game_SRC    src/main.cpp
                 src/keyCallback.cpp
                 src/Shader.cpp
                 src/Noise.cpp
+                src/ModelLoader.cpp
     )
 
 #message(${Game_SRC})
