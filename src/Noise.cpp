@@ -240,7 +240,7 @@ bool Noise:: saveToFile(const char* filename){
 			*it = (char)(mNoise[x][y] * 255);
 			it++;
 			//std::cout<< (y + x) + y * mWidth << std::endl;
-			std::cout << mNoise[x][y] << std::endl;
+			//std::cout << mNoise[x][y] << std::endl;
 		}
 	}
 

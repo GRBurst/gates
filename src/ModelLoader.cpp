@@ -11,6 +11,7 @@ ModelLoader::ModelLoader(const char* filePath, GLint shaderProgram) :
     , faces(0)
     , lightPosition(vec3(0))
     , cameraPosition(vec3(0))
+	, MVP(glm::mat4(1))
 {
 	fileStream = new ifstream();
 	fileStream->open(filePath, ios::in);
@@ -134,7 +135,7 @@ void ModelLoader::loadFile(){
 			value = lineValues.substr(0, spacePos);
 			vector.z = (float)atof(value.c_str());
 
-			fileNormals.push_back(vector);
+//			fileNormals.push_back(vector);
 		}
 
 		if (line.at(0) == 'f' && line.at(1) == ' '){
@@ -162,13 +163,14 @@ void ModelLoader::loadFile(){
 
 				vertexIndices.push_back(atoi(vertexIndex.c_str()));
 				uvIndices.push_back(atoi(uvIndex.c_str()));
-				normalIndices.push_back(atoi(normalIndex.c_str()));
+//				normalIndices.push_back(atoi(normalIndex.c_str()));
 			}
 			faces++;
 
 		}
 	}
-
+	std::cout << fileUvs.size() << std::endl;
+	std::cout << uvIndices.size() << std::endl;
 	fileStream->close();
 }
 vector<int> ModelLoader::getVertexIndices(){
@@ -180,24 +182,28 @@ vector<vec3> ModelLoader::getVertices(){
 	return fileVertices;
 }
 void ModelLoader::setStride(){
+
 	if (!this->fileVertices.empty() && !this->fileNormals.empty() && !this->fileUvs.empty()){
 
 		for(unsigned long i = 0; i < vertexIndices.size(); i++){
+			//std::cout << "HIERE" << std::endl;
 			vertices.push_back(this->fileVertices.at(vertexIndices.at(i)-1));
 		}
 
-		for(unsigned long i = 0; i < normalIndices.size(); i++){
-			normals.push_back(this->fileNormals.at(normalIndices.at(i)-1));
-		}
+//		for(unsigned long i = 0; i < normalIndices.size(); i++){
+//			//std::cout << "HIERE" << std::endl;
+//			normals.push_back(this->fileNormals.at(normalIndices.at(i)-1));
+//		}
 
 		for(unsigned long i = 0; i < uvIndices.size(); i++){
+			//std::cout << "HIERE" << std::endl;
 			uvs.push_back(this->fileUvs.at(uvIndices.at(i)-1));
 		}
 		GLfloat *saveBuffer;
 
 		this->calculateTangents();
 
-		vertexBuffer = new GLfloat[vertices.size() * 3 + normals.size() * 3 + uvs.size() * 2 + tangents.size() * 3 + bitangents.size() * 3];
+		vertexBuffer = new GLfloat[vertices.size() * 3 + uvs.size()];// * 2 + tangents.size() * 3 + bitangents.size() * 3+ normals.size() * 3 ];
 		saveBuffer = vertexBuffer;
 		for (unsigned long i = 0; i < vertices.size(); i++){
 			*saveBuffer = vertices.at(i).x;
@@ -206,24 +212,24 @@ void ModelLoader::setStride(){
 			saveBuffer++;
 			*saveBuffer = vertices.at(i).z;
 			saveBuffer++;
-			*saveBuffer = normals.at(i).x;
-			saveBuffer++;
-			*saveBuffer = normals.at(i).y;
-			saveBuffer++;
-			*saveBuffer = normals.at(i).z;
-			saveBuffer++;
-			*saveBuffer = tangents.at(i).x;
-			saveBuffer++;
-			*saveBuffer = tangents.at(i).y;
-			saveBuffer++;
-			*saveBuffer = tangents.at(i).z;
-			saveBuffer++;
-			*saveBuffer = bitangents.at(i).x;
-			saveBuffer++;
-			*saveBuffer = bitangents.at(i).y;
-			saveBuffer++;
-			*saveBuffer = bitangents.at(i).z;
-			saveBuffer++;
+//			*saveBuffer = normals.at(i).x;
+//			saveBuffer++;
+//			*saveBuffer = normals.at(i).y;
+//			saveBuffer++;
+//			*saveBuffer = normals.at(i).z;
+//			saveBuffer++;
+//			*saveBuffer = tangents.at(i).x;
+//			saveBuffer++;
+//			*saveBuffer = tangents.at(i).y;
+//			saveBuffer++;
+//			*saveBuffer = tangents.at(i).z;
+//			saveBuffer++;
+//			*saveBuffer = bitangents.at(i).x;
+//			saveBuffer++;
+//			*saveBuffer = bitangents.at(i).y;
+//			saveBuffer++;
+//			*saveBuffer = bitangents.at(i).z;
+//			saveBuffer++;
 			*saveBuffer = uvs.at(i).x;
 			saveBuffer++;
 			*saveBuffer = uvs.at(i).y;
@@ -232,7 +238,7 @@ void ModelLoader::setStride(){
 		vertexCount = vertices.size();
 		normalCount = normals.size();
 		uvCount = uvs.size();
-
+		std::cout << "HIERE" << std::endl;
 	}
 }
 void ModelLoader::setVerticesAsArray(){
@@ -257,9 +263,9 @@ void ModelLoader::setVerticesAsArray(){
 void ModelLoader::setBuffers(){
 	this->setStride();
 	cout << "Buffers for "<< shaderProgram << " set" << endl;
-	/* GLint posAttrib = glGetAttribLocation(shaderProgram, "position"); */
+	GLint posAttrib = glGetAttribLocation(shaderProgram, "vPosition");
 	/* GLint normAttrib = glGetAttribLocation(shaderProgram, "normal"); */
-	/* GLint uvAttrib = glGetAttribLocation(shaderProgram, "uv"); */
+	GLint uvAttrib = glGetAttribLocation(shaderProgram, "vUV");
 	/* GLint tanAttrib = glGetAttribLocation(shaderProgram, "tangent"); */
 	/* GLint bitAttrib = glGetAttribLocation(shaderProgram, "bitangent"); */
 
@@ -274,16 +280,16 @@ void ModelLoader::setBuffers(){
 //	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 //	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), elementBuffer, GL_STATIC_DRAW);
 
-	/* glEnableVertexAttribArray(posAttrib); */
-	/* glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(GLfloat), (GLvoid*) 0); */
+	glEnableVertexAttribArray(posAttrib);
+	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*) 0);
 	/* glEnableVertexAttribArray(normAttrib); */
 	/* glVertexAttribPointer(normAttrib, 3, GL_FLOAT, GL_TRUE, 14 * sizeof(GLfloat), (GLvoid*) (3 * sizeof(GLfloat))); */
 	/* glEnableVertexAttribArray(tanAttrib); */
 	/* glVertexAttribPointer(tanAttrib, 3, GL_FLOAT, GL_TRUE, 14 * sizeof(GLfloat), (GLvoid*) (6 * sizeof(GLfloat))); */
 	/* glEnableVertexAttribArray(bitAttrib); */
 	/* glVertexAttribPointer(bitAttrib, 3, GL_FLOAT, GL_TRUE, 14 * sizeof(GLfloat), (GLvoid*) (9 * sizeof(GLfloat))); */
-	/* glEnableVertexAttribArray(uvAttrib); */
-	/* glVertexAttribPointer(uvAttrib, 2, GL_FLOAT, GL_FALSE, 14 * sizeof(GLfloat), (GLvoid*) (12 * sizeof(GLfloat))); */
+	glEnableVertexAttribArray(uvAttrib);
+	glVertexAttribPointer(uvAttrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*) (3 * sizeof(GLfloat)));
 
 	//Unbind VBO
 	//Setze Texture in ShaderProgram an TEXTURE0

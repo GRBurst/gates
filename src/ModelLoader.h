@@ -31,7 +31,8 @@ public:
 	void setBuffers();
 	void setStandardUniformLocations();
 	void setStandardTexAttribLocations();
-
+	void draw();
+	void draw(GLuint &locations);
 
 private:
 	GLuint VBO, VAO, modelLocation, projectionLocation, viewLocation, MVPLocation, MVLocation, MV3Location, lightLoc, cameraLoc;
@@ -66,8 +67,7 @@ private:
 	vector<vec2> getUVs();
 	vector<vec3> getNormals();
 	vector<int> getVertexIndices(), getNormalIndices(), getUVIndices();
-	void draw();
-	void draw(GLuint &locations);
+
 	void changeShader(GLint &shaderProgram);
 	/* void loadTexture(); */
 	void setView(mat4 &view);

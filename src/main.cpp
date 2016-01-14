@@ -154,39 +154,40 @@ int main(){
     initOpenGL();
 
     Shader shader;
+    Camera camera;
     /* shader.loadShader("../src/shader/triangle.vs", Shader::VERTEX); */
     /* shader.loadShader("../src/shader/triangle.fs", Shader::FRAGMENT); */
     shader.loadShader("../src/shader/main.vs", Shader::VERTEX);
     GLint prog = shader.linkShaders();
     //Outsource
 
-    ModelLoader *model = new ModelLoader("../objects/Ring_27.obj", prog);
+    ModelLoader *model = new ModelLoader("../objects/sphere.obj", prog);
 	model->loadFile();
 
 	model->setBuffers();
 	model->setStandardUniformLocations();
-
-    GLuint posAttrib = glGetAttribLocation(prog, "vPosition");
-    GLuint VAO;
-
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    GLfloat vertexBuffer[] = {
-    		-1.0f, -1.0f, -0.5f,
-			1.0f, -1.0f, -0.6f,
-   		    0.0f,  1.0f, -1.0f,
-    };
-
-    GLuint VBO;
-    glGenBuffers(1, &VBO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexBuffer), vertexBuffer, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(posAttrib);
-    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*) 0);
-    glBindVertexArray(0);
+	model->setProjection(camera.getProjectionMatrix());
+//    GLuint posAttrib = glGetAttribLocation(prog, "vPosition");
+//    GLuint VAO;
+//
+//    glGenVertexArrays(1, &VAO);
+//    glBindVertexArray(VAO);
+//
+//    GLfloat vertexBuffer[] = {
+//    		-1.0f, -1.0f, -0.5f,
+//			1.0f, -1.0f, -0.6f,
+//   		    0.0f,  1.0f, -1.0f,
+//    };
+//
+//    GLuint VBO;
+//    glGenBuffers(1, &VBO);
+//
+//    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexBuffer), vertexBuffer, GL_STATIC_DRAW);
+//
+//    glEnableVertexAttribArray(posAttrib);
+//    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*) 0);
+//    glBindVertexArray(0);
     //set Uniforms
     //GLint mvpMat = glGetUniformLocation(prog, "ModelViewProjectionMatrix");
     // Ensure we can capture the escape key being pressed below
@@ -200,7 +201,7 @@ int main(){
     noise.saveToFile("texture.tga");
 
     //
-    Camera camera;
+
 
     while(!(glfwWindowShouldClose(window)))
     {
@@ -220,16 +221,11 @@ int main(){
     		//std::cout << "Pos(x, y): " << camera.getCamPos().x <<", " << camera.getCamPos().y << std::endl;
     	}
     	//update Frame
-    	glUseProgram(prog);
+//    	glUseProgram(prog);
         glClear(GL_COLOR_BUFFER_BIT);
         glClearColor(0.0, 0.0, 0.0, 1.0);
         //neu
-        glEnableVertexAttribArray(0);
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        //neu
-        glBindVertexArray(0);
-        glDisableVertexAttribArray(0);
+        model->draw();
         //processInput
         glfwPollEvents();
 
@@ -238,8 +234,8 @@ int main(){
 
     }
     // Cleanup VBO
-	glDeleteBuffers(1, &VBO);
-	glDeleteVertexArrays(1, &VAO);
+//	glDeleteBuffers(1, &VBO);
+//	glDeleteVertexArrays(1, &VAO);
 	glDeleteProgram(prog);
 
 }
