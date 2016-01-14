@@ -212,7 +212,7 @@ void ModelLoader::setStride(){
 			saveBuffer++;
 			*saveBuffer = vertices.at(i).z;
 			saveBuffer++;
-			std::cout << vertices.at(i).x << ", " << vertices.at(i).y << ", " << vertices.at(i).z << std::endl;
+			//std::cout << vertices.at(i).x << ", " << vertices.at(i).y << ", " << vertices.at(i).z << std::endl;
 //			*saveBuffer = normals.at(i).x;
 //			saveBuffer++;
 //			*saveBuffer = normals.at(i).y;
@@ -231,10 +231,10 @@ void ModelLoader::setStride(){
 //			saveBuffer++;
 //			*saveBuffer = bitangents.at(i).z;
 //			saveBuffer++;
-//			*saveBuffer = uvs.at(i).x;
-//			saveBuffer++;
-//			*saveBuffer = uvs.at(i).y;
-//			saveBuffer++;
+			*saveBuffer = uvs.at(i).x;
+			saveBuffer++;
+			*saveBuffer = uvs.at(i).y;
+			saveBuffer++;
 		}
 		vertexCount = vertices.size();
 		normalCount = normals.size();
@@ -264,12 +264,10 @@ void ModelLoader::setVerticesAsArray(){
 void ModelLoader::setBuffers(){
 	this->setStride();
 	cout << "Buffers for "<< shaderProgram << " set" << endl;
-	err = glGetError();
-	        if (err != GL_NO_ERROR)
-	        	std::cout << "Fehler: " << err << std::endl;
+
 	GLint posAttrib = glGetAttribLocation(shaderProgram, "vPosition");
 	/* GLint normAttrib = glGetAttribLocation(shaderProgram, "normal"); */
-//	GLint uvAttrib = glGetAttribLocation(shaderProgram, "vUV");
+	GLint uvAttrib = glGetAttribLocation(shaderProgram, "vUV");
 
 	/* GLint tanAttrib = glGetAttribLocation(shaderProgram, "tangent"); */
 	/* GLint bitAttrib = glGetAttribLocation(shaderProgram, "bitangent"); */
@@ -281,24 +279,22 @@ void ModelLoader::setBuffers(){
 
 	//Binde VBO an VAO
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, (vertices.size() * 3) * sizeof(GLfloat), vertexBuffer, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, (vertices.size() * 3 + vertices.size() * 2) * sizeof(GLfloat), vertexBuffer, GL_STATIC_DRAW);
 	//location, attribute size vec3, data type, bool normalized?, stride size, offset to first dataobject in array
 //	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 //	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), elementBuffer, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*) 0);
-	err = glGetError();
-	        if (err != GL_NO_ERROR)
-	        	std::cout << "Fehler: " << err << std::endl;
+	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*) 0);
+
 	/* glEnableVertexAttribArray(normAttrib); */
 	/* glVertexAttribPointer(normAttrib, 3, GL_FLOAT, GL_TRUE, 14 * sizeof(GLfloat), (GLvoid*) (3 * sizeof(GLfloat))); */
 	/* glEnableVertexAttribArray(tanAttrib); */
 	/* glVertexAttribPointer(tanAttrib, 3, GL_FLOAT, GL_TRUE, 14 * sizeof(GLfloat), (GLvoid*) (6 * sizeof(GLfloat))); */
 	/* glEnableVertexAttribArray(bitAttrib); */
 	/* glVertexAttribPointer(bitAttrib, 3, GL_FLOAT, GL_TRUE, 14 * sizeof(GLfloat), (GLvoid*) (9 * sizeof(GLfloat))); */
-//	glEnableVertexAttribArray(uvAttrib);
-//	glVertexAttribPointer(uvAttrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*) (3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(uvAttrib);
+	glVertexAttribPointer(uvAttrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*) (3 * sizeof(GLfloat)));
 
 	//Unbind VBO
 	//Setze Texture in ShaderProgram an TEXTURE0

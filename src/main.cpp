@@ -206,7 +206,7 @@ int main(){
     noise.generateNoiseImage();
     noise.saveToFile("texture.tga");
 
-
+	double xpos, ypos;
     //model->setView(camera.getViewMatrix());
 
     while(!(glfwWindowShouldClose(window)))
@@ -217,7 +217,7 @@ int main(){
     	newTime = glfwGetTime();
     	while (oldTime < newTime && loops < MAX_FRAMESKIP){
     		//here update game   glfwPollEvents();
-    	   	double xpos, ypos;
+
     	   	glfwGetCursorPos(window, &xpos, &ypos);
 
     		camera.moveCamera(xpos, ypos, window);
