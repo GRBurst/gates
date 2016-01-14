@@ -4,10 +4,10 @@
 #include <glm/glm.hpp>
 #include <chrono>
 #include "Shader.h"
-#include "keyCallback.h"
 #include "Noise.h"
-#include "camera.h"
+#include "Camera.h"
 #include "ModelLoader.h"
+#include "inputCallback.h"
 
 
 using namespace glm;
@@ -112,7 +112,7 @@ void initOpenGL()
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-void resizeCallback( GLFWwindow* p, int newWidth, int newHeight )
+void resize_callback( GLFWwindow* p, int newWidth, int newHeight )
 {
     wWidth  = newWidth;
     wHeight = newHeight;
@@ -197,8 +197,14 @@ int main(){
     //set Uniforms
     //GLint mvpMat = glGetUniformLocation(prog, "ModelViewProjectionMatrix");
     // Ensure we can capture the escape key being pressed below
+
     glfwSetKeyCallback( window, key_callback );
-    glfwSetWindowSizeCallback( window, resizeCallback );
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+    glfwSetWindowSizeCallback( window, resize_callback );
+    
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPos(window, 0, 0);
 
     oldTime = glfwGetTime();
     //Noise Test

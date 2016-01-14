@@ -62,16 +62,16 @@ include_directories(
 #)
 
 set(Game_HEAD   src/main.h
-                src/camera.h
-                src/keyCallback.h
+                src/inputCallback.h
+                src/Camera.h
                 src/Shader.h
                 src/Noise.h
                 src/ModelLoader.h
     )
 
 set(Game_SRC    src/main.cpp
-                src/camera.cpp
-                src/keyCallback.cpp
+                src/inputCallback.cpp
+                src/Camera.cpp
                 src/Shader.cpp
                 src/Noise.cpp
                 src/ModelLoader.cpp
