@@ -168,12 +168,31 @@ int main(){
     shader.loadShader("../src/shader/main.fs", Shader::FRAGMENT);
 
     GLint prog = shader.linkShaders();
-
+//GRASS
     Shader grassshader;
     grassshader.loadShader("../src/shader/grass.vs", Shader::VERTEX);
     grassshader.loadShader("../src/shader/grass.gs", Shader::GEOMETRY);
+
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+    float billboard[] = {
+    		-1.0f, 1.0f,
+			1.0f, 1.0f,
+			1.0f, -1.0f,
+    		-1.0f, -1.0
+    };
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(billboard), billboard, GL_STATIC_DRAW);
+
+    GLuint vao;
+    glGenVertexArrays(2, &vao);
+    glBindVertexArray(vao);
+
+
+    //END GRASS
     //Outsource
-    GLint prog = shader.linkShaders();
+    GLint grassprog = grassshader.linkShaders();
 
     ModelLoader *model = new ModelLoader("../objects/sphere.obj", prog);
 	model->loadFile();
