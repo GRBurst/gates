@@ -280,8 +280,8 @@ int main(){
 			if (err != GL_NO_ERROR)
 				std::cout << "Fehler: " << err << std::endl;
         //processInput
-		glUseProgram(grassprog);
-		glDrawArrays(GL_POINTS, 0, 4);
+		//glUseProgram(grassprog);
+		//glDrawArrays(GL_POINTS, 0, 4);
 
 
         glfwSwapBuffers( window );
