@@ -166,9 +166,14 @@ int main(){
     /* shader.loadShader("../src/shader/triangle.fs", Shader::FRAGMENT); */
     shader.loadShader("../src/shader/main.vs", Shader::VERTEX);
     shader.loadShader("../src/shader/main.fs", Shader::FRAGMENT);
+
     GLint prog = shader.linkShaders();
 
+    Shader grassshader;
+    grassshader.loadShader("../src/shader/grass.vs", Shader::VERTEX);
+    grassshader.loadShader("../src/shader/grass.gs", Shader::GEOMETRY);
     //Outsource
+    GLint prog = shader.linkShaders();
 
     ModelLoader *model = new ModelLoader("../objects/sphere.obj", prog);
 	model->loadFile();
