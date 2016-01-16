@@ -138,6 +138,24 @@ void displayFrame(){
 
 }
 
+/* void renderHeightmap(float size, float h, double* heights) */
+/* { */
+
+/*     int dim = 50; */
+/*     for(int i = 0; i < dim-1; i++) */
+/*         for(int j = 0; j < dim-1; j++) */
+/*         { */
+/*             glBegin(GL_TRIANGLE_STRIP); */
+/*             glColor3f(heights[dim * i + j], heights[dim * i + j], heights[dim * i + j]); */
+/*             glVertex3f(i*dim, heights[dim * i + j]*h, j*size); */
+/*             glVertex3f((i+1)*dim, heights[dim * (i+1) + j]*h, j*size); */
+/*             glVertex3f(i*dim, heights[dim * i + (j+1)]*h, (j+1)*size); */
+/*             glVertex3f((i+1)*dim, heights[dim * (i+1) + (j+1)]*h, (j+1)*size); */
+/*             glEnd(); */
+/*         } */
+
+/* } */
+
 int main(){
 
     if( !glfwInit() )
@@ -168,6 +186,8 @@ int main(){
     /* shader.loadShader("../src/shader/triangle.fs", Shader::FRAGMENT); */
     shader.loadShader("../src/shader/main.vs", Shader::VERTEX);
     shader.loadShader("../src/shader/main.fs", Shader::FRAGMENT);
+    /* shader.loadShader("../src/shader/terrain.vs", Shader::VERTEX); */
+    /* shader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT); */
     GLint prog = shader.linkShaders();
 
     //Outsource
@@ -215,9 +235,18 @@ int main(){
 
     oldTime = glfwGetTime();
     //Noise Test
-    Noise noise(500, 500, Noise::PERLIN, 546, 4, 1.0, 0.8);
+    Noise noise(50, 50, Noise::PERLIN, 546, 4, 1.0, 0.8);
     noise.generateNoiseImage();
-    noise.saveToFile("texture.tga");
+    /* noise.saveToFile("texture.tga"); */
+
+    //Heightmap rendering
+    Texture *heightmap = new Texture();
+    heightmap->bind();
+    heightmap->loadCommonOptions();
+    heightmap->setData(noise.getTextureDataF());
+    heightmap->linkTexture(prog, "heightMap", GL_DEPTH_COMPONENT);
+
+
 
 	double xpos, ypos;
     //model->setView(camera.getViewMatrix());
@@ -249,6 +278,7 @@ int main(){
         model->setView(camera.getViewMatrix());
 
         model->draw();
+        /* renderHeightmap(0.1, 10 , noise.getTextureData()); */
         err = glGetError();
 			if (err != GL_NO_ERROR)
 				std::cout << "Fehler: " << err << std::endl;

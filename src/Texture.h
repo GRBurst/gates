@@ -25,6 +25,7 @@ class Texture
 
         void linkTexture(GLint shaderProgram, const char *texture_name, GLenum type);
         void setData(unsigned char* data);
+        void setData(float* data);
         void loadCommonOptions();
         void bind();
         void unbind();
@@ -37,7 +38,8 @@ class Texture
         GLint location;
 
         int width, height;
-        unsigned char* data;
+        unsigned char* cdata;
+        float* ddata;
 
 };
 #endif /* TEXTURE_H_ */
