@@ -64,17 +64,19 @@ include_directories(
 set(Game_HEAD   src/main.h
     #src/inputCallback.h
                 src/Camera.h
-                src/Shader.h
-                src/Noise.h
                 src/ModelLoader.h
+                src/Noise.h
+                src/Shader.h
+                src/Texture.h
     )
 
 set(Game_SRC    src/main.cpp
     #src/inputCallback.cpp
                 src/Camera.cpp
-                src/Shader.cpp
-                src/Noise.cpp
                 src/ModelLoader.cpp
+                src/Noise.cpp
+                src/Shader.cpp
+                src/Texture.cpp
     )
 
 #message(${Game_SRC})
