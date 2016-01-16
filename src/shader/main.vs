@@ -11,10 +11,11 @@ uniform mat3 MV3;
 uniform vec3 light_position;
 uniform vec3 camera_position;
 out vec3 vColor;
+out vec2 fUV;
 
 void main()
 {
 	vColor = vec3(1.0, 0.0, 0.0);
+    fUV = vUV;
     gl_Position = MVP * vec4(vPosition, 1.0);
-
 }

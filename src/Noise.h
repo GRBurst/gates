@@ -32,6 +32,7 @@ class Noise
 		void generate(int seed);
 		void generateNoiseImage();
 		double* getTextureData();
+		float* getTextureDataF();
 		bool saveToFile(const char* filename);
 	private:
 		int mSampleSize = 256;
@@ -44,6 +45,7 @@ class Noise
 		std::vector<glm::dvec2> mGradientTable2d;
 		double** mGradientNoise;
 		double* mNoise;
+		float* mNoiseF;
 		double perlinNoise2D(double x, double y);
 		double calculateNoiseValue(double x, double y);
 		void initPermutationTable();
