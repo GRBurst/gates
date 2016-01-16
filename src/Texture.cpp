@@ -50,7 +50,7 @@ void Texture::loadCommonOptions()
 {
 
     // select modulate to mix texture with color for shading
-    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
     // when texture area is small, bilinear filter the closest mipmap
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -58,8 +58,8 @@ void Texture::loadCommonOptions()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     // texture should tile
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 }
 
@@ -67,6 +67,7 @@ void Texture::bind()
 {
     glActiveTexture(GL_TEXTURE0 + this->location);
     glBindTexture(GL_TEXTURE_2D, this->texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 50, 50, 0, GL_RED, GL_FLOAT, ddata);
 }
 
 void Texture::unbind()
@@ -90,7 +91,7 @@ void Texture::linkTexture(GLint shaderProgram, const char* texture_name, GLenum 
     glUniform1i(textureLocation, location);
 
     // Give the image to OpenGL
-    glTexImage2D(GL_TEXTURE_2D, 0, type, this->width, this->height, 0, type, GL_FLOAT, ddata);
+
 
     // build our texture mipmaps
     /* gluBuild2DMipmaps(GL_TEXTURE_2D, 4, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data); */

@@ -273,7 +273,7 @@ int main(){
     heightmap->bind();
     heightmap->loadCommonOptions();
     heightmap->setData(noise.getTextureDataF());
-    heightmap->linkTexture(prog, "heightMap", GL_RED);
+
 
 
 
@@ -305,7 +305,7 @@ int main(){
         //neu
         model->setProjection(camera.getProjectionMatrix());
         model->setView(camera.getViewMatrix());
-
+        heightmap->bind();
         model->draw();
         /* renderHeightmap(0.1, 10 , noise.getTextureData()); */
         err = glGetError();
@@ -341,16 +341,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             if(action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
             break;
         case GLFW_KEY_W :
-            if(action == GLFW_PRESS) camera.moveForward( float(frameTime) );
+            if(action == GLFW_REPEAT) camera.moveForward( float(frameTime) );
             break;
         case GLFW_KEY_S :
-            if(action == GLFW_PRESS) camera.moveBack( float(frameTime) );
+            if(action == GLFW_REPEAT) camera.moveBack( float(frameTime) );
             break;
         case GLFW_KEY_A :
-            if(action == GLFW_PRESS) camera.moveLeft( float(frameTime) );
+            if(action == GLFW_REPEAT) camera.moveLeft( float(frameTime) );
             break;
         case GLFW_KEY_D :
-            if(action == GLFW_PRESS) camera.moveRight( float(frameTime) );
+            if(action == GLFW_REPEAT) camera.moveRight( float(frameTime) );
             break;
         default: std::cout << "Key has no function!" << std::endl;
             break;

@@ -48,9 +48,9 @@ glm::mat4 Camera::lookAt(const glm::vec3 &viewPos)
 glm::vec3 Camera::getRight() const
 {
     return glm::normalize(glm::vec3(
-            sin(this->mHorizontalAngle + 3.14f/2.0f),
+            sin(this->mHorizontalAngle - 3.14f/2.0f),
             0,
-            cos(this->mHorizontalAngle + 3.14f/2.0f)
+            cos(this->mHorizontalAngle - 3.14f/2.0f)
         ));
 }
 
@@ -65,7 +65,7 @@ glm::vec3 Camera::getViewDirection() const
 
 glm::vec3 Camera::getUp() const
 {
-    return glm::normalize(glm::cross(getViewDirection(), getRight()));
+    return glm::normalize(glm::cross(getRight(), getViewDirection()));
 }
 
 
