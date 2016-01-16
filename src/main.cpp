@@ -241,7 +241,7 @@ int main(){
 //    	glUseProgram(prog);
     	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(0.0, 0.0, 0.0, 1.0);
-     //   std::cout << "view: " << camera.getCamPos().x << "< " << camera.getCamPos().y << "< " << camera.getCamPos().z << std::endl;
+        /* std::cout << "view: " << camera.getPos().x << "< " << camera.getPos().y << "< " << camera.getPos().z << std::endl; */
         //neu
         model->setProjection(camera.getProjectionMatrix());
         model->setView(camera.getViewMatrix());
