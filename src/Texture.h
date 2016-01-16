@@ -2,7 +2,7 @@
 #define TEXTURE_H_
 
 #include <GL/glew.h>
-#include <SOIL/SOIL.h>
+//#include <SOIL/SOIL.h>
 #include <iostream>
 
 /*

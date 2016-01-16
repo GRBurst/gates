@@ -174,7 +174,8 @@ int main(){
     Shader grassshader;
     grassshader.loadShader("../src/shader/grass.vs", Shader::VERTEX);
     grassshader.loadShader("../src/shader/grass.gs", Shader::GEOMETRY);
-
+    grassshader.loadShader("../src/shader/grass.fs", Shader::FRAGMENT);
+    GLint grassprog = grassshader.linkShaders();
     GLuint vbo;
     glGenBuffers(1, &vbo);
     float billboard[] = {
@@ -190,11 +191,13 @@ int main(){
     GLuint vao;
     glGenVertexArrays(2, &vao);
     glBindVertexArray(vao);
-
+    GLint posAttrib = glGetAttribLocation(grassprog, "vPosition");
+    glEnableVertexAttribArray(posAttrib);
+    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
     //END GRASS
     //Outsource
-    GLint grassprog = grassshader.linkShaders();
+
 
     ModelLoader *model = new ModelLoader("../objects/sphere.obj", prog);
 	model->loadFile();
@@ -256,7 +259,7 @@ int main(){
     		//here update game   glfwPollEvents();
 
     	   	glfwGetCursorPos(window, &xpos, &ypos);
-
+    	    glfwPollEvents();
     		/* camera.moveCamera(xpos, ypos, window); */
     		newTime += frameTime;
     		/* camera.setDeltaTime(frameTime); */
@@ -277,7 +280,9 @@ int main(){
 			if (err != GL_NO_ERROR)
 				std::cout << "Fehler: " << err << std::endl;
         //processInput
-        glfwPollEvents();
+		glUseProgram(grassprog);
+		glDrawArrays(GL_POINTS, 0, 4);
+
 
         glfwSwapBuffers( window );
 
@@ -304,16 +309,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             if(action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
             break;
         case GLFW_KEY_W :
-            if(action == GLFW_REPEAT) camera.moveForward( float(frameTime) );
+            if(action == GLFW_PRESS) camera.moveForward( float(frameTime) );
             break;
         case GLFW_KEY_S :
-            if(action == GLFW_REPEAT) camera.moveBack( float(frameTime) );
+            if(action == GLFW_PRESS) camera.moveBack( float(frameTime) );
             break;
         case GLFW_KEY_A :
-            if(action == GLFW_REPEAT) camera.moveLeft( float(frameTime) );
+            if(action == GLFW_PRESS) camera.moveLeft( float(frameTime) );
             break;
         case GLFW_KEY_D :
-            if(action == GLFW_REPEAT) camera.moveRight( float(frameTime) );
+            if(action == GLFW_PRESS) camera.moveRight( float(frameTime) );
             break;
         default: std::cout << "Key has no function!" << std::endl;
             break;

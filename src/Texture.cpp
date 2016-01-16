@@ -22,10 +22,10 @@ Texture::Texture(const char* imagePath)
     , data(0)
 {
     this->location = idGenerator++;
-    texture = SOIL_load_OGL_texture(imagePath, SOIL_LOAD_RGBA, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_COMPRESS_TO_DXT);
+ //   texture = SOIL_load_OGL_texture(imagePath, SOIL_LOAD_RGBA, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_COMPRESS_TO_DXT);
 
-    if(!texture)
-        std::cout << imagePath << " Problem! Fehler: " << SOIL_last_result()  << std::endl;
+//    if(!texture)
+//        std::cout << imagePath << " Problem! Fehler: " << SOIL_last_result()  << std::endl;
 
 }
 

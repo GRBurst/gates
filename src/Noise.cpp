@@ -101,8 +101,8 @@ double Noise::clamp(double x, double min, double max){
 double Noise::calculateNoiseValue(double x, double y){
 	int N = 4096;
 	glm::dvec2 inputVector(x, y);
-	int bx0, bx1, by0, by1, b00, b10, b01, b11;
-	double rx0, rx1, ry0, ry1, a, b, u, v;
+	int b00, b10, b01, b11;
+	double a, b, u, v;
 	int i, j;
 	glm::ivec2 bx, by;
 	glm::dvec2 t, rx, ry, s, q;
