@@ -147,9 +147,7 @@ double Noise::calculateNoiseValue(double x, double y){
 	v = glm::dot(q, glm::dvec2(rx.y, ry.y));
 	b = lerp(s.x, u, v);
 
-	double result = lerp(s.y, a, b);//, 0.0 , 1.0;//clamp
-	std::cout
-	return result;
+	return clamp(lerp(s.y, a, b), 0.0, 1.0);
 }
 
 
@@ -257,6 +255,6 @@ bool Noise:: saveToFile(const char* filename){
 
 }
 
-//double Noise::getTextureData(){
-//	return mNoise;
-//}
+double *Noise::getTextureData(){
+	return mNoise;
+}
