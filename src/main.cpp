@@ -3,11 +3,13 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <chrono>
-#include "Shader.h"
-#include "Noise.h"
+
+/* #include "inputCallback.h" */
 #include "Camera.h"
 #include "ModelLoader.h"
-/* #include "inputCallback.h" */
+#include "Noise.h"
+#include "Shader.h"
+#include "Texture.h"
 
 
 using namespace glm;

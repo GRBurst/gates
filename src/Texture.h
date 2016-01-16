@@ -2,31 +2,36 @@
 #define TEXTURE_H_
 
 #include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <SOIL/SOIL.h>
-#include "GLerror.h"
+#include <iostream>
 
+/*
+ * Texture class. Use in the following order:
+ * 1.) Constructor
+ * 2.) bind()
+ * 3.) loadCommonOptions (& setData)
+ * 4.) linkTexture
+ */
 class Texture
 {
 
     public:
         Texture();
-        ~Texture() {};
+        Texture(const char* imagePath);
+        ~Texture();
 
         GLuint getTexture();
         GLuint getTextureLoc();
 
-        void setTexture(GLint shaderProgram, GLint location, const char *texture_name);
-        void setData(unsigned char& data);
+        void linkTexture(GLint shaderProgram, const char *texture_name, GLenum type);
+        void setData(unsigned char* data);
         void loadCommonOptions();
         void bind();
         void unbind();
 
 
     private:
+        static unsigned int idGenerator;
         GLuint texture;
         GLuint textureLocation;
         GLint location;
@@ -34,5 +39,5 @@ class Texture
         int width, height;
         unsigned char* data;
 
-}
+};
 #endif /* TEXTURE_H_ */
