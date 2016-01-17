@@ -200,17 +200,18 @@ int main(){
     grassshader.loadShader("../src/shader/grass.fs", Shader::FRAGMENT);
     GLint grassprog = grassshader.linkShaders();
     Grass grass;
-    GLuint vao;
+
     grass.setShaderProgram(grassprog);
-    grass.setBuffers();
     float billboard[] = {
-    		0.8f, 0.06f, -1.0f,
-			0.6f, 0.0f, -6.0f,
-			0.6f, 0.0f, -2.0f,
-    		0.2f, 0.0f, -5.0f
-    };
+        		0.8f, 0.0f, -1.0f,
+    			1.6f, 0.0f, -2.0f,
+    			3.6f, 0.0f, -5.0f,
+        		0.2f, 0.0f, -6.0f
+        };
 
     grass.setPositionsFromArray(billboard);
+    grass.setBuffers();
+
     grass.setUniforms();
     //END GRASS
     //Outsource
@@ -218,7 +219,7 @@ int main(){
 
     ModelLoader *model = new ModelLoader("../objects/sphere.obj", prog);
 	model->loadFile();
-	model->setProjection(camera.getProjectionMatrix());
+
 	model->setBuffers();
 	model->setStandardUniformLocations();
 	glm::vec3 trans(1.0, 0.0, -1.0);
@@ -305,6 +306,8 @@ int main(){
 //        err = glGetError();
 //		if (err != GL_NO_ERROR)
 //			std::cout << "Fehler: " << err << std::endl;
+        grass.setCameraPosRef(camera.getPos());
+        grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
         grass.draw();
 
 		//END GRASS

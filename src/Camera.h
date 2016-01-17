@@ -11,7 +11,7 @@ class Camera
 	    ~Camera() {};
 
         // Getters & Setters
-        glm::vec3 getPos() const { return this->mPos; };
+        glm::vec3 getPos() const { return mPos; };
         void setPos(const glm::vec3 &position) { this->mPos = position; };
 
         float getNearPlane() const { return this->mNearPlane; };

@@ -13,27 +13,27 @@ void main()
 {
 	vec3 pos = gl_in[0].gl_Position.xyz;
  
- 	vec3 toCamera = vec3(0.0, 0.0, 1.0);//normalize(gCameraPos - pos);
+ 	vec3 toCamera = vec3(0.0, 0.0, -1.0);//normalize(gCameraPos - pos);
     vec3 up = vec3(0.0, 1.0, 0.0);
     vec3 right = cross(toCamera, up);
  
-    pos -= (right * 0.5);
+    pos -= (right * 0.1);
     gl_Position = gVP * vec4(pos, 1.0);
     texCoord = vec2(0.0, 0.0);
     EmitVertex();
 
-    pos.y += 1.0;
+    pos.y += 0.2;
     gl_Position = gVP * vec4(pos, 1.0);
     texCoord = vec2(0.0, 1.0);
     EmitVertex();
 
-    pos.y -= 1.0;
-    pos += right;
+    pos.y -= 0.2;
+    pos += right * 0.2;
     gl_Position = gVP * vec4(pos, 1.0);
     texCoord = vec2(1.0, 0.0);
     EmitVertex();
 
-    pos.y += 1.0;
+    pos.y += 0.2;
     gl_Position = gVP * vec4(pos, 1.0);
     texCoord = vec2(1.0, 1.0);
     EmitVertex();
