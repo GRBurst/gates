@@ -35,6 +35,7 @@ class Camera
         // Calculatable matrizes from camera
         glm::mat4 getViewMatrix();
         glm::mat4 getProjectionMatrix();
+        glm::mat4 getVPMatrix() {return getProjectionMatrix() * getViewMatrix(); }
 
         // Functions
         glm::mat4 lookAt(const glm::vec3 &viewPos = glm::vec3(0.0f, 0.0f, 0.0f));
