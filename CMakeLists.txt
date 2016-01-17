@@ -67,6 +67,7 @@ set(Game_HEAD   src/main.h
                 src/ModelLoader.h
                 src/Noise.h
                 src/Shader.h
+                src/Terrain.h
                 src/Texture.h
     )
 
@@ -76,6 +77,7 @@ set(Game_SRC    src/main.cpp
                 src/ModelLoader.cpp
                 src/Noise.cpp
                 src/Shader.cpp
+                src/Terrain.cpp
                 src/Texture.cpp
     )
 

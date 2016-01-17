@@ -9,6 +9,7 @@
 #include "ModelLoader.h"
 #include "Noise.h"
 #include "Shader.h"
+#include "Terrain.h"
 #include "Texture.h"
 
 
@@ -193,29 +194,29 @@ int main(){
 
 
 //GRASS
-    Shader grassshader;
-    grassshader.loadShader("../src/shader/grass.vs", Shader::VERTEX);
-    grassshader.loadShader("../src/shader/grass.gs", Shader::GEOMETRY);
-    grassshader.loadShader("../src/shader/grass.fs", Shader::FRAGMENT);
-    GLint grassprog = grassshader.linkShaders();
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-    float billboard[] = {
-    		-1.0f, 1.0f,
-			1.0f, 1.0f,
-			1.0f, -1.0f,
-    		-1.0f, -1.0
-    };
+    /* Shader grassshader; */
+    /* grassshader.loadShader("../src/shader/grass.vs", Shader::VERTEX); */
+    /* grassshader.loadShader("../src/shader/grass.gs", Shader::GEOMETRY); */
+    /* grassshader.loadShader("../src/shader/grass.fs", Shader::FRAGMENT); */
+    /* GLint grassprog = grassshader.linkShaders(); */
+    /* GLuint vbo; */
+    /* glGenBuffers(1, &vbo); */
+    /* float billboard[] = { */
+    /* 		-1.0f, 1.0f, */
+			/* 1.0f, 1.0f, */
+			/* 1.0f, -1.0f, */
+    /* 		-1.0f, -1.0 */
+    /* }; */
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(billboard), billboard, GL_STATIC_DRAW);
+    /* glBindBuffer(GL_ARRAY_BUFFER, vbo); */
+    /* glBufferData(GL_ARRAY_BUFFER, sizeof(billboard), billboard, GL_STATIC_DRAW); */
 
-    GLuint vao;
-    glGenVertexArrays(2, &vao);
-    glBindVertexArray(vao);
-    GLint posAttrib = glGetAttribLocation(grassprog, "vPosition");
-    glEnableVertexAttribArray(posAttrib);
-    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    /* GLuint vao; */
+    /* glGenVertexArrays(2, &vao); */
+    /* glBindVertexArray(vao); */
+    /* GLint posAttrib = glGetAttribLocation(grassprog, "vPosition"); */
+    /* glEnableVertexAttribArray(posAttrib); */
+    /* glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0); */
 
     //END GRASS
     //Outsource
@@ -269,11 +270,22 @@ int main(){
     /* noise.saveToFile("texture.tga"); */
 
     //Heightmap rendering
+    Shader terrainshader;
+    terrainshader.loadShader("../src/shader/terrain.vs", Shader::VERTEX);
+    terrainshader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT);
+    GLint terrainprog = terrainshader.linkShaders();
+
     Texture *heightmap = new Texture();
     heightmap->bind();
     heightmap->setData(noise.getTextureDataF(), 500, 500);
     heightmap->loadHeightmapOptions();
     heightmap->linkTexture(prog, "heightMap");
+    heightmap->linkTexture(terrainprog, "heightMap");
+
+    Terrain *terrain = new Terrain(terrainprog, 500, 500);
+    terrain->setVPMatrix(camera.getVPMatrix());
+    terrain->buildVBO();
+    terrain->buildIBO();
 
 
 	double xpos, ypos;
@@ -306,6 +318,8 @@ int main(){
         model->setView(camera.getViewMatrix());
         /* heightmap->bind(); */
         model->draw();
+        terrain->setVPMatrix(camera.getVPMatrix());
+        terrain->draw();
         /* renderHeightmap(0.1, 10 , noise.getTextureData()); */
         err = glGetError();
 			if (err != GL_NO_ERROR)
