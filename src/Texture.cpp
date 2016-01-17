@@ -36,18 +36,28 @@ Texture::~Texture()
     glDeleteTextures(1, &texture);
 }
 
-void Texture::setData(unsigned char* data)
+void Texture::setData(unsigned char* data, int width, int height)
 {
-    this->cdata = data;
+    this->cdata     = data;
+    this->width     = width;
+    this->height    = height;
 }
 
-void Texture::setData(float* data)
+void Texture::setData(float* data, int width, int height)
 {
-    this->ddata = data;
+    this->ddata     = data;
+    this->width     = width;
+    this->height    = height;
 }
 
 void Texture::loadCommonOptions()
 {
+
+    // Give the image to OpenGL
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, this->width, this->height, 0, GL_RED, GL_FLOAT, ddata);
+
+    // build our texture mipmaps
+    /* gluBuild2DMipmaps(GL_TEXTURE_2D, 4, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data); */
 
     // select modulate to mix texture with color for shading
     glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
@@ -67,7 +77,6 @@ void Texture::bind()
 {
     glActiveTexture(GL_TEXTURE0 + this->location);
     glBindTexture(GL_TEXTURE_2D, this->texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 50, 50, 0, GL_RED, GL_FLOAT, ddata);
 }
 
 void Texture::unbind()
@@ -89,12 +98,6 @@ void Texture::linkTexture(GLint shaderProgram, const char* texture_name, GLenum 
 {
     textureLocation = glGetUniformLocation(shaderProgram, texture_name);
     glUniform1i(textureLocation, location);
-
-    // Give the image to OpenGL
-
-
-    // build our texture mipmaps
-    /* gluBuild2DMipmaps(GL_TEXTURE_2D, 4, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data); */
 
     // free buffer
     /* free(data); */

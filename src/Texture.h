@@ -9,8 +9,9 @@
  * Texture class. Use in the following order:
  * 1.) Constructor
  * 2.) bind()
- * 3.) loadCommonOptions (& setData)
- * 4.) linkTexture
+ * 3.) setData()
+ * 4.) loadCommonOptions()
+ * 5.) linkTexture
  */
 
 class Texture
@@ -25,8 +26,8 @@ class Texture
         GLuint getTextureLoc();
 
         void linkTexture(GLint shaderProgram, const char *texture_name, GLenum type);
-        void setData(unsigned char* data);
-        void setData(float* data);
+        void setData(unsigned char* data, int width, int height);
+        void setData(float* data, int width, int height);
         void loadCommonOptions();
         void bind();
         void unbind();

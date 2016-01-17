@@ -264,15 +264,15 @@ int main(){
 
     oldTime = glfwGetTime();
     //Noise Test
-    Noise noise(50, 50, Noise::PERLIN, 546, 4, 1.0, 0.8);
+    Noise noise(500, 500, Noise::PERLIN, 546, 4, 1.0, 0.8);
     noise.generateNoiseImage();
     /* noise.saveToFile("texture.tga"); */
 
     //Heightmap rendering
     Texture *heightmap = new Texture();
     heightmap->bind();
+    heightmap->setData(noise.getTextureDataF(), 500, 500);
     heightmap->loadCommonOptions();
-    heightmap->setData(noise.getTextureDataF());
 
 
 
