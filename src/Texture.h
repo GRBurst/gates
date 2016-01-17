@@ -25,10 +25,11 @@ class Texture
         GLuint getTexture();
         GLuint getTextureLoc();
 
-        void linkTexture(GLint shaderProgram, const char *texture_name, GLenum type);
+        void linkTexture(GLint shaderProgram, const char *texture_name);
         void setData(unsigned char* data, int width, int height);
         void setData(float* data, int width, int height);
-        void loadCommonOptions();
+        void loadCommonOptions(GLenum type);
+        void loadHeightmapOptions();
         void bind();
         void unbind();
 

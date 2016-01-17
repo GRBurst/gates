@@ -266,9 +266,10 @@ int main(){
     //Heightmap rendering
     Texture *heightmap = new Texture();
     heightmap->bind();
-    heightmap->setData(noise.getTextureDataF(), 200, 200);
-    heightmap->loadCommonOptions();
 
+    heightmap->setData(noise.getTextureDataF(), 200, 200);
+    heightmap->loadHeightmapOptions();
+    heightmap->linkTexture(prog, "heightMap");
 
 
 
@@ -309,7 +310,7 @@ int main(){
 		//END GRASS
         model->setProjection(camera.getProjectionMatrix());
         model->setView(camera.getViewMatrix());
-        heightmap->bind();
+        /* heightmap->bind(); */
         model->draw();
         /* renderHeightmap(0.1, 10 , noise.getTextureData()); */
         err = glGetError();
