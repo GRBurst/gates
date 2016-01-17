@@ -11,6 +11,7 @@
 #include "Shader.h"
 #include "Terrain.h"
 #include "Texture.h"
+#include "Grass.h"
 
 
 using namespace glm;
@@ -194,37 +195,32 @@ int main(){
 
 
 //GRASS
-    /* Shader grassshader; */
-    /* grassshader.loadShader("../src/shader/grass.vs", Shader::VERTEX); */
-    /* grassshader.loadShader("../src/shader/grass.gs", Shader::GEOMETRY); */
-    /* grassshader.loadShader("../src/shader/grass.fs", Shader::FRAGMENT); */
-    /* GLint grassprog = grassshader.linkShaders(); */
-    /* GLuint vbo; */
-    /* glGenBuffers(1, &vbo); */
-    /* float billboard[] = { */
-    /* 		-1.0f, 1.0f, */
-			/* 1.0f, 1.0f, */
-			/* 1.0f, -1.0f, */
-    /* 		-1.0f, -1.0 */
-    /* }; */
+    Shader grassshader;
+    grassshader.loadShader("../src/shader/grass.vs", Shader::VERTEX);
+    grassshader.loadShader("../src/shader/grass.gs", Shader::GEOMETRY);
+    grassshader.loadShader("../src/shader/grass.fs", Shader::FRAGMENT);
+    GLint grassprog = grassshader.linkShaders();
+    Grass grass;
 
-    /* glBindBuffer(GL_ARRAY_BUFFER, vbo); */
-    /* glBufferData(GL_ARRAY_BUFFER, sizeof(billboard), billboard, GL_STATIC_DRAW); */
+    grass.setShaderProgram(grassprog);
+    float billboard[] = {
+        		0.8f, 0.0f, -1.0f,
+    			1.6f, 0.0f, -2.0f,
+    			3.6f, 0.0f, -5.0f,
+        		0.2f, 0.0f, -6.0f
+        };
 
-    /* GLuint vao; */
-    /* glGenVertexArrays(2, &vao); */
-    /* glBindVertexArray(vao); */
-    /* GLint posAttrib = glGetAttribLocation(grassprog, "vPosition"); */
-    /* glEnableVertexAttribArray(posAttrib); */
-    /* glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0); */
+    grass.setPositionsFromArray(billboard);
+    grass.setBuffers();
 
+    grass.setUniforms();
     //END GRASS
     //Outsource
 
 
     ModelLoader *model = new ModelLoader("../objects/sphere.obj", prog);
 	model->loadFile();
-	model->setProjection(camera.getProjectionMatrix());
+
 	model->setBuffers();
 	model->setStandardUniformLocations();
 	glm::vec3 trans(1.0, 0.0, -1.0);
@@ -265,7 +261,7 @@ int main(){
 
     oldTime = glfwGetTime();
     //Noise Test
-    Noise noise(500, 500, Noise::PERLIN, 546, 4, 1.0, 0.8);
+    Noise noise(200, 200, Noise::PERLIN, 120, 1, 1.0, 1.0);
     noise.generateNoiseImage();
     /* noise.saveToFile("texture.tga"); */
 
@@ -277,7 +273,8 @@ int main(){
 
     Texture *heightmap = new Texture();
     heightmap->bind();
-    heightmap->setData(noise.getTextureDataF(), 500, 500);
+
+    heightmap->setData(noise.getTextureDataF(), 200, 200);
     heightmap->loadHeightmapOptions();
     heightmap->linkTexture(prog, "heightMap");
     heightmap->linkTexture(terrainprog, "heightMap");
@@ -286,6 +283,7 @@ int main(){
     terrain->setVPMatrix(camera.getVPMatrix());
     terrain->buildVBO();
     terrain->buildIBO();
+
 
 
 	double xpos, ypos;
@@ -314,6 +312,17 @@ int main(){
         glClearColor(0.0, 0.0, 0.0, 1.0);
         /* std::cout << "view: " << camera.getPos().x << "< " << camera.getPos().y << "< " << camera.getPos().z << std::endl; */
         //neu
+        //GRASS
+
+
+//        err = glGetError();
+//		if (err != GL_NO_ERROR)
+//			std::cout << "Fehler: " << err << std::endl;
+        grass.setCameraPosRef(camera.getPos());
+        grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
+        grass.draw();
+
+		//END GRASS
         model->setProjection(camera.getProjectionMatrix());
         model->setView(camera.getViewMatrix());
         /* heightmap->bind(); */
@@ -322,11 +331,10 @@ int main(){
         terrain->draw();
         /* renderHeightmap(0.1, 10 , noise.getTextureData()); */
         err = glGetError();
-			if (err != GL_NO_ERROR)
-				std::cout << "Fehler: " << err << std::endl;
+		if (err != GL_NO_ERROR)
+			std::cout << "Fehler: " << err << std::endl;
         //processInput
-		//glUseProgram(grassprog);
-		//glDrawArrays(GL_POINTS, 0, 4);
+
 
 
         glfwSwapBuffers( window );
