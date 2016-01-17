@@ -10,6 +10,7 @@
 #include "Noise.h"
 #include "Shader.h"
 #include "Texture.h"
+#include "Grass.h"
 
 
 using namespace glm;
@@ -198,25 +199,19 @@ int main(){
     grassshader.loadShader("../src/shader/grass.gs", Shader::GEOMETRY);
     grassshader.loadShader("../src/shader/grass.fs", Shader::FRAGMENT);
     GLint grassprog = grassshader.linkShaders();
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
+    Grass grass;
+    GLuint vao;
+    grass.setShaderProgram(grassprog);
+    grass.setBuffers();
     float billboard[] = {
-    		-1.0f, 1.0f,
-			1.0f, 1.0f,
-			1.0f, -1.0f,
-    		-1.0f, -1.0
+    		0.8f, 0.06f, -1.0f,
+			0.6f, 0.0f, -6.0f,
+			0.6f, 0.0f, -2.0f,
+    		0.2f, 0.0f, -5.0f
     };
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(billboard), billboard, GL_STATIC_DRAW);
-
-    GLuint vao;
-    glGenVertexArrays(2, &vao);
-    glBindVertexArray(vao);
-    GLint posAttrib = glGetAttribLocation(grassprog, "vPosition");
-    glEnableVertexAttribArray(posAttrib);
-    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
+    grass.setPositionsFromArray(billboard);
+    grass.setUniforms();
     //END GRASS
     //Outsource
 
@@ -264,14 +259,14 @@ int main(){
 
     oldTime = glfwGetTime();
     //Noise Test
-    Noise noise(500, 500, Noise::PERLIN, 546, 4, 1.0, 0.8);
+    Noise noise(200, 200, Noise::PERLIN, 120, 1, 1.0, 1.0);
     noise.generateNoiseImage();
     /* noise.saveToFile("texture.tga"); */
 
     //Heightmap rendering
     Texture *heightmap = new Texture();
     heightmap->bind();
-    heightmap->setData(noise.getTextureDataF(), 500, 500);
+    heightmap->setData(noise.getTextureDataF(), 200, 200);
     heightmap->loadCommonOptions();
 
 
@@ -303,17 +298,25 @@ int main(){
         glClearColor(0.0, 0.0, 0.0, 1.0);
         /* std::cout << "view: " << camera.getPos().x << "< " << camera.getPos().y << "< " << camera.getPos().z << std::endl; */
         //neu
+        //GRASS
+
+
+//        err = glGetError();
+//		if (err != GL_NO_ERROR)
+//			std::cout << "Fehler: " << err << std::endl;
+        grass.draw();
+
+		//END GRASS
         model->setProjection(camera.getProjectionMatrix());
         model->setView(camera.getViewMatrix());
         heightmap->bind();
         model->draw();
         /* renderHeightmap(0.1, 10 , noise.getTextureData()); */
         err = glGetError();
-			if (err != GL_NO_ERROR)
-				std::cout << "Fehler: " << err << std::endl;
+		if (err != GL_NO_ERROR)
+			std::cout << "Fehler: " << err << std::endl;
         //processInput
-		//glUseProgram(grassprog);
-		//glDrawArrays(GL_POINTS, 0, 4);
+
 
 
         glfwSwapBuffers( window );
