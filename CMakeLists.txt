@@ -64,6 +64,7 @@ include_directories(
 set(Game_HEAD   src/main.h
     #src/inputCallback.h
                 src/Camera.h
+                src/Grass.h
                 src/ModelLoader.h
                 src/Noise.h
                 src/Shader.h
@@ -74,6 +75,7 @@ set(Game_HEAD   src/main.h
 set(Game_SRC    src/main.cpp
     #src/inputCallback.cpp
                 src/Camera.cpp
+                src/Grass.cpp
                 src/ModelLoader.cpp
                 src/Noise.cpp
                 src/Shader.cpp
