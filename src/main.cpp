@@ -272,9 +272,8 @@ int main(){
     Texture *heightmap = new Texture();
     heightmap->bind();
     heightmap->setData(noise.getTextureDataF(), 500, 500);
-    heightmap->loadCommonOptions();
-
-
+    heightmap->loadHeightmapOptions();
+    heightmap->linkTexture(prog, "heightMap");
 
 
 	double xpos, ypos;
@@ -305,7 +304,7 @@ int main(){
         //neu
         model->setProjection(camera.getProjectionMatrix());
         model->setView(camera.getViewMatrix());
-        heightmap->bind();
+        /* heightmap->bind(); */
         model->draw();
         /* renderHeightmap(0.1, 10 , noise.getTextureData()); */
         err = glGetError();

@@ -50,7 +50,30 @@ void Texture::setData(float* data, int width, int height)
     this->height    = height;
 }
 
-void Texture::loadCommonOptions()
+void Texture::loadCommonOptions(GLenum type)
+{
+
+    // Give the image to OpenGL
+    glTexImage2D(GL_TEXTURE_2D, 0, type, this->width, this->height, 0, type, GL_UNSIGNED_BYTE, cdata);
+
+    // build our texture mipmaps
+    /* gluBuild2DMipmaps(GL_TEXTURE_2D, 4, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data); */
+
+    // select modulate to mix texture with color for shading
+    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+
+    // when texture area is small, bilinear filter the closest mipmap
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    // when texture area is large, bilinear filter the first mipmap
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+    // texture should tile
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+}
+
+void Texture::loadHeightmapOptions()
 {
 
     // Give the image to OpenGL
@@ -94,7 +117,7 @@ GLuint Texture::getTexture()
     return texture;
 }
 
-void Texture::linkTexture(GLint shaderProgram, const char* texture_name, GLenum type)
+void Texture::linkTexture(GLint shaderProgram, const char* texture_name)
 {
     textureLocation = glGetUniformLocation(shaderProgram, texture_name);
     glUniform1i(textureLocation, location);
