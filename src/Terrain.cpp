@@ -13,9 +13,6 @@ Terrain::Terrain(GLint shaderProgram, int width, int height)
     int numDegensRequired = 2 * (numStripsRequired - 1);
     int verticesPerStrip = 2 * mWidth;
     mTotalIndices = (verticesPerStrip * numStripsRequired) + numDegensRequired;
-
-    glGenVertexArrays(1, &mVao);
-    glBindVertexArray(mVao);
 }
 
 /* void Terrain::setHeigthMapData(float* heights) */
@@ -79,20 +76,6 @@ void Terrain::buildVBO(int floatsPerVertex)
         }
     }
 
-    glGenBuffers(1, &mVbo);
-    glBindBuffer(GL_ARRAY_BUFFER, mVbo);
-    glBufferData(GL_ARRAY_BUFFER, getVerticeNumber() * sizeof(GLfloat), mVertices, GL_STATIC_DRAW);
-
-    GLint terrainPosAttrib = glGetAttribLocation(mShaderProgram, "vPosition");
-    mVPLocation = glGetUniformLocation(mShaderProgram, "VPMatrix");
-    mTerrainSizeLocation = glGetUniformLocation(mShaderProgram, "terrainSize");
-
-    glVertexAttribPointer(terrainPosAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(terrainPosAttrib);
-
-    //Unbind
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 }
 
 void Terrain::buildIBO()
@@ -120,11 +103,45 @@ void Terrain::buildIBO()
 
     /* indexCount = mIndices.size(); */
 
+}
+
+void Terrain::setup()
+{
+
+    //Unbind
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glUseProgram(mShaderProgram);
+
+    GLint terrainPosAttrib = glGetAttribLocation(mShaderProgram, "vPosition");
+    mVPLocation = glGetUniformLocation(mShaderProgram, "VPMatrix");
+    mTerrainSizeLocation = glGetUniformLocation(mShaderProgram, "terrainSize");
+
+    //Generate & bind vao
+    glGenVertexArrays(1, &mVao);
+    glBindVertexArray(mVao);
+
+    //Generate & bind vbo
+    glGenBuffers(1, &mVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, mVbo);
+    glBufferData(GL_ARRAY_BUFFER, getVerticeNumber() * sizeof(GLfloat), mVertices, GL_STATIC_DRAW);
+
+    // Get Attrib location
+    glEnableVertexAttribArray(terrainPosAttrib);
+    glVertexAttribPointer(terrainPosAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+    //Generate & bind ibo
     glGenBuffers(1, &mIbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIbo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, mTotalIndices * sizeof(GLint), mIndices, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+
+
+    //Unbind
+    glBindVertexArray(0);
+    //glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 }
 
@@ -137,12 +154,13 @@ void Terrain::draw()
     // Bind Attributes
     glBindVertexArray(mVao);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIbo);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIbo);
     /* int size; */
     /* glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size); */
     /* std::cout << "buffer size = " << size << ", vertice numeber = " << getVerticeNumber() << ", indice number = " << totalIndices << std::endl; // size/sizeof(GLuint)*/
     glDrawElements(GL_TRIANGLE_STRIP, mTotalIndices, GL_UNSIGNED_INT, 0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    //glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }

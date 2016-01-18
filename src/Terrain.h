@@ -14,6 +14,7 @@ class Terrain {
         /* void setHeigthMapData(float* heights); */
         void buildVBO(int floatsPerVertex = 2);
         void buildIBO();
+        void setup();
         void setVPMatrix(glm::mat4 vp);
         void draw();
 
