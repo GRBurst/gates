@@ -345,6 +345,8 @@ int main(){
 //	glDeleteBuffers(1, &VBO);
 //	glDeleteVertexArrays(1, &VAO);
 	glDeleteProgram(prog);
+	glDeleteProgram(grassprog);
+	glDeleteProgram(terrainprog);
 
 }
 
