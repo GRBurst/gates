@@ -94,9 +94,34 @@ void Texture::setData(float* data, int width, int height)
 
 void Texture::loadCommonOptions()
 {
-	 glActiveTexture(GL_TEXTURE0 + this->location);
+	glActiveTexture(GL_TEXTURE0 + this->location);
 	glBindTexture(GL_TEXTURE_2D, this->texture);
-    // Give the image to OpenGL
+
+
+	for(int i = 6; i < width * height; i+= 4){
+
+		cout << (int)cdata[i - 4] << endl;
+		cout.flush();
+	}
+//	FIBITMAP *bitmap =FreeImage_Allocate(width, height, 32, 8, 8, 8);
+//	if (bitmap){
+//		for(int y = height-1 ;y > =0; y--)
+//		{
+//		    unsigned char *bits = FreeImage_GetScanLine(bitmap, height-1-y);
+//		    for(int  =0 ;x < width; x++)
+//		    {
+//		        bits[0] =mpixels[(y*width+x)*4+0];
+//		        bits[1] =mpixels[(y*width+x)*4+1];
+//		        bits[2] =mpixels[(y*width+x)*4+2];
+//		        bits[3] =mpixels[(y*width+x)*4+3];
+//		        bits+=4;
+//
+//		    }
+//
+//		}
+//	}
+//	bool bSuccess = FreeImage_Save(FIF_PNG, bitmap, "tmp.png", PNG_DEFAULT);
+	// Give the image to OpenGL
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, this->width, this->height, 0, GL_BGRA, GL_UNSIGNED_BYTE, cdata);
 
     // build our texture mipmaps
