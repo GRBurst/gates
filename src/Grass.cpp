@@ -38,7 +38,7 @@ void Grass::draw(){
 	glUniform3fv(cameraPosLocation, 1, value_ptr(cameraPos));
     glBindVertexArray(vao);
 	glDrawArrays(GL_POINTS, 0, 4);
-
+	glBindVertexArray(0);
 }
 
 

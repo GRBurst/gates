@@ -283,6 +283,7 @@ int main(){
     terrain->setVPMatrix(camera.getVPMatrix());
     terrain->buildVBO();
     terrain->buildIBO();
+    terrain->setup();
 
 
 
