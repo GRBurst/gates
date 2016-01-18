@@ -9,7 +9,7 @@ vec4 colorRes;
 
 void main()
 {
-	color = vec4(vcolor, 1.0);
-   //color = vec4(texture2D(textureMat, texCoord).rgb, 1.0);
+	//color = vec4(vcolor, 1.0);
+    color = vec4(texture2D(textureMat, texCoord));
     //color = vec4(texCoord, 1.0, 0.5);
 }

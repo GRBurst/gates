@@ -121,6 +121,7 @@ void initOpenGL()
     glDepthFunc( GL_LESS );
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glEnable(GL_BLEND);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void resize_callback( GLFWwindow* p, int newWidth, int newHeight )
@@ -321,17 +322,7 @@ int main(){
         glClearColor(0.0, 0.0, 0.0, 1.0);
         /* std::cout << "view: " << camera.getPos().x << "< " << camera.getPos().y << "< " << camera.getPos().z << std::endl; */
         //neu
-        //GRASS
 
-
-//        err = glGetError();
-//		if (err != GL_NO_ERROR)
-//			std::cout << "Fehler: " << err << std::endl;
-        grass.setCameraPosRef(camera.getPos());
-        grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
-        grass.draw();
-
-		//END GRASS
         model->setProjection(camera.getProjectionMatrix());
         model->setView(camera.getViewMatrix());
 
@@ -341,7 +332,17 @@ int main(){
         /* renderHeightmap(0.1, 10 , noise.getTextureData()); */
 
         //processInput
+        //GRASS
 
+
+ //        err = glGetError();
+ //		if (err != GL_NO_ERROR)
+ //			std::cout << "Fehler: " << err << std::endl;
+         grass.setCameraPosRef(camera.getPos());
+         grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
+         grass.draw();
+
+ 		//END GRASS
 
 
         glfwSwapBuffers( window );
