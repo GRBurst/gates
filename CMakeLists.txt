@@ -2,6 +2,10 @@ cmake_minimum_required (VERSION 2.8)
 
 project (GATES)
 
+LIST(APPEND CMAKE_MODULE_PATH
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake
+)
+
 option(USE_CLANG "build application with clang" OFF) # OFF is the default
 if(USE_CLANG)
     SET(CMAKE_CXX_COMPILER  "/usr/bin/clang++")
@@ -34,16 +38,25 @@ endif(NOT GLEW_FOUND)
 include_directories(${GLEW_INCLUDE_DIRS})
 #target_link_libraries(${PROJECT_NAME} ${GLEW_LIBRARIES})
 
+# FreeImage
+#include(cmake/FindFreeImage.cmake)
+find_package(FreeImage REQUIRED)
+if(NOT FreeImage_FOUND)
+    message(FATAL_ERROR "FreeImage not found!")
+endif(NOT FreeImage_FOUND)
+include_directories(${FreeImage_INCLUDE_DIRS})
+
 # SOIL
-include(cmake/FindSOIL.cmake)
-if(NOT SOIL_FOUND)
-    message(FATAL_ERROR "SOIL not found!")
-    endif(NOT SOIL_FOUND)
-include_directories(${SOIL_INCLUDE_DIR})
+#include(cmake/FindSOIL.cmake)
+#if(NOT SOIL_FOUND)
+#    message(FATAL_ERROR "SOIL not found!")
+#    endif(NOT SOIL_FOUND)
+#include_directories(${SOIL_INCLUDE_DIR})
 #target_link_libraries(${PROJECT_NAME} ${SOIL_LIBRARY})
 
 # Set Libraries
-set(LIBRARIES ${GLEW_LIBRARIES} ${SOIL_LIBRARY} ${GLFW_LIBRARIES} ${OPENGL_LIBRARY})
+set(LIBRARIES ${GLEW_LIBRARIES} ${FreeImage_LIBRARIES} ${GLFW_LIBRARIES} ${OPENGL_LIBRARY})
+#set(LIBRARIES ${GLEW_LIBRARIES} ${SOIL_LIBRARY} ${GLFW_LIBRARIES} ${OPENGL_LIBRARY})
 #set(LIBRARIES ${GLEW_LIBRARIES} ${GLFW_LIBRARIES} ${OPENGL_LIBRARY})
 
 include_directories(
