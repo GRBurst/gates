@@ -18,7 +18,8 @@ void main()
     if (colorRes < 0.2){
     	//float deviation = rand(fUV) / 10;
     	//color = vec4(0.1, 0.1, 0.6 + deviation, 1.0);
-    	color = vec4(0.1, 0.15, 0.75, 1.0) * vec4(texture(heightMap, fUV).rrr, 1.0);
+    	//color = vec4(0.1, 0.15, 0.75, 1.0) * vec4(texture(heightMap, fUV).rrr, 1.0);
+    	color = vec4(0.1,0.1,0.1,0.8) + vec4(0.1, 0.15, 0.75, 1.0) * (0.199 + vec4(texture(heightMap, fUV).rrr, 1.0) * 0.005 );
     }
     else if (colorRes >= 0.199 && colorRes < 0.7){
     	//float deviation = rand(fUV) / 10;
