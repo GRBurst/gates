@@ -120,6 +120,7 @@ GLuint Texture::getTexture()
 void Texture::linkTexture(GLint shaderProgram, const char* texture_name)
 {
     textureLocation = glGetUniformLocation(shaderProgram, texture_name);
+    glUseProgram(shaderProgram);
     glUniform1i(textureLocation, location);
 
     // free buffer
