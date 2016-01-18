@@ -261,9 +261,9 @@ int main(){
 
     oldTime = glfwGetTime();
     //Noise Test
-    Noise noise(200, 200, Noise::PERLIN, 120, 1, 1.0, 1.0);
+    Noise noise(200, 200, Noise::PERLIN, 27, 8, 1.0, 1.0);
     noise.generateNoiseImage();
-    /* noise.saveToFile("texture.tga"); */
+    noise.saveToFile("texture.tga");
 
     //Heightmap rendering
     Shader terrainshader;
@@ -279,7 +279,7 @@ int main(){
     //heightmap->linkTexture(prog, "heightMap");
     heightmap->linkTexture(terrainprog, "heightMap");
 
-    Terrain *terrain = new Terrain(terrainprog, 400, 500);
+    Terrain *terrain = new Terrain(terrainprog, 512, 512);
     terrain->setVPMatrix(camera.getVPMatrix());
     terrain->buildVBO();
     terrain->buildIBO();

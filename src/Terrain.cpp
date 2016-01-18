@@ -65,8 +65,8 @@ void Terrain::buildVBO(int floatsPerVertex)
     {
         for(int x = 0; x < mWidth; x++)
         {
-            float xRatio = x / static_cast<float>(mWidth -1);
-            float yRatio = 1.0f - (y / static_cast<float>(mHeight - 1));
+            float xRatio = static_cast<float>(x) / static_cast<float>(mWidth -1);
+            float yRatio = 1.0f - (static_cast<float>(y) / static_cast<float>(mHeight - 1));
 
             float xPosition = minPos + (xRatio * posRange);
             float yPosition = minPos + (yRatio * posRange);
