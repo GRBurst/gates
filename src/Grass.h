@@ -34,7 +34,7 @@ private:
 	glm::mat4 view;
 	glm::mat4 projection;
 	glm::vec3 cameraPos;
-	Texture texture;
+	Texture *texture;
 };
 
 #endif /* SRC_GRASS_H_ */

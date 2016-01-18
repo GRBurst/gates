@@ -20,10 +20,10 @@ Grass::~Grass()
 
 
 void Grass::loadTexture(){
-	texture = Texture("../src/textures/billboardflowers.png");
-	texture.linkTexture(shaderProgram, "textureMat");
-	texture.bind();
-	texture.loadCommonOptions();
+	texture = new Texture("../src/textures/billboardflowers.png");
+	texture->linkTexture(shaderProgram, "textureMat");
+	texture->bind();
+	texture->loadCommonOptions();
 
 }
 

@@ -34,13 +34,14 @@ endif(NOT GLEW_FOUND)
 include_directories(${GLEW_INCLUDE_DIRS})
 #target_link_libraries(${PROJECT_NAME} ${GLEW_LIBRARIES})
 
-# SOIL
-include(cmake/FindSOIL.cmake)
-if(NOT SOIL_FOUND)
-    message(FATAL_ERROR "SOIL not found!")
-    endif(NOT SOIL_FOUND)
-include_directories(${SOIL_INCLUDE_DIR})
-#target_link_libraries(${PROJECT_NAME} ${SOIL_LIBRARY})
+# freeimage
+include(cmake/FindFREEIMAGE.cmake)
+if(NOT FREEIMAGE_FOUND)
+    message(FATAL_ERROR "FREEIMAGE not found!")
+    endif(NOT FREEIMAGE_FOUND)
+include_directories(${FREEIMAGE_INCLUDE_DIR})
+#target_link_libraries(${PROJECT_NAME} ${FREEIMAGE_LIBRARY})
+
 
 # Set Libraries
 set(LIBRARIES ${GLEW_LIBRARIES} ${SOIL_LIBRARY} ${GLFW_LIBRARIES} ${OPENGL_LIBRARY})

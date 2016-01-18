@@ -230,11 +230,7 @@ int main(){
 	model->setStandardUniformLocations();
 	glm::vec3 trans(1.0, 0.0, -1.0);
 	model->translate(trans);
-	Texture *texture = new Texture("../src/textures/1.jpg");
-	texture->bind();
-	texture->linkTexture(prog, "heightMap");
 
-	texture->loadHeightmapOptions();
 //    GLuint posAttrib = glGetAttribLocation(prog, "vPosition");
 //    GLuint VAO;
 //
@@ -271,7 +267,7 @@ int main(){
     oldTime = glfwGetTime();
     //Noise Test
 
-    Noise noise(512, 512, Noise::PERLIN, 120, 8, 1.0, 4.0);
+    Noise noise(1024, 1024, Noise::PERLIN, 43, 16, 2.0, 3.0);
 
     noise.generateNoiseImage();
     noise.saveToFile("texture.tga");
@@ -285,13 +281,13 @@ int main(){
     Texture *heightmap = new Texture();
     heightmap->bind();
 
-    heightmap->setData(noise.getTextureDataF(), 512, 512);
+    heightmap->setData(noise.getTextureDataF(), 1024, 1024);
     heightmap->loadHeightmapOptions();
     heightmap->linkTexture(prog, "heightMap");
     heightmap->linkTexture(terrainprog, "heightMap");
+    //heightmap->linkTexture(grassprog, "textureMat");
 
-
-    Terrain *terrain = new Terrain(terrainprog, 512, 512);
+    Terrain *terrain = new Terrain(terrainprog, 1024, 1024);
     terrain->setVPMatrix(camera.getVPMatrix());
     terrain->buildVBO();
     terrain->buildIBO();
@@ -338,7 +334,7 @@ int main(){
 		//END GRASS
         model->setProjection(camera.getProjectionMatrix());
         model->setView(camera.getViewMatrix());
-        texture->bind();
+
         model->draw();
         terrain->setVPMatrix(camera.getVPMatrix());
         terrain->draw();

@@ -94,7 +94,8 @@ void Texture::setData(float* data, int width, int height)
 
 void Texture::loadCommonOptions()
 {
-
+	 glActiveTexture(GL_TEXTURE0 + this->location);
+	glBindTexture(GL_TEXTURE_2D, this->texture);
     // Give the image to OpenGL
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, this->width, this->height, 0, GL_BGRA, GL_UNSIGNED_BYTE, cdata);
 

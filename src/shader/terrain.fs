@@ -20,12 +20,12 @@ void main()
     	//color = vec4(0.1, 0.1, 0.6 + deviation, 1.0);
     	color = vec4(0.1, 0.15, 0.75, 1.0) * vec4(texture(heightMap, fUV).rrr, 1.0);
     }
-    else if (colorRes >= 0.2 && colorRes < 0.7){
+    else if (colorRes >= 0.199 && colorRes < 0.7){
     	//float deviation = rand(fUV) / 10;
     	//color = vec4(0.1, 0.6 + deviation, 0.1 +deviation, 1.0);
     	color =vec4(0.1, 0.6, 0.1, 1.0) * vec4(texture(heightMap, fUV).rrr, 1.0);
     }
-    else if (colorRes >= 0.7 && colorRes < 0.9){
+    else if (colorRes >= 0.699 && colorRes < 0.9){
     	//float deviation = rand(fUV) / 7;
     	//color = vec4(0.8 + deviation, 0.8 + deviation, 0.8 +deviation, 1.0);
     	color = vec4(0.8, 0.8, 0.8, 1.0) * vec4(texture(heightMap, fUV).rrr, 1.0);
