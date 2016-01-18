@@ -10,7 +10,7 @@ Texture::Texture()
     , cdata(0)
     , ddata(0)
 {
-    this->location = idGenerator++;
+    this->location = 0;
     glGenTextures(1, &texture);
 }
 
@@ -23,17 +23,59 @@ Texture::Texture(const char* imagePath)
     , cdata(0)
     , ddata(0)
 {
-    this->location = idGenerator++;
- //   texture = SOIL_load_OGL_texture(imagePath, SOIL_LOAD_RGBA, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_COMPRESS_TO_DXT);
+	FreeImage_Initialise();
+	glGenTextures(1, &texture);
 
-//    if(!texture)
-//        std::cout << imagePath << " Problem! Fehler: " << SOIL_last_result()  << std::endl;
+	this->location = 1;
+	FREE_IMAGE_FORMAT fif = FreeImage_GetFileType(imagePath, 0);
+
+	if (fif == FIF_UNKNOWN)
+		{
+			cout << "Unbekannter Typ" << endl;
+			cout.flush();
+		}
+
+	FIBITMAP* pImage = FreeImage_Load(
+	        fif,
+			imagePath);
+	if (!FreeImage_HasPixels(pImage))
+		{
+			cout << "No Pixels" << endl;
+			cout.flush();
+		}
+	if (FreeImage_GetBPP(pImage) != 32)
+	{
+		cout << "Konvertiere zu 32 bits" << endl;
+		cout.flush();
+	    FIBITMAP* tempImage = pImage;
+	    pImage = FreeImage_ConvertTo32Bits(tempImage);
+	}
+//	FIBITMAP* tempImage = pImage;
+//	pImage = FreeImage_ConvertTo24Bits(tempImage);
+//	pImage = FreeImage_ConvertTo24Bits(pImage);
+	width = FreeImage_GetWidth(pImage);
+	height = FreeImage_GetHeight(pImage);
+
+	cdata = FreeImage_GetBits(pImage);
+
+//		{
+//			cdata[pix * 4 + 0] = pixels[pix * 4 + 2];
+//			cdata[pix * 4 + 1] = pixels[pix * 4 + 1];
+//			cdata[pix * 4 + 2] = pixels[pix * 4 + 0];
+//			cdata[pix * 4 + 3] = pixels[pix * 4 + 3]; // Add this line to copy Alpha
+//		}
+
+//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, nWidth, nHeight,
+//	    0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(pImage));
+
+//	FreeImage_Unload(pImage);
 
 }
 
 Texture::~Texture()
 {
     glDeleteTextures(1, &texture);
+    FreeImage_DeInitialise();
 }
 
 void Texture::setData(unsigned char* data, int width, int height)
@@ -50,26 +92,26 @@ void Texture::setData(float* data, int width, int height)
     this->height    = height;
 }
 
-void Texture::loadCommonOptions(GLenum type)
+void Texture::loadCommonOptions()
 {
 
     // Give the image to OpenGL
-    glTexImage2D(GL_TEXTURE_2D, 0, type, this->width, this->height, 0, type, GL_UNSIGNED_BYTE, cdata);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, this->width, this->height, 0, GL_BGRA, GL_UNSIGNED_BYTE, cdata);
 
     // build our texture mipmaps
-    /* gluBuild2DMipmaps(GL_TEXTURE_2D, 4, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data); */
+    //gluBuild2DMipmaps(GL_TEXTURE_2D, 4, width, height, GL_RGBA, GL_UNSIGNED_BYTE, cdata);
 
     // select modulate to mix texture with color for shading
     glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
     // when texture area is small, bilinear filter the closest mipmap
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     // when texture area is large, bilinear filter the first mipmap
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // texture should tile
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,  GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,  GL_CLAMP_TO_EDGE);
 
 }
 
@@ -78,6 +120,7 @@ void Texture::loadHeightmapOptions()
 
     // Give the image to OpenGL
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, this->width, this->height, 0, GL_RED, GL_FLOAT, ddata);
+
 
     // build our texture mipmaps
     /* gluBuild2DMipmaps(GL_TEXTURE_2D, 4, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data); */
@@ -119,8 +162,11 @@ GLuint Texture::getTexture()
 
 void Texture::linkTexture(GLint shaderProgram, const char* texture_name)
 {
+	glUseProgram(shaderProgram);
     textureLocation = glGetUniformLocation(shaderProgram, texture_name);
     glUniform1i(textureLocation, location);
+    cout << textureLocation;
+    cout.flush();
 
     // free buffer
     /* free(data); */

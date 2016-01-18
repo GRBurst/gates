@@ -53,7 +53,7 @@ GLint Shader::loadShader(const char *shaderPath, ShaderType type)
     const GLchar* file  = tmpFile.c_str();
     GLenum glShaderType = 0;
 
-    cout << "shader filedata: " << endl << readFile(shaderPath) << endl;
+   // cout << "shader filedata: " << endl << readFile(shaderPath) << endl;
 
     switch(type)
     {

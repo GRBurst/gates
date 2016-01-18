@@ -7,7 +7,7 @@
 
 #include "Grass.h"
 
-Grass::Grass():shaderProgram(0), vao(0), vbo(0), data(0), gVPLocation(0), cameraPosLocation(0), view(glm::mat4(0)), projection(glm::mat4(0)), cameraPos(0)
+Grass::Grass()
 {
 	// TODO Auto-generated constructor stub
 
@@ -21,6 +21,10 @@ Grass::~Grass()
 
 void Grass::loadTexture(){
 	texture = Texture("../src/textures/billboardflowers.png");
+	texture.linkTexture(shaderProgram, "textureMat");
+	texture.bind();
+	texture.loadCommonOptions();
+
 }
 
 void Grass::setPositionsFromArray(float* data){
@@ -32,12 +36,21 @@ void Grass::setShaderProgram(GLint shaderProgram){
 }
 
 void Grass::draw(){
+	GLint err;
 	glUseProgram(shaderProgram);
-	texture.bind();
+
 	glUniformMatrix4fv(gVPLocation, 1, GL_FALSE, glm::value_ptr(projection * view));
 	glUniform3fv(cameraPosLocation, 1, value_ptr(cameraPos));
     glBindVertexArray(vao);
+    err = glGetError();
+    	if (err != GL_NO_ERROR)
+    		std::cout << "Fehler2: " << err << std::endl;
+    	std::cout.flush();
 	glDrawArrays(GL_POINTS, 0, 4);
+	err = glGetError();
+		if (err != GL_NO_ERROR)
+			std::cout << "Fehler3: " << err << std::endl;
+		std::cout.flush();
 
 }
 

@@ -16,7 +16,7 @@ class Grass
 {
 public:
 	Grass();
-	virtual ~Grass();
+	~Grass();
 	void setShaderProgram(GLint shaderProgram);
 	void setUniforms();
 	void setBuffers();
