@@ -46,6 +46,7 @@ void Grass::draw(){
     	if (err != GL_NO_ERROR)
     		std::cout << "Fehler2: " << err << std::endl;
     	std::cout.flush();
+    glActiveTexture(GL_TEXTURE0);
 	glDrawArrays(GL_POINTS, 0, 4);
 
 	glBindVertexArray(0);

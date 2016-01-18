@@ -4,6 +4,7 @@ in vec2 texCoord;
 uniform sampler2D textureMat;
 //uniform sampler2D heightMap; 
 out vec4 color;
+vec4 colorRes;
 
 void main()
 {
