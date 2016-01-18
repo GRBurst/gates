@@ -14,6 +14,7 @@ class Terrain {
         /* void setHeigthMapData(float* heights); */
         void buildVBO(int floatsPerVertex = 2);
         void buildIBO();
+        void setup();
         void setVPMatrix(glm::mat4 vp);
         void draw();
 
@@ -27,15 +28,17 @@ class Terrain {
         int mWidth, mHeight;
         int mTotalIndices, mTotalVertices;
 
-        GLint mShaderProgram;
-        GLuint mVPLocation;
-        glm::mat4 mVPMatrix;
-
         GLfloat* mVertices;
         GLint* mIndices;
         GLuint mVao;
         GLuint mVbo;
         GLuint mIbo;
+
+        GLint mShaderProgram;
+        GLuint mVPLocation;
+        glm::mat4 mVPMatrix;
+        GLuint mTerrainSizeLocation;
+        glm::vec2 mTerrainSize;
 
         /* float minPos, posRange; */
 

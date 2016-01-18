@@ -343,6 +343,7 @@ void ModelLoader::draw(){
 	//glBindVertexArray(0);
 	//glUseProgram(0);
 
+	glBindVertexArray(0);
 }
 
 void ModelLoader::setStandardUniformLocations(){

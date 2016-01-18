@@ -264,34 +264,38 @@ int main(){
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetWindowSizeCallback( window, resize_callback );
-    
+
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPos(window, 0, 0);
 
     oldTime = glfwGetTime();
     //Noise Test
+
     Noise noise(512, 512, Noise::PERLIN, 120, 8, 1.0, 1.0);
+
     noise.generateNoiseImage();
     noise.saveToFile("texture.tga");
 
     //Heightmap rendering
-//    Shader terrainshader;
-//    terrainshader.loadShader("../src/shader/terrain.vs", Shader::VERTEX);
-//    terrainshader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT);
-//    GLint terrainprog = terrainshader.linkShaders();
-//
-//    Texture *heightmap = new Texture();
-//    heightmap->bind();
-//
-//    heightmap->setData(noise.getTextureDataF(), 200, 200);
-//    heightmap->loadHeightmapOptions();
-//    heightmap->linkTexture(prog, "heightMap");
-//    heightmap->linkTexture(terrainprog, "heightMap");
+    Shader terrainshader;
+    terrainshader.loadShader("../src/shader/terrain.vs", Shader::VERTEX);
+    terrainshader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT);
+    GLint terrainprog = terrainshader.linkShaders();
 
-//    Terrain *terrain = new Terrain(terrainprog, 500, 500);
-//    terrain->setVPMatrix(camera.getVPMatrix());
-//    terrain->buildVBO();
-//    terrain->buildIBO();
+    Texture *heightmap = new Texture();
+    heightmap->bind();
+
+    heightmap->setData(noise.getTextureDataF(), 512, 512);
+    heightmap->loadHeightmapOptions();
+    heightmap->linkTexture(prog, "heightMap");
+    heightmap->linkTexture(terrainprog, "heightMap");
+
+
+    Terrain *terrain = new Terrain(terrainprog, 512, 512);
+    terrain->setVPMatrix(camera.getVPMatrix());
+    terrain->buildVBO();
+    terrain->buildIBO();
+    terrain->setup();
 
 
 
@@ -336,8 +340,8 @@ int main(){
         model->setView(camera.getViewMatrix());
         texture->bind();
         model->draw();
-//        terrain->setVPMatrix(camera.getVPMatrix());
-//        terrain->draw();
+        terrain->setVPMatrix(camera.getVPMatrix());
+        terrain->draw();
         /* renderHeightmap(0.1, 10 , noise.getTextureData()); */
 
         //processInput
@@ -351,7 +355,11 @@ int main(){
     // Cleanup VBO
 //	glDeleteBuffers(1, &VBO);
 //	glDeleteVertexArrays(1, &VAO);
-//	glDeleteProgram(prog);
+
+	glDeleteProgram(prog);
+	glDeleteProgram(grassprog);
+	glDeleteProgram(terrainprog);
+
 
 }
 
@@ -379,6 +387,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             break;
         case GLFW_KEY_D :
             if(action == GLFW_REPEAT) camera.moveRight( float(frameTime) );
+            break;
+        case GLFW_KEY_I :
+            if(action == GLFW_PRESS) camera.setCamSpeed( 10.0 );
+            break;
+        case GLFW_KEY_K :
+            if(action == GLFW_PRESS) camera.setCamSpeed( -10.0 );
             break;
         default: std::cout << "Key has no function!" << std::endl;
             break;

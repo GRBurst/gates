@@ -33,6 +33,8 @@ class Camera
         float getVerticalAngle() const { return this->mVerticalAngle; };
         void setVerticalAngle(float angle) { this->mVerticalAngle = angle; }
 
+        void setCamSpeed(float multiplicator = 2.0) {this->mCamSpeed *= multiplicator; }
+
         // Calculatable matrizes from camera
         glm::mat4 getViewMatrix();
         glm::mat4 getProjectionMatrix();
