@@ -100,14 +100,16 @@ void Terrain::buildIBO()
 
     }
 
+}
 
-    /* indexCount = mIndices.size(); */
-
+void Terrain::build()
+{
+    buildVBO();
+    buildIBO();
 }
 
 void Terrain::setup()
 {
-
     //Unbind
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -135,11 +137,10 @@ void Terrain::setup()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIbo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, mTotalIndices * sizeof(GLint), mIndices, GL_STATIC_DRAW);
 
-
-
-
     //Unbind
     glBindVertexArray(0);
+    delete mVertices;
+    delete mIndices;
     //glBindBuffer(GL_ARRAY_BUFFER, 0);
     //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 

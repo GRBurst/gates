@@ -12,8 +12,7 @@ class Terrain {
         Terrain(GLint shaderProgram, int width = 0, int height = 0);
         ~Terrain();
         /* void setHeigthMapData(float* heights); */
-        void buildVBO(int floatsPerVertex = 2);
-        void buildIBO();
+        void build();
         void setup();
         void setVPMatrix(glm::mat4 vp);
         void draw();
@@ -24,6 +23,9 @@ class Terrain {
         int getIndicesPerRow();
         int getDegensRequired();
         int getTotalIndices();
+
+        void buildVBO(int floatsPerVertex = 2);
+        void buildIBO();
 
         int mWidth, mHeight;
         int mTotalIndices, mTotalVertices;

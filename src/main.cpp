@@ -32,6 +32,7 @@ Camera camera;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void take_screenshot();
 
 void debugCallback(GLenum source, GLenum type, GLuint id,
                    GLenum severity, GLsizei length,
@@ -289,8 +290,7 @@ int main(){
 
     Terrain *terrain = new Terrain(terrainprog, 1024, 1024);
     terrain->setVPMatrix(camera.getVPMatrix());
-    terrain->buildVBO();
-    terrain->buildIBO();
+    terrain->build();
     terrain->setup();
 
 
@@ -390,6 +390,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         case GLFW_KEY_K :
             if(action == GLFW_PRESS) camera.setCamSpeed( -10.0 );
             break;
+        case GLFW_KEY_P :
+            if(action == GLFW_PRESS) take_screenshot();
+            break;
         default: std::cout << "Key has no function!" << std::endl;
             break;
     }
@@ -412,4 +415,22 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     // TODO
+}
+
+void take_screenshot()
+{
+    // Make the BYTE array, factor of 3 because it's RBG.
+    //BYTE pixels[ 3 * wWidth * wHeight];
+    BYTE* pixels = new BYTE[ 3 * wWidth * wHeight];
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glReadPixels(0, 0, wWidth, wHeight, GL_BGR, GL_UNSIGNED_BYTE, pixels);
+
+    // Convert to FreeImage format & save to file
+    FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, wWidth, wHeight, 3 * wWidth, 24, 0x0000FF, 0xFF0000, 0x00FF00, false);
+    FreeImage_Save(FIF_BMP, image, "../screenshots/screenshot.bmp", 0);
+
+    // Free resources
+    FreeImage_Unload(image);
+    delete [] pixels;
 }
