@@ -7,6 +7,7 @@ Terrain::Terrain(GLint shaderProgram, int width, int height)
 {
 	this->mShaderProgram = shaderProgram;
     mTotalVertices = width * height;
+    glm::vec2 terrainSize(static_cast<float>(width), static_cast<float>(height));
 
     int numStripsRequired = mHeight - 1;
     int numDegensRequired = 2 * (numStripsRequired - 1);
@@ -72,6 +73,8 @@ void Terrain::buildVBO(int floatsPerVertex)
 
             mVertices[offset++] = xPosition;
             mVertices[offset++] = yPosition;
+            /* std::cout << "xPos = " << xPosition << std::endl; */
+            /* std::cout << "yPos = " << yPosition << std::endl; */
 
         }
     }
@@ -79,8 +82,11 @@ void Terrain::buildVBO(int floatsPerVertex)
     glGenBuffers(1, &mVbo);
     glBindBuffer(GL_ARRAY_BUFFER, mVbo);
     glBufferData(GL_ARRAY_BUFFER, getVerticeNumber() * sizeof(GLfloat), mVertices, GL_STATIC_DRAW);
+
     GLint terrainPosAttrib = glGetAttribLocation(mShaderProgram, "vPosition");
     mVPLocation = glGetUniformLocation(mShaderProgram, "VPMatrix");
+    mTerrainSizeLocation = glGetUniformLocation(mShaderProgram, "terrainSize");
+
     glVertexAttribPointer(terrainPosAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(terrainPosAttrib);
 
@@ -98,16 +104,16 @@ void Terrain::buildIBO()
     for(int y = 0; y < mHeight - 1; y++)
     {
         if(y > 0)
-            mIndices[offset++] = (y * mHeight);
+            mIndices[offset++] = (y * mWidth);
 
         for(int x = 0; x < mWidth; x++)
         {
-            mIndices[offset++] = ((y * mHeight) + x);
-            mIndices[offset++] = (((y+1) * mHeight) + x);
+            mIndices[offset++] = ((y * mWidth) + x);
+            mIndices[offset++] = (((y+1) * mWidth) + x);
         }
 
         if(y < mHeight - 2)
-            mIndices[offset++] = (((y+1) * mHeight) + (mWidth - 1));
+            mIndices[offset++] = (((y+1) * mWidth) + (mWidth - 1));
 
     }
 
@@ -126,6 +132,7 @@ void Terrain::draw()
 {
     glUseProgram(mShaderProgram);
     glUniformMatrix4fv(mVPLocation, 1, GL_FALSE, value_ptr(mVPMatrix));
+    glUniformMatrix4fv(mTerrainSizeLocation, 1, GL_FALSE, value_ptr(mTerrainSize));
 
     // Bind Attributes
     glBindVertexArray(mVao);

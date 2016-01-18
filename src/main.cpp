@@ -182,49 +182,49 @@ int main(){
     initOpenGL();
     GLenum err = GL_NO_ERROR;
     err = glGetError();
-    Shader shader;
+    /* Shader shader; */
 
-    /* shader.loadShader("../src/shader/triangle.vs", Shader::VERTEX); */
-    /* shader.loadShader("../src/shader/triangle.fs", Shader::FRAGMENT); */
-    shader.loadShader("../src/shader/main.vs", Shader::VERTEX);
-    shader.loadShader("../src/shader/main.fs", Shader::FRAGMENT);
+    /* /1* shader.loadShader("../src/shader/triangle.vs", Shader::VERTEX); *1/ */
+    /* /1* shader.loadShader("../src/shader/triangle.fs", Shader::FRAGMENT); *1/ */
+    /* shader.loadShader("../src/shader/main.vs", Shader::VERTEX); */
+    /* shader.loadShader("../src/shader/main.fs", Shader::FRAGMENT); */
 
-    /* shader.loadShader("../src/shader/terrain.vs", Shader::VERTEX); */
-    /* shader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT); */
-    GLint prog = shader.linkShaders();
+    /* /1* shader.loadShader("../src/shader/terrain.vs", Shader::VERTEX); *1/ */
+    /* /1* shader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT); *1/ */
+    /* GLint prog = shader.linkShaders(); */
 
 
 //GRASS
-    Shader grassshader;
-    grassshader.loadShader("../src/shader/grass.vs", Shader::VERTEX);
-    grassshader.loadShader("../src/shader/grass.gs", Shader::GEOMETRY);
-    grassshader.loadShader("../src/shader/grass.fs", Shader::FRAGMENT);
-    GLint grassprog = grassshader.linkShaders();
-    Grass grass;
+    /* Shader grassshader; */
+    /* grassshader.loadShader("../src/shader/grass.vs", Shader::VERTEX); */
+    /* grassshader.loadShader("../src/shader/grass.gs", Shader::GEOMETRY); */
+    /* grassshader.loadShader("../src/shader/grass.fs", Shader::FRAGMENT); */
+    /* GLint grassprog = grassshader.linkShaders(); */
+    /* Grass grass; */
 
-    grass.setShaderProgram(grassprog);
-    float billboard[] = {
-        		0.8f, 0.0f, -1.0f,
-    			1.6f, 0.0f, -2.0f,
-    			3.6f, 0.0f, -5.0f,
-        		0.2f, 0.0f, -6.0f
-        };
+    /* grass.setShaderProgram(grassprog); */
+    /* float billboard[] = { */
+    /*     		0.8f, 0.0f, -1.0f, */
+    /* 			1.6f, 0.0f, -2.0f, */
+    /* 			3.6f, 0.0f, -5.0f, */
+    /*     		0.2f, 0.0f, -6.0f */
+    /*     }; */
 
-    grass.setPositionsFromArray(billboard);
-    grass.setBuffers();
+    /* grass.setPositionsFromArray(billboard); */
+    /* grass.setBuffers(); */
 
-    grass.setUniforms();
-    //END GRASS
-    //Outsource
+    /* grass.setUniforms(); */
+    /* //END GRASS */
+    /* //Outsource */
 
 
-    ModelLoader *model = new ModelLoader("../objects/sphere.obj", prog);
-	model->loadFile();
+    /* ModelLoader *model = new ModelLoader("../objects/sphere.obj", prog); */
+	/* model->loadFile(); */
 
-	model->setBuffers();
-	model->setStandardUniformLocations();
-	glm::vec3 trans(1.0, 0.0, -1.0);
-	model->translate(trans);
+	/* model->setBuffers(); */
+	/* model->setStandardUniformLocations(); */
+	/* glm::vec3 trans(1.0, 0.0, -1.0); */
+	/* model->translate(trans); */
 
 //    GLuint posAttrib = glGetAttribLocation(prog, "vPosition");
 //    GLuint VAO;
@@ -276,10 +276,10 @@ int main(){
 
     heightmap->setData(noise.getTextureDataF(), 200, 200);
     heightmap->loadHeightmapOptions();
-    heightmap->linkTexture(prog, "heightMap");
+    //heightmap->linkTexture(prog, "heightMap");
     heightmap->linkTexture(terrainprog, "heightMap");
 
-    Terrain *terrain = new Terrain(terrainprog, 500, 500);
+    Terrain *terrain = new Terrain(terrainprog, 400, 500);
     terrain->setVPMatrix(camera.getVPMatrix());
     terrain->buildVBO();
     terrain->buildIBO();
@@ -318,15 +318,15 @@ int main(){
 //        err = glGetError();
 //		if (err != GL_NO_ERROR)
 //			std::cout << "Fehler: " << err << std::endl;
-        grass.setCameraPosRef(camera.getPos());
-        grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
-        grass.draw();
+        /* grass.setCameraPosRef(camera.getPos()); */
+        /* grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix()); */
+        /* grass.draw(); */
 
 		//END GRASS
-        model->setProjection(camera.getProjectionMatrix());
-        model->setView(camera.getViewMatrix());
-        /* heightmap->bind(); */
-        model->draw();
+        /* model->setProjection(camera.getProjectionMatrix()); */
+        /* model->setView(camera.getViewMatrix()); */
+        /* /1* heightmap->bind(); *1/ */
+        /* model->draw(); */
         terrain->setVPMatrix(camera.getVPMatrix());
         terrain->draw();
         /* renderHeightmap(0.1, 10 , noise.getTextureData()); */
@@ -344,7 +344,7 @@ int main(){
     // Cleanup VBO
 //	glDeleteBuffers(1, &VBO);
 //	glDeleteVertexArrays(1, &VAO);
-	glDeleteProgram(prog);
+	//glDeleteProgram(prog);
 
 }
 
@@ -372,6 +372,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             break;
         case GLFW_KEY_D :
             if(action == GLFW_REPEAT) camera.moveRight( float(frameTime) );
+            break;
+        case GLFW_KEY_I :
+            if(action == GLFW_PRESS) camera.setCamSpeed( 10.0 );
+            break;
+        case GLFW_KEY_K :
+            if(action == GLFW_PRESS) camera.setCamSpeed( -10.0 );
             break;
         default: std::cout << "Key has no function!" << std::endl;
             break;

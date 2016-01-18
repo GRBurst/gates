@@ -27,15 +27,17 @@ class Terrain {
         int mWidth, mHeight;
         int mTotalIndices, mTotalVertices;
 
-        GLint mShaderProgram;
-        GLuint mVPLocation;
-        glm::mat4 mVPMatrix;
-
         GLfloat* mVertices;
         GLint* mIndices;
         GLuint mVao;
         GLuint mVbo;
         GLuint mIbo;
+
+        GLint mShaderProgram;
+        GLuint mVPLocation;
+        glm::mat4 mVPMatrix;
+        GLuint mTerrainSizeLocation;
+        glm::vec2 mTerrainSize;
 
         /* float minPos, posRange; */
 
