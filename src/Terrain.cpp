@@ -311,7 +311,7 @@ void Terrain::setBuffers()
     if(mUseNormals)
     {
         glEnableVertexAttribArray(terrainNormalAttrib);
-        glVertexAttribPointer(terrainNormalAttrib, 3, GL_FLOAT, GL_FALSE, 12, reinterpret_cast<const GLvoid*>(4*3*mTotalVertices));
+        glVertexAttribPointer(terrainNormalAttrib, 3, GL_FLOAT, GL_FALSE, 12, reinterpret_cast<const GLvoid*>(12*3*mTotalVertices));
     }
 
     //Generate & bind ibo
