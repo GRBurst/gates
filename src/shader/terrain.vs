@@ -23,8 +23,8 @@ void main()
 
     float x         = (5.0 + vPosition.x) / 10.0;
     float y         = (5.0 + vPosition.y) / 10.0;
-    float height    = texture2D(heightMap, vec2(x, y)).r;
-    //float height    = vPosition.z;
+    //float height    = texture2D(heightMap, vec2(x, y)).r;
+    float height    = vPosition.z;
     //float height = 0.5;
     if (height < 0.2) height = 0.2;
     float hScale    = 1.0;

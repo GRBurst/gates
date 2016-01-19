@@ -88,8 +88,8 @@ void Noise::generateNoiseImage(){
 
 	for(int x = 0; x < mWidth; x++){
 		for(int y = 0; y < mHeight; y++){
-			mNoise[x * mHeight + y] += perlinNoise2D(x, y);
-			mNoiseF[x * mHeight + y] += static_cast<float>(perlinNoise2D(x, y));
+			mNoise[x * mHeight + y]     = perlinNoise2D(x, y);
+			mNoiseF[x * mHeight + y]    = mNoise[x * mHeight + y];
 		}
 	}
 

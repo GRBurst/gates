@@ -3,6 +3,7 @@
 
 #include <GL/glew.h>
 #include <iostream>
+#include <stdio.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Noise.h"

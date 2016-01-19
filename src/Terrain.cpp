@@ -350,29 +350,57 @@ void Terrain::draw()
 
 void Terrain::debug()
 {
+
+    /* std::cout << std::endl << std::endl; */
+    /* std::cout << "heights:" << std::endl; */
+    /* for(int i = 2; i < 3*mTotalVertices; i+= 3) */
+    /* { */
+    /*     if(((i-2)% mWidth) == 0) printf("\n%5.2f" , mVertices[i]); */
+    /*     else printf(", %5.2f" , mVertices[i]); */
+    /* } */
+    /* std::cout << std::endl << std::endl; */
+
     std::cout << std::endl << std::endl;
-    std::cout << "vertices:" << std::endl;
-    for(int i = 0; i < 3*mTotalVertices; i++)
+    std::cout << "STRANGE heights:" << std::endl;
+    for(int i = 2; i < 3*mTotalVertices; i+= 3)
     {
-        if((i % 3) == 0) std::cout << std::endl << mVertices[i];
-        else std::cout << ", " << mVertices[i];
+        if(((mVertices[i] <= 0.0) || (mVertices[i] > 2.4)) && (mVertices[3*mTotalVertices+i-2] == 0.0) && (mVertices[3*mTotalVertices+i-1] == 0.0) && (mVertices[3*mTotalVertices+i] == 0.0))
+        {
+            printf("vertice:\t x = %5.2f, y = %5.2f, z = %5.2f\n" , mVertices[i-2], mVertices[i-1], mVertices[i]);
+            printf("normal:\t\t x = %5.2f, y = %5.2f, z = %5.2f\n" , mVertices[3*mTotalVertices+i+1], mVertices[3*mTotalVertices+i+2], mVertices[3*mTotalVertices+i+3]);
+        }
+
     }
     std::cout << std::endl << std::endl;
 
-    std::cout << std::endl << std::endl;
-    std::cout << "indices:" << std::endl;
-    std::cout << mIndices[0];
-    for(int i = 1; i < mTotalIndices; i++)
-    {
-        std::cout << ", " << mIndices[i];
-    }
-    std::cout << std::endl << std::endl;
 
-    std::cout << "normals:" << std::endl;
-    for(int i = 3*mTotalVertices; i < 6*mTotalVertices; i++)
-    {
-        if((i % 3) == 0) std::cout << std::endl << mVertices[i];
-        else std::cout << ", " << mVertices[i];
-    }
-    std::cout << std::endl << std::endl;
+    std::cout << "Origin:" << std::endl;
+    printf("vertex: x = %5.2f, y = %5.2f, z = %5.2f\n" , mVertices[0], mVertices[1], mVertices[2]);
+    printf("normal: x = %5.2f, y = %5.2f, z = %5.2f\n" , mVertices[3*mTotalVertices], mVertices[3*mTotalVertices+1], mVertices[3*mTotalVertices+2]);
+
+/*     std::cout << std::endl << std::endl; */
+/*     std::cout << "vertices:" << std::endl; */
+/*     for(int i = 0; i < 3*mTotalVertices; i++) */
+/*     { */
+/*         if((i % 3) == 0) std::cout << std::endl << mVertices[i]; */
+/*         else std::cout << ", " << mVertices[i]; */
+/*     } */
+/*     std::cout << std::endl << std::endl; */
+
+/*     std::cout << std::endl << std::endl; */
+/*     std::cout << "indices:" << std::endl; */
+/*     std::cout << mIndices[0]; */
+/*     for(int i = 1; i < mTotalIndices; i++) */
+/*     { */
+/*         std::cout << ", " << mIndices[i]; */
+/*     } */
+/*     std::cout << std::endl << std::endl; */
+
+/*     std::cout << "normals:" << std::endl; */
+/*     for(int i = 3*mTotalVertices; i < 6*mTotalVertices; i++) */
+/*     { */
+/*         if((i % 3) == 0) std::cout << std::endl << mVertices[i]; */
+/*         else std::cout << ", " << mVertices[i]; */
+/*     } */
+/*     std::cout << std::endl << std::endl; */
 }

@@ -10,6 +10,7 @@
 
 #include <random>
 #include <iostream>
+#include <stdio.h>
 #include <fstream>
 #include <algorithm>
 #include <glm/glm.hpp>
