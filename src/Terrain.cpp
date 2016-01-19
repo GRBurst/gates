@@ -9,8 +9,8 @@ Terrain::Terrain(GLint shaderProgram, int width, int height)
     mTotalVertices = width * height;
     glm::vec2 terrainSize(static_cast<float>(width), static_cast<float>(height));
 
-    mTerrainMinPos = -5.0f;
-    mTerrainPosRange = 10.0f;
+    mTerrainMinPos = -25.0f;
+    mTerrainPosRange = 50.0f;
     mHeightMapTerrainRatio = 1;
     mFloatsPerVertex = 3;
 

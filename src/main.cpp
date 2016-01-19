@@ -216,8 +216,8 @@ int main(){
     /* heightmap->linkTexture(terrainprog, "heightMap"); */
     /* //heightmap->linkTexture(grassprog, "textureMat"); */
 
-    int noiseDimX = 512;
-    int noiseDimY = 512;
+    int noiseDimX = 25;
+    int noiseDimY = 25;
     Terrain *terrain = new Terrain(terrainprog, noiseDimX, noiseDimY, noiseDimX, noiseDimY, Noise::PERLIN, 9, 8, 2.0, 3.0);
     terrain->setVPMatrix(camera.getVPMatrix());
     terrain->enableNormals();
@@ -228,7 +228,7 @@ int main(){
 	terrain->saveNoiseToFile();
 
     terrain->linkHeightMapTexture(prog);
-    /* terrain->debug(); */
+    terrain->debug();
 
 
 
