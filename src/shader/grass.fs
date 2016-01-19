@@ -1,4 +1,4 @@
-#version 430 core
+#version 410 core
 in vec3 vColor;
 in vec2 texCoord;
 uniform sampler2D textureMat;

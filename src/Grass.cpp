@@ -41,12 +41,8 @@ void Grass::draw(){
 
 	glUniformMatrix4fv(gVPLocation, 1, GL_FALSE, glm::value_ptr(projection * view));
 	glUniform3fv(cameraPosLocation, 1, value_ptr(cameraPos));
-    glBindVertexArray(vao);
-    err = glGetError();
-    	if (err != GL_NO_ERROR)
-    		std::cout << "Fehler2: " << err << std::endl;
-    	std::cout.flush();
     glActiveTexture(GL_TEXTURE0);
+    glBindVertexArray(vao);
 	glDrawArrays(GL_POINTS, 0, 4);
 
 	glBindVertexArray(0);
@@ -64,7 +60,7 @@ void Grass::setBuffers(){
 
 	//Binde VBO an VAO
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 12 *sizeof(GLfloat), data, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(posAttrib);
     glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);

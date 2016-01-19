@@ -180,10 +180,13 @@ int main(){
         fprintf(stderr, "Failed to initialize GLEW\n");
         return -1;
     }
-
-    initOpenGL();
     GLenum err = GL_NO_ERROR;
     err = glGetError();
+	if (err != GL_NO_ERROR)
+		std::cout << "Fehler GLEWInit(): " << err << std::endl;
+	std::cout.flush();
+	initOpenGL();
+
     Shader shader;
 
     /* shader.loadShader("../src/shader/triangle.vs", Shader::VERTEX); */
@@ -206,11 +209,11 @@ int main(){
     Grass grass;
 //
     grass.setShaderProgram(grassprog);
-    float billboard[] = {
-        		0.8f, 0.0f, -1.0f,
-				0.1f, 0.0f, -2.0f,
-				0.3f, 1.0f, -1.5f,
-				-0.3f, 0.76f, -1.0f
+    GLfloat billboard[] = {
+        		1.0f, 2.0f, 0.0f,
+				0.1f, 2.0f, -2.0f,
+				0.3f, 2.0f, -1.5f,
+				-0.3f, 2.76f, -1.0f
 
         };
 
@@ -268,7 +271,7 @@ int main(){
     oldTime = glfwGetTime();
     //Noise Test
 
-    Noise noise(1024, 1024, Noise::PERLIN, 43, 16, 2.0, 3.0);
+    Noise noise(1024, 1024, Noise::PERLIN, 13, 16, 2.0, 3.0);
 
     noise.generateNoiseImage();
     noise.saveToFile("texture.tga");
@@ -333,7 +336,6 @@ int main(){
 
         //processInput
         //GRASS
-
 
  //        err = glGetError();
  //		if (err != GL_NO_ERROR)
