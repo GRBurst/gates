@@ -30,6 +30,7 @@ void main()
     float hScale    = 1.0;
 
     vec4 pos = VPMatrix * vec4(vPosition.x, hScale * height, -vPosition.y, 1.0);
+    //vec4 pos = VPMatrix * vec4(vPosition.x, vPosition.y, 1.0, 1.0);
 
     fColor = vec3(height, height, height);
     fUV = calculateUV();

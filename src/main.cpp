@@ -119,7 +119,7 @@ void initOpenGL()
     glClearColor( 0.0, 0.0, 0.0, 1.0 );
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LESS );
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glEnable(GL_BLEND);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
@@ -216,19 +216,17 @@ int main(){
     /* heightmap->linkTexture(terrainprog, "heightMap"); */
     /* //heightmap->linkTexture(grassprog, "textureMat"); */
 
-    int noiseDimX = 512;
-    int noiseDimY = 512;
+    int noiseDimX = 5;
+    int noiseDimY = 5;
     Terrain *terrain = new Terrain(terrainprog, noiseDimX, noiseDimY, noiseDimX, noiseDimY, Noise::PERLIN, 9, 8, 2.0, 3.0);
     terrain->setVPMatrix(camera.getVPMatrix());
     terrain->enableNormals();
     terrain->computeTerrain();
     terrain->genHeightMapTexture();
-    /* terrain->build(); */
-    /* terrain->setBuffers(); */
 	terrain->saveNoiseToFile();
 
     terrain->linkHeightMapTexture(prog);
-    /* terrain->debug(); */
+    //terrain->debug();
 
 
 
@@ -335,10 +333,10 @@ int main(){
         /* std::cout << "view: " << camera.getPos().x << "< " << camera.getPos().y << "< " << camera.getPos().z << std::endl; */
         //neu
 
-        model->setProjection(camera.getProjectionMatrix());
-        model->setView(camera.getViewMatrix());
+        /* model->setProjection(camera.getProjectionMatrix()); */
+        /* model->setView(camera.getViewMatrix()); */
+        /* model->draw(); */
 
-        model->draw();
         terrain->setVPMatrix(camera.getVPMatrix());
         terrain->draw();
         /* renderHeightmap(0.1, 10 , noise.getTextureData()); */
@@ -349,9 +347,9 @@ int main(){
  //        err = glGetError();
  //		if (err != GL_NO_ERROR)
  //			std::cout << "Fehler: " << err << std::endl;
-         grass.setCameraPosRef(camera.getPos());
-         grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
-         grass.draw();
+         /* grass.setCameraPosRef(camera.getPos()); */
+         /* grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix()); */
+         /* grass.draw(); */
 
  		//END GRASS
 

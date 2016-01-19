@@ -46,8 +46,6 @@ class Terrain {
 
         void setVPMatrix(glm::mat4 vp);
         void enableNormals() {mUseNormals = true; mFloatsPerVertex += 3;};
-        void build();
-        void setBuffers();
         void draw();
 
         float getWidth()
@@ -115,8 +113,11 @@ class Terrain {
         //glm::vec3 computeNormals();
         void computeTerrainNormals(int &offset, int &length);
 
+        void build();
+        void setBuffers();
         void buildVBO();
         void buildIBO();
+        void buildDebug();
 
         int mWidth, mHeight;
         int mTotalIndices, mTotalVertices;
