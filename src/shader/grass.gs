@@ -12,8 +12,8 @@ out vec3 vcolor;
 void main()
 {
 	
-	vec3 pos = gl_in[0].gl_Position.xyz;
-  	vcolor = vec3(pos);
+	vec3 pos = vec3(gl_in[0].gl_Position.x, gl_in[0].gl_Position.y, -gl_in[0].gl_Position.z);
+  	
  	vec3 toCamera = vec3(0.0, 0.0, -1.0);//normalize(gCameraPos - pos);
     vec3 up = vec3(0.0, 1.0, 0.0);
     vec3 right = cross(toCamera, up);
