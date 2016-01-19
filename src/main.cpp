@@ -186,6 +186,10 @@ int main(){
 		std::cout << "Fehler GLEWInit(): " << err << std::endl;
 	std::cout.flush();
 	initOpenGL();
+	Noise noise(1024, 1024, Noise::PERLIN, 13, 16, 2.0, 3.0);
+
+	noise.generateNoiseImage();
+	noise.saveToFile("texture.tga");
 
     Shader shader;
 
@@ -209,15 +213,15 @@ int main(){
     Grass grass;
 //
     grass.setShaderProgram(grassprog);
-    GLfloat billboard[] = {
-        		1.0f, 2.0f, 0.0f,
-				0.1f, 2.0f, -2.0f,
-				0.3f, 2.0f, -1.5f,
-				-0.3f, 2.76f, -1.0f
+//    GLfloat billboard[] = {
+//        		1.0f, 2.0f, 0.0f,
+//				0.1f, 2.0f, -2.0f,
+//				0.3f, 2.0f, -1.5f,
+//				-0.3f, 2.76f, -1.0f
+//
+//        };
 
-        };
-
-    grass.setPositionsFromArray(billboard);
+    grass.generatePositionsFromTexture(noise.getTextureDataF(), noise.getWidth(), noise.getHeight(), 0.2f, 0.7f);
 
     grass.setBuffers();
 
@@ -271,10 +275,7 @@ int main(){
     oldTime = glfwGetTime();
     //Noise Test
 
-    Noise noise(1024, 1024, Noise::PERLIN, 13, 16, 2.0, 3.0);
 
-    noise.generateNoiseImage();
-    noise.saveToFile("texture.tga");
 
     //Heightmap rendering
     Shader terrainshader;

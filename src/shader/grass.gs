@@ -14,7 +14,7 @@ void main()
 	
 	vec3 pos = gl_in[0].gl_Position.xyz;
   	vcolor = vec3(pos);
- 	vec3 toCamera = vec3(0.5, 0.0, -1.0);//normalize(gCameraPos - pos);
+ 	vec3 toCamera = vec3(0.0, 0.0, -1.0);//normalize(gCameraPos - pos);
     vec3 up = vec3(0.0, 1.0, 0.0);
     vec3 right = cross(toCamera, up);
  
@@ -38,6 +38,5 @@ void main()
     gl_Position = gVP * vec4(pos, 1.0);
     texCoord = vec2(1.0, 1.0);
     EmitVertex();
-	vcolor = pos;
     EndPrimitive();
 }

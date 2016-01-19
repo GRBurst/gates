@@ -10,6 +10,7 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <vector>
 #include "Texture.h"
 
 class Grass
@@ -21,7 +22,7 @@ public:
 	void setUniforms();
 	void setBuffers();
 	void generatePositionsFromTexture(float* textureData, int width, int height, float minInterval, float maxInterval); //set Interval for values where grass should grow
-	void setPositionsFromArray(float* data);
+	void setPositionsFromArray(float* data, int noElements);
 	void setViewAndProjectionMatrix(glm::mat4 view, glm::mat4 projection);
 	void draw();
 	void setCameraPosRef( glm::vec3 cameraPos);
@@ -29,12 +30,14 @@ public:
 private:
 	GLint shaderProgram;
 	GLuint vao, vbo;
-	float *data;
+	float *fdata;
+	std::vector<GLfloat> vfdata;
 	GLint gVPLocation, cameraPosLocation;
 	glm::mat4 view;
 	glm::mat4 projection;
 	glm::vec3 cameraPos;
 	Texture *texture;
+	int noElements;
 };
 
 #endif /* SRC_GRASS_H_ */

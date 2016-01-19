@@ -34,6 +34,9 @@ class Noise
 		double* getTextureData();
 		float* getTextureDataF();
 		bool saveToFile(const char* filename);
+		int getWidth(){ return mWidth;}
+		int getHeight(){return mHeight;}
+		glm::ivec2 getDimension(){ return glm::ivec2(mWidth, mHeight);}
 	private:
 		int mSampleSize = 256;
 		int mWidth, mHeight, mSeed, mOctaves;
