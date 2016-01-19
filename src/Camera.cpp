@@ -2,7 +2,7 @@
 #include <iostream>
 
 Camera::Camera() :
-    mPos(glm::vec3(0.0f, 0.0f, 0.0f))
+    mPos(glm::vec3(0.0f, 1.0f, 0.0f))
     , mNearPlane(0.1f)
     , mFarPlane(1000.0f)
     , mHFoV(45.0f)
