@@ -29,6 +29,7 @@ class Noise
 		Noise(int x, int y, NoiseType noiseType, int seed, int octaves, double frequency, double amplitude);
 		virtual ~Noise();
 
+        void setParams(int x, int y, NoiseType noiseType, int seed, int octaves, double frequency, double amplitude);
 		void generate(int seed);
 		void generateNoiseImage();
 		double* getTextureData();
@@ -36,6 +37,7 @@ class Noise
 		bool saveToFile(const char* filename);
 		int getWidth(){ return mWidth;}
 		int getHeight(){return mHeight;}
+		double calculateNoiseValue(double x, double y);
 		glm::ivec2 getDimension(){ return glm::ivec2(mWidth, mHeight);}
 	private:
 		int mSampleSize = 256;
@@ -50,7 +52,6 @@ class Noise
 		double* mNoise;
 		float* mNoiseF;
 		double perlinNoise2D(double x, double y);
-		double calculateNoiseValue(double x, double y);
 		void initPermutationTable();
 		void initGradientTable();
 		double clamp(double x, double min, double max);
@@ -228,7 +229,7 @@ void Perlin::normalize3(float v[3])
 	v[1] = v[1] * s;
 	v[2] = v[2] * s;
 }
-/* Randomization and Permutation
+// Randomization and Permutation
 void Perlin::init(void)
 {
 	int i, j, k;

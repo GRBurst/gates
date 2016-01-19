@@ -37,6 +37,25 @@ Noise::~Noise()
 {
 	// TODO Auto-generated destructor stub
 }
+
+void Noise::setParams(int x, int y, NoiseType noiseType, int seed, int octaves, double frequency, double amplitude)
+{
+    this->mWidth = x;
+    this->mHeight = y;
+    this->mSeed = seed;
+    this->mOctaves = octaves;
+    this->mFrequency = frequency;
+    this->mAmplitude = amplitude;
+    this->mPermutationTable = std::vector<int>(mSampleSize);
+    this->mGradientTable2d = std::vector<glm::dvec2>(mSampleSize);
+    mGradientNoise = new double* [x];
+    for (int i = 0; i < x; i++)
+    {
+        mGradientNoise[i] = new double[y]();
+    }
+    mNoise = new double[mWidth * mHeight];
+    mNoiseF = new float[mWidth * mHeight];
+}
 /*
 void Noise::generate(int seed){
 	int octave = 2;

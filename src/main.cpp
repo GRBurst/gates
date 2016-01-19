@@ -186,10 +186,9 @@ int main(){
 		std::cout << "Fehler GLEWInit(): " << err << std::endl;
 	std::cout.flush();
 	initOpenGL();
-	Noise noise(1024, 1024, Noise::PERLIN, 9, 8, 2.0, 3.0);
-
-	noise.generateNoiseImage();
-	noise.saveToFile("texture.tga");
+	//Noise noise(noiseDimX, noiseDimY, Noise::PERLIN, 9, 8, 2.0, 3.0);
+	//noise.generateNoiseImage();
+	//noise.saveToFile("texture.tga");
 
     Shader shader;
 
@@ -201,6 +200,36 @@ int main(){
     /* shader.loadShader("../src/shader/terrain.vs", Shader::VERTEX); */
     /* shader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT); */
     GLint prog = shader.linkShaders();
+
+    // Terrain
+    Shader terrainshader;
+    terrainshader.loadShader("../src/shader/terrain.vs", Shader::VERTEX);
+    terrainshader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT);
+    GLint terrainprog = terrainshader.linkShaders();
+
+    /* Texture *heightmap = new Texture(); */
+    /* heightmap->bind(); */
+
+    /* heightmap->setData(noise.getTextureDataF(), noiseDimX, noiseDimY); */
+    /* heightmap->loadHeightmapOptions(); */
+    /* heightmap->linkTexture(prog, "heightMap"); */
+    /* heightmap->linkTexture(terrainprog, "heightMap"); */
+    /* //heightmap->linkTexture(grassprog, "textureMat"); */
+
+    int noiseDimX = 512;
+    int noiseDimY = 512;
+    Terrain *terrain = new Terrain(terrainprog, noiseDimX, noiseDimY, noiseDimX, noiseDimY, Noise::PERLIN, 9, 8, 2.0, 3.0);
+    terrain->setVPMatrix(camera.getVPMatrix());
+    terrain->enableNormals();
+    terrain->computeTerrain();
+    terrain->genHeightMapTexture();
+    /* terrain->build(); */
+    /* terrain->setBuffers(); */
+	terrain->saveNoiseToFile();
+
+    terrain->linkHeightMapTexture(prog);
+    /* terrain->debug(); */
+
 
 
 //GRASS
@@ -222,7 +251,8 @@ int main(){
 //
 //        };
 
-    grass.generatePositionsFromTexture(noise.getTextureDataF(), noise.getWidth(), noise.getHeight(), 0.2f, 0.7f);
+    //grass.generatePositionsFromTexture(noise.getTextureDataF(), noise.getWidth(), noise.getHeight(), 0.2f, 0.7f);
+    grass.generatePositionsFromTexture(terrain->getNoiseValues(), terrain->getWidth(), terrain->getHeight(), 0.2f, 0.7f);
 
     grass.setBuffers();
 
@@ -275,28 +305,6 @@ int main(){
 
     oldTime = glfwGetTime();
     //Noise Test
-
-
-
-    //Heightmap rendering
-    Shader terrainshader;
-    terrainshader.loadShader("../src/shader/terrain.vs", Shader::VERTEX);
-    terrainshader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT);
-    GLint terrainprog = terrainshader.linkShaders();
-
-    Texture *heightmap = new Texture();
-    heightmap->bind();
-
-    heightmap->setData(noise.getTextureDataF(), 1024, 1024);
-    heightmap->loadHeightmapOptions();
-    heightmap->linkTexture(prog, "heightMap");
-    heightmap->linkTexture(terrainprog, "heightMap");
-    //heightmap->linkTexture(grassprog, "textureMat");
-
-    Terrain *terrain = new Terrain(terrainprog, 1024, 1024);
-    terrain->setVPMatrix(camera.getVPMatrix());
-    terrain->build();
-    terrain->setup();
 
 
 
