@@ -45,9 +45,10 @@ void Grass::generatePositionsFromTexture(float* textureData, int width, int heig
 			if(*iterTexture > 0.2f && *iterTexture < 0.7f){
 				float xRatio = static_cast<float>(x) / static_cast<float>(width -1);
 				float yRatio = 1.0f - (static_cast<float>(y) / static_cast<float>(height - 1));
-				vfdata.push_back((xRatio * posRange));
+				vfdata.push_back(-minPos - (yRatio * posRange));
+
 				vfdata.push_back(*iterTexture);
-				vfdata.push_back((yRatio * posRange));
+				vfdata.push_back(minPos + (xRatio * posRange));
 			}
 			iterTexture++;
 		}
@@ -67,7 +68,7 @@ void Grass::draw(){
 	glUniform3fv(cameraPosLocation, 1, value_ptr(cameraPos));
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(vao);
-	glDrawArrays(GL_POINTS, 0, 4);
+	glDrawArrays(GL_POINTS, 0, vfdata.size()/3);
 
 	glBindVertexArray(0);
 

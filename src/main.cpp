@@ -32,7 +32,6 @@ Camera camera;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void take_screenshot();
 
 void debugCallback(GLenum source, GLenum type, GLuint id,
                    GLenum severity, GLsizei length,
@@ -187,7 +186,7 @@ int main(){
 		std::cout << "Fehler GLEWInit(): " << err << std::endl;
 	std::cout.flush();
 	initOpenGL();
-	Noise noise(1024, 1024, Noise::PERLIN, 13, 16, 2.0, 3.0);
+	Noise noise(1024, 1024, Noise::PERLIN, 9, 8, 2.0, 3.0);
 
 	noise.generateNoiseImage();
 	noise.saveToFile("texture.tga");
@@ -218,7 +217,8 @@ int main(){
 //        		1.0f, 2.0f, 0.0f,
 //				0.1f, 2.0f, -2.0f,
 //				0.3f, 2.0f, -1.5f,
-//				-0.3f, 2.76f, -1.0f
+//				-0.3f, 2.76f, -1.0f,
+//				2.0f,1.0f,2.0f,0.6f,-1.0f,-1.0f
 //
 //        };
 
@@ -394,9 +394,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         case GLFW_KEY_K :
             if(action == GLFW_PRESS) camera.setCamSpeed( -10.0 );
             break;
-        case GLFW_KEY_P :
-            if(action == GLFW_PRESS) take_screenshot();
-            break;
         default: std::cout << "Key has no function!" << std::endl;
             break;
     }
@@ -419,22 +416,4 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     // TODO
-}
-
-void take_screenshot()
-{
-    // Make the BYTE array, factor of 3 because it's RBG.
-    //BYTE pixels[ 3 * wWidth * wHeight];
-    BYTE* pixels = new BYTE[ 3 * wWidth * wHeight];
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glReadPixels(0, 0, wWidth, wHeight, GL_BGR, GL_UNSIGNED_BYTE, pixels);
-
-    // Convert to FreeImage format & save to file
-    FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, wWidth, wHeight, 3 * wWidth, 24, 0x0000FF, 0xFF0000, 0x00FF00, false);
-    FreeImage_Save(FIF_BMP, image, "../screenshots/screenshot.bmp", 0);
-
-    // Free resources
-    FreeImage_Unload(image);
-    delete [] pixels;
 }

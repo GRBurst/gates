@@ -18,23 +18,23 @@ void main()
     vec3 up = vec3(0.0, 1.0, 0.0);
     vec3 right = cross(toCamera, up);
  
-    pos -= (right * 0.1);
+    pos -= (right * 0.01);
     gl_Position = gVP * vec4(pos, 1.0);
     texCoord = vec2(0.0, 0.0);
     EmitVertex();
  
-    pos.y += 0.2;
+    pos.y += 0.02;
     gl_Position = gVP * vec4(pos, 1.0);
     texCoord = vec2(0.0, 1.0);
     EmitVertex();
 
-    pos.y -= 0.2;
-    pos += right * 0.2;
+    pos.y -= 0.02;
+    pos += right * 0.02;
     gl_Position = gVP * vec4(pos, 1.0);
     texCoord = vec2(1.0, 0.0);
     EmitVertex();
 
-    pos.y += 0.2;
+    pos.y += 0.02;
     gl_Position = gVP * vec4(pos, 1.0);
     texCoord = vec2(1.0, 1.0);
     EmitVertex();
