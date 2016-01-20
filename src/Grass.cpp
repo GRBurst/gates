@@ -73,9 +73,8 @@ void Grass::draw(){
 	glUniform3fv(cameraPosLocation, 1, value_ptr(cameraPos));
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(vao);
-    glDisable(GL_ALPHA_TEST);
-    glEnable(GL_BLEND);
-	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glDisable(GL_ALPHA_TEST);
+
     glDrawElements(GL_TRIANGLE_STRIP, mTotalIndices, GL_UNSIGNED_INT, 0);
 	//glDrawArrays(GL_POINTS, 0, vfdata.size()/3);
 

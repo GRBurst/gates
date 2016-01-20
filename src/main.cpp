@@ -72,6 +72,7 @@ void debugCallback(GLenum source, GLenum type, GLuint id,
 
 bool createWindow()
 {
+
     // OpenGL context
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
@@ -120,6 +121,8 @@ void initOpenGL()
     glClearColor( 0.0, 0.0, 0.0, 1.0 );
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LESS );
+    glEnable(GL_BLEND);
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 }
