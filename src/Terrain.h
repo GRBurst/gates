@@ -44,7 +44,9 @@ class Terrain {
         void genHeightMapTexture();
         void linkHeightMapTexture(GLint shader);
 
-        void setVPMatrix(glm::mat4 vp);
+        void setInvViewMatrix(glm::mat3 iv) { this->mInvViewMatrix = iv; };
+        void setVPMatrix(glm::mat4 vp) { this->mVPMatrix = vp; };
+
         void enableNormals() {mUseNormals = true; mFloatsPerVertex += 3;};
         void draw();
 
@@ -86,6 +88,7 @@ class Terrain {
         /*     return mNoiseValues; */
         /* }; */
 
+        void setGrid(int mode) {mDrawGrid = mode;};
 
         void saveNoiseToFile()
         {
@@ -128,7 +131,6 @@ class Terrain {
         Texture mHeightMapTexture;
         bool mUseHeightMapTexture;
 
-        int mHeightMapTerrainRatio;
         float mTerrainOffset;
         float mTerrainScale;
         float mTerrainMinPos;
@@ -143,10 +145,14 @@ class Terrain {
         GLuint mIbo;
 
         GLint mShaderProgram;
-        GLuint mVPLocation;
+        GLuint muVPLocation;
         glm::mat4 mVPMatrix;
-        GLuint mTerrainSizeLocation;
-        glm::vec2 mTerrainSize;
+        GLuint muInvViewLocation;
+        glm::mat3 mInvViewMatrix;
+        GLint muHeightMapTerrainRatioLocation;
+        int mHeightMapTerrainRatio;
+        GLint muDrawGridLocation;
+        int mDrawGrid;
 
         /* float minPos, posRange; */
         typedef struct
@@ -155,9 +161,10 @@ class Terrain {
             glm::vec3 b;
             glm::vec3 c;
         } Triangle;
+        // normal, counterclockwise edges
         glm::vec3 computeTriangleNormal(Triangle &t)
         {
-            return glm::cross(glm::vec3(t.a - t.c), glm::vec3(t.b - t.c));
+            return glm::cross(glm::vec3(t.c - t.a), glm::vec3(t.b - t.a));
         };
         glm::vec3 computeVertexNormal(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, glm::vec3 v4, glm::vec3 v5, glm::vec3 v6 )
         {

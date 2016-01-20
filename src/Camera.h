@@ -37,6 +37,7 @@ class Camera
 
         // Calculatable matrizes from camera
         glm::mat4 getViewMatrix();
+        glm::mat3 getInvViewMatrix() { return glm::inverse(glm::transpose(glm::mat3(getViewMatrix()))); };
         glm::mat4 getProjectionMatrix();
         glm::mat4 getVPMatrix() {return getProjectionMatrix() * getViewMatrix(); }
 
