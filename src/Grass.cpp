@@ -23,7 +23,7 @@ Grass::~Grass()
 
 
 void Grass::loadTexture(){
-	texture = new Texture("../src/textures/grass.png");
+	texture = new Texture("../src/textures/billboardgrass.png");
 	texture->linkTexture(shaderProgram, "textureMat");
 	texture->bind();
 	texture->loadCommonOptions();
