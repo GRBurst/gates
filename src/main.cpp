@@ -120,8 +120,7 @@ void initOpenGL()
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LESS );
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glEnable(GL_BLEND);
-    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 }
 
 void resize_callback( GLFWwindow* p, int newWidth, int newHeight )
@@ -327,7 +326,7 @@ int main(){
     		loops++;
     		//std::cout << "Pos(x, y): " << camera.getCamPos().x <<", " << camera.getCamPos().y << std::endl;
     	}
-    	//update Frame
+     	//update Frame
 //    	glUseProgram(prog);
     	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(0.0, 0.0, 0.0, 1.0);

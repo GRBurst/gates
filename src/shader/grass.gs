@@ -19,7 +19,7 @@ void main()
 	if(abs(pos.x- pos2.x) < 1)
 	  	if(pos.y > 0.2 && pos.y < 0.6)
 	  	{
-	  		pos.y += 0.15 * heightDiff;
+	  		pos.y += 0.2 * heightDiff;
 		    gl_Position = gVP * vec4(pos, 1.0);
 		    texCoord = vec2(0.0, 0.0);
 		    EmitVertex();
@@ -30,7 +30,7 @@ void main()
 		    EmitVertex();
 		
 			pos = pos2;
-			pos.y += 0.1 * heightDiff;
+			pos.y += 0.2 * heightDiff;
 		    gl_Position = gVP * vec4(pos, 1.0);
 		    texCoord = vec2(1.0, 0.0);
 		    EmitVertex();
