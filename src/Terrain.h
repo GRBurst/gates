@@ -46,8 +46,6 @@ class Terrain {
 
         void setVPMatrix(glm::mat4 vp);
         void enableNormals() {mUseNormals = true; mFloatsPerVertex += 3;};
-        void build();
-        void setBuffers();
         void draw();
 
         float getWidth()
@@ -94,6 +92,8 @@ class Terrain {
             mNoise.saveToFile("terrainNoise.tga");
         }
 
+        GLuint getVAO(){return mVao;}
+        int getTotalIndices();
 
         void debug();
 
@@ -102,7 +102,6 @@ class Terrain {
         int getVerticeNumber();
         int getIndicesPerRow();
         int getDegensRequired();
-        int getTotalIndices();
 
         int getIndexLeftPosition(int index);
         int getIndexRightPosition(int index);
@@ -115,8 +114,11 @@ class Terrain {
         //glm::vec3 computeNormals();
         void computeTerrainNormals(int &offset, int &length);
 
+        void build();
+        void setBuffers();
         void buildVBO();
         void buildIBO();
+        void buildDebug();
 
         int mWidth, mHeight;
         int mTotalIndices, mTotalVertices;

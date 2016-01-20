@@ -9,8 +9,8 @@ Terrain::Terrain(GLint shaderProgram, int width, int height)
     mTotalVertices = width * height;
     glm::vec2 terrainSize(static_cast<float>(width), static_cast<float>(height));
 
-    mTerrainMinPos = -25.0f;
-    mTerrainPosRange = 50.0f;
+    mTerrainMinPos = -5.0f;
+    mTerrainPosRange = 10.0f;
     mHeightMapTerrainRatio = 1;
     mFloatsPerVertex = 3;
 
@@ -79,6 +79,7 @@ glm::vec3 Terrain::computePosition(int x, int y)
     /* std::cout << "zPosition = " << zPosition << std::endl; */
 
     return glm::vec3(xPosition, yPosition, zPosition);
+    /* return glm::vec3(x, y, -1.0); */
 }
 
 int Terrain::computeTerrainPositions()
@@ -276,6 +277,22 @@ void Terrain::build()
 {
     buildVBO();
     buildIBO();
+    /* buildDebug(); */
+}
+
+void Terrain::buildDebug()
+{
+
+    mTotalVertices = 9;
+    mTotalIndices = 3;
+
+    mVertices = new GLfloat[mTotalVertices]{0, 0, 0, 0, 1, 0, 1, 1, 0};
+    mIndices = new GLint[mTotalVertices];
+    //Generate & bind ibo
+    mIndices[0] = 0;
+    mIndices[1] = 1;
+    mIndices[2] = 2;
+
 }
 
 void Terrain::setBuffers()
@@ -297,7 +314,7 @@ void Terrain::setBuffers()
     //Generate & bind vbo
     glGenBuffers(1, &mVbo);
     glBindBuffer(GL_ARRAY_BUFFER, mVbo);
-    glBufferData(GL_ARRAY_BUFFER, getVerticeNumber() * sizeof(GLfloat), mVertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, mFloatsPerVertex*mTotalVertices * sizeof(GLfloat), mVertices, GL_STATIC_DRAW);
 
     // Get Attrib location
     /* glEnableVertexAttribArray(terrainPosAttrib); */
@@ -308,6 +325,7 @@ void Terrain::setBuffers()
     // First all positions, then all normals
     glEnableVertexAttribArray(terrainPosAttrib);
     glVertexAttribPointer(terrainPosAttrib, 3, GL_FLOAT, GL_FALSE, 12, 0);
+    /* glVertexAttribPointer(terrainPosAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0); */
     if(mUseNormals)
     {
         glEnableVertexAttribArray(terrainNormalAttrib);
@@ -351,6 +369,37 @@ void Terrain::draw()
 void Terrain::debug()
 {
 
+
+    std::cout << std::endl << std::endl;
+    std::cout << "vertices(" << mTotalVertices << "):" << std::endl;
+    for(int i = 0; i < 3*mTotalVertices; i++)
+    {
+        if((i % 3) == 0) std::cout << std::endl << mVertices[i];
+        else std::cout << ", " << mVertices[i];
+    }
+    std::cout << std::endl << std::endl;
+    
+    std::cout << "vertices(" << mTotalVertices << "):" << std::endl;
+    for(int i = 0; i < mTotalVertices; i++)
+    {
+        if((i % mWidth) == 0) std::cout << std::endl << i;
+        else std::cout << "\t" << i;
+    }
+    std::cout << std::endl << std::endl;
+
+    std::cout << "indices(" << mTotalIndices << "):" << std::endl;
+    std::cout << mIndices[0];
+    for(int i = 1; i < mTotalIndices; i++)
+    {
+        std::cout << ", " << mIndices[i];
+    }
+    std::cout << std::endl << std::endl;
+
+
+
+
+
+
     /* std::cout << std::endl << std::endl; */
     /* std::cout << "heights:" << std::endl; */
     /* for(int i = 2; i < 3*mTotalVertices; i+= 3) */
@@ -360,23 +409,23 @@ void Terrain::debug()
     /* } */
     /* std::cout << std::endl << std::endl; */
 
-    std::cout << std::endl << std::endl;
-    std::cout << "STRANGE heights:" << std::endl;
-    for(int i = 2; i < 3*mTotalVertices; i+= 3)
-    {
-        if(((mVertices[i] <= 0.0) || (mVertices[i] > 2.4)) && (mVertices[3*mTotalVertices+i-2] == 0.0) && (mVertices[3*mTotalVertices+i-1] == 0.0) && (mVertices[3*mTotalVertices+i] == 0.0))
-        {
-            printf("vertice:\t x = %5.2f, y = %5.2f, z = %5.2f\n" , mVertices[i-2], mVertices[i-1], mVertices[i]);
-            printf("normal:\t\t x = %5.2f, y = %5.2f, z = %5.2f\n" , mVertices[3*mTotalVertices+i+1], mVertices[3*mTotalVertices+i+2], mVertices[3*mTotalVertices+i+3]);
-        }
+/*     std::cout << std::endl << std::endl; */
+/*     std::cout << "STRANGE heights:" << std::endl; */
+/*     for(int i = 2; i < 3*mTotalVertices; i+= 3) */
+/*     { */
+/*         if(((mVertices[i] <= 0.0) || (mVertices[i] > 2.4)) && (mVertices[3*mTotalVertices+i-2] == 0.0) && (mVertices[3*mTotalVertices+i-1] == 0.0) && (mVertices[3*mTotalVertices+i] == 0.0)) */
+/*         { */
+/*             printf("vertice:\t x = %5.2f, y = %5.2f, z = %5.2f\n" , mVertices[i-2], mVertices[i-1], mVertices[i]); */
+/*             printf("normal:\t\t x = %5.2f, y = %5.2f, z = %5.2f\n" , mVertices[3*mTotalVertices+i+1], mVertices[3*mTotalVertices+i+2], mVertices[3*mTotalVertices+i+3]); */
+/*         } */
 
-    }
-    std::cout << std::endl << std::endl;
+/*     } */
+/*     std::cout << std::endl << std::endl; */
 
 
-    std::cout << "Origin:" << std::endl;
-    printf("vertex: x = %5.2f, y = %5.2f, z = %5.2f\n" , mVertices[0], mVertices[1], mVertices[2]);
-    printf("normal: x = %5.2f, y = %5.2f, z = %5.2f\n" , mVertices[3*mTotalVertices], mVertices[3*mTotalVertices+1], mVertices[3*mTotalVertices+2]);
+/*     std::cout << "Origin:" << std::endl; */
+/*     printf("vertex: x = %5.2f, y = %5.2f, z = %5.2f\n" , mVertices[0], mVertices[1], mVertices[2]); */
+/*     printf("normal: x = %5.2f, y = %5.2f, z = %5.2f\n" , mVertices[3*mTotalVertices], mVertices[3*mTotalVertices+1], mVertices[3*mTotalVertices+2]); */
 
 /*     std::cout << std::endl << std::endl; */
 /*     std::cout << "vertices:" << std::endl; */

@@ -215,20 +215,19 @@ int main(){
     /* heightmap->linkTexture(prog, "heightMap"); */
     /* heightmap->linkTexture(terrainprog, "heightMap"); */
     /* //heightmap->linkTexture(grassprog, "textureMat"); */
+    int noiseDimX = 1000;
+    int noiseDimY = 1000;
 
-    int noiseDimX = 25;
-    int noiseDimY = 25;
     Terrain *terrain = new Terrain(terrainprog, noiseDimX, noiseDimY, noiseDimX, noiseDimY, Noise::PERLIN, 9, 8, 2.0, 3.0);
     terrain->setVPMatrix(camera.getVPMatrix());
     terrain->enableNormals();
     terrain->computeTerrain();
     terrain->genHeightMapTexture();
-    /* terrain->build(); */
-    /* terrain->setBuffers(); */
 	terrain->saveNoiseToFile();
 
     terrain->linkHeightMapTexture(prog);
-    terrain->debug();
+
+    //terrain->debug();
 
 
 
@@ -252,8 +251,8 @@ int main(){
 //        };
 
     //grass.generatePositionsFromTexture(noise.getTextureDataF(), noise.getWidth(), noise.getHeight(), 0.2f, 0.7f);
-    grass.generatePositionsFromTexture(terrain->getNoiseValues(), terrain->getWidth(), terrain->getHeight(), 0.2f, 0.7f);
 
+    grass.setTerrainVao(terrain->getVAO(), terrain->getTotalIndices());
     grass.setBuffers();
 
     grass.setUniforms();
@@ -335,10 +334,10 @@ int main(){
         /* std::cout << "view: " << camera.getPos().x << "< " << camera.getPos().y << "< " << camera.getPos().z << std::endl; */
         //neu
 
-        model->setProjection(camera.getProjectionMatrix());
-        model->setView(camera.getViewMatrix());
+        /* model->setProjection(camera.getProjectionMatrix()); */
+        /* model->setView(camera.getViewMatrix()); */
+        /* model->draw(); */
 
-        model->draw();
         terrain->setVPMatrix(camera.getVPMatrix());
         terrain->draw();
         /* renderHeightmap(0.1, 10 , noise.getTextureData()); */

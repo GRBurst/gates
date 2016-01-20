@@ -17,8 +17,8 @@ void main()
 	
     //float colorRes = texture(heightMap, fUV).r;
 
-    //float colorRes = fColor.r;
-    vec3 colorRes = texture(heightMap, fUV).rrr;
+    vec3 colorRes = fColor;
+    //vec3 colorRes = texture(heightMap, fUV).rrr;
     float initColor = colorRes.r;
     if (initColor < 0.2){
     	//float deviation = rand(fUV) / 10;
@@ -44,6 +44,8 @@ void main()
     //color = vec4(1.0 - deviation, 1.0 - deviation, 1.0 - deviation, 1.0);
     color = vec4(1.0, 1.0, 1.0, 1.0) * vec4(colorRes.rrr, 1.0);
     }
+    //color = vec4(1.0, 1.0, 1.0, 1.0);
     //color = vec4(fColor, 1.0);
+    
     //color = vec4(texture2D(heightMap,fUV), 1.0);
 }

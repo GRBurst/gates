@@ -20,41 +20,47 @@ Grass::~Grass()
 
 
 void Grass::loadTexture(){
-	texture = new Texture("../src/textures/billboardflowers.png");
+	texture = new Texture("../src/textures/billboardgrass.png");
 	texture->linkTexture(shaderProgram, "textureMat");
 	texture->bind();
 	texture->loadCommonOptions();
 
 }
 
-void Grass::setPositionsFromArray(float* data, int noElements){
-	this->fdata = data;
-	this->noElements = noElements;
+void Grass::setTerrainVao(GLuint vao, int totalIndices){
+	this->vao = vao;
+	this->mTotalIndices = totalIndices;
 }
+//Deprecated__ only for debug purpose
+//void Grass::setPositionsFromArray(float* data, int noElements){
+//	this->fdata = data;
+//	this->mIndices = noElements;
+//}
 
-void Grass::generatePositionsFromTexture(float* textureData, int width, int height, float minInterval, float maxInterval){
-	//fdata = new float[width * height * 3];
-
-	float minPos = -5.0f;
-	float posRange = 10.0f;
-
-	float* iterTexture = textureData;
-	for (int y = 0; y < height; y++){
-		for (int x = 0; x < width; x++)
-		{
-			if(*iterTexture > 0.2f && *iterTexture < 0.7f){
-				float xRatio = static_cast<float>(x) / static_cast<float>(width -1);
-				float yRatio = 1.0f - (static_cast<float>(y) / static_cast<float>(height - 1));
-				vfdata.push_back(minPos + (xRatio * posRange));
-				vfdata.push_back(*iterTexture);
-				vfdata.push_back(-minPos - (yRatio * posRange));
-			}
-			iterTexture++;
-		}
-
-	}
-
-}
+//void Grass::generatePositionsFromTexture(float* textureData, int width, int height, float minInterval, float maxInterval){
+//	//fdata = new float[width * height * 3];
+//
+//	float minPos = -5.0f;
+//	float posRange = 10.0f;
+//
+//	float* iterTexture = textureData;
+//	for (int y = 0; y < height; y++){
+//		for (int x = 0; x < width; x++)
+//		{
+//			if(*iterTexture > 0.2f && *iterTexture < 0.7f){
+//				float xRatio = static_cast<float>(x) / static_cast<float>(width -1);
+//				float yRatio = 1.0f - (static_cast<float>(y) / static_cast<float>(height - 1));
+//				vfdata.push_back(minPos + (xRatio * posRange));
+//				vfdata.push_back(*iterTexture);
+//				vfdata.push_back(-minPos - (yRatio * posRange));
+//			}
+//			iterTexture++;
+//		}
+//
+//	}
+//
+//}
+//////////////////////////////////////
 
 void Grass::setShaderProgram(GLint shaderProgram){
 	this->shaderProgram = shaderProgram;
@@ -62,13 +68,18 @@ void Grass::setShaderProgram(GLint shaderProgram){
 
 void Grass::draw(){
 	glUseProgram(shaderProgram);
-
+	GLenum err = GL_NO_ERROR;
 	glUniformMatrix4fv(gVPLocation, 1, GL_FALSE, glm::value_ptr(projection * view));
 	glUniform3fv(cameraPosLocation, 1, value_ptr(cameraPos));
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(vao);
-	glDrawArrays(GL_POINTS, 0, vfdata.size()/3);
+    glDrawElements(GL_TRIANGLE_STRIP, mTotalIndices, GL_UNSIGNED_INT, 0);
+	//glDrawArrays(GL_POINTS, 0, vfdata.size()/3);
 
+       err = glGetError();
+   	if (err != GL_NO_ERROR)
+   		std::cout << "Fehler 79(): " << err << std::endl;
+   	std::cout.flush();
 	glBindVertexArray(0);
 
 }
@@ -78,13 +89,13 @@ void Grass::setBuffers(){
 	GLint posAttrib = glGetAttribLocation(shaderProgram, "vPosition");
 
 	//Erzeuge Vertex Array Object und Vertex Buffer Object
-	glGenVertexArrays(1, &vao);
-	glGenBuffers(1, &vbo);
+	//glGenVertexArrays(1, &vao);
+	//glGenBuffers(1, &vbo);
 	glBindVertexArray(vao);
 
 	//Binde VBO an VAO
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, vfdata.size() * sizeof(GLfloat), &vfdata.front(), GL_STATIC_DRAW);
+//    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+//	glBufferData(GL_ARRAY_BUFFER, vfdata.size() * sizeof(GLfloat), &vfdata.front(), GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(posAttrib);
     glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);

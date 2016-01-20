@@ -13,7 +13,7 @@ out vec3 fNormal;
 
 vec2 calculateUV()
 {
-    return vec2((5.0 + vPosition.x) / 10.0, (5.0 + vPosition.y) / 10.0);
+    return vec2((25.0 + vPosition.x) / 50.0, (25.0 + vPosition.y) / 50.0);
     //return vec2(0.2, 0.1);
 }
 
@@ -23,15 +23,17 @@ void main()
 
     float x         = (5.0 + vPosition.x) / 10.0;
     float y         = (5.0 + vPosition.y) / 10.0;
-    float height    = texture2D(heightMap, vec2(x, y)).r;
-    //float height    = vPosition.z;
+    //float height    = texture2D(heightMap, vec2(x, y)).r;
+    float height    = vPosition.z;
+    fColor = vec3(height, height, height);
     //float height = 0.5;
     if (height < 0.2) height = 0.2;
     float hScale    = 1.0;
 
     vec4 pos = VPMatrix * vec4(vPosition.x, hScale * height, -vPosition.y, 1.0);
+    //vec4 pos = VPMatrix * vec4(vPosition.x, vPosition.y, 1.0, 1.0);
 
-    fColor = vec3(height, height, height);
+    
     fUV = calculateUV();
     fNormal = vec3(VPMatrix * vec4(vNormal, 1.0)); 
     gl_Position = pos;
