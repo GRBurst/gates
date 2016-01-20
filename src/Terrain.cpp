@@ -9,10 +9,13 @@ Terrain::Terrain(GLint shaderProgram, int width, int height)
     mTotalVertices = width * height;
     glm::vec2 terrainSize(static_cast<float>(width), static_cast<float>(height));
 
-    mTerrainMinPos = -5.0f;
-    mTerrainPosRange = 10.0f;
+    /* mTerrainPosRange = static_cast<float>(width); */
+    /* mTerrainMinPos = -static_cast<float>(width/2); */
+    mTerrainPosRange = 20.0f;
+    mTerrainMinPos = -10.0f;
     mHeightMapTerrainRatio = 1;
     mFloatsPerVertex = 3;
+    mDrawGrid = 0;
 
     int numStripsRequired = mHeight - 1;
     int numDegensRequired = 2 * (numStripsRequired - 1);
@@ -61,24 +64,19 @@ int Terrain::getDegensRequired()
     return (mWidth - 1) * 2;
 }
 
-void Terrain::setVPMatrix(glm::mat4 vp)
-{
-    this->mVPMatrix = vp;
-}
-
-glm::vec3 Terrain::computePosition(int x, int y)
+glm::vec3 Terrain::computePosition(int x, int z)
 {
 
     float xRatio = static_cast<float>(x) / static_cast<float>(mWidth -1);
-    float yRatio = 1.0f - (static_cast<float>(y) / static_cast<float>(mHeight - 1));
+    float zRatio = 1.0f - (static_cast<float>(z) / static_cast<float>(mHeight - 1));
 
     float xPosition = mTerrainMinPos + (xRatio * mTerrainPosRange);
-    float yPosition = mTerrainMinPos + (yRatio * mTerrainPosRange);
-    float zPosition = mNoiseValues[y * mHeightMapTerrainRatio * mNoise.getWidth() + x];
-    /* double zPosition = mNoise.calculateNoiseValue((double)x * (double)mHeightMapTerrainRatio, (double)y * (double)mHeightMapTerrainRatio); */
+    float yPosition = mNoiseValues[z * mHeightMapTerrainRatio * mNoise.getWidth() + x];
+    float zPosition = mTerrainMinPos + (zRatio * mTerrainPosRange);
+    /* double zPosition = mNoise.calculateNoiseValue((double)x * (double)muHeightMapTerrainRatio, (double)y * (double)muHeightMapTerrainRatio); */
     /* std::cout << "zPosition = " << zPosition << std::endl; */
 
-    return glm::vec3(xPosition, yPosition, zPosition);
+    return glm::vec3(xPosition, yPosition, -zPosition);
     /* return glm::vec3(x, y, -1.0); */
 }
 
@@ -86,13 +84,13 @@ int Terrain::computeTerrainPositions()
 {
     glm::vec3 position;
     int offset = 0;
-    for(int y = 0; y < mHeight; y++)
+    for(int z = 0; z < mHeight; z++)
     {
         for(int x = 0; x < mWidth; x++)
         {
 
             // Position calculation
-            position = computePosition(x, y);
+            position = computePosition(x, z);
 
             mVertices[offset++] = position.x;
             mVertices[offset++] = position.y;
@@ -125,7 +123,7 @@ void Terrain::computeTerrainNormals(int &offset, int &length)
         j = getIndexBottomLeftPosition(i);
         glm::vec3 bl(mVertices[j], mVertices[j+1], mVertices[j+2]);
 
-        // Triangle
+        // Triangle, clockwise vertices
         Triangle A = {c, l, t};
         Triangle B = {c, t, tr};
         Triangle C = {c, tr,r};
@@ -146,6 +144,9 @@ void Terrain::computeTerrainNormals(int &offset, int &length)
         mVertices[i+1] = vNormal.y;
         mVertices[i+2] = vNormal.z;
 
+        /* mVertices[i+0] = 1.0; */
+        /* mVertices[i+1] = 0.0; */
+        /* mVertices[i+2] = 0.0; */
         //std::cout << "normal =" << vNormal.x << ", " << vNormal.y << ", " << vNormal.z << std::endl;
     }
 
@@ -233,19 +234,19 @@ void Terrain::buildIBO()
     mIndices = new GLint[mTotalIndices];
 
     int offset = 0;
-    for(int y = 0; y < mHeight - 1; y++)
+    for(int z = 0; z < mHeight - 1; z++)
     {
-        if(y > 0)
-            mIndices[offset++] = (y * mWidth);
+        if(z > 0)
+            mIndices[offset++] = (z * mWidth);
 
         for(int x = 0; x < mWidth; x++)
         {
-            mIndices[offset++] = ((y * mWidth) + x);
-            mIndices[offset++] = (((y+1) * mWidth) + x);
+            mIndices[offset++] = ((z * mWidth) + x);
+            mIndices[offset++] = (((z+1) * mWidth) + x);
         }
 
-        if(y < mHeight - 2)
-            mIndices[offset++] = (((y+1) * mWidth) + (mWidth - 1));
+        if(z < mHeight - 2)
+            mIndices[offset++] = (((z+1) * mWidth) + (mWidth - 1));
 
     }
 
@@ -304,8 +305,10 @@ void Terrain::setBuffers()
 
     GLint terrainPosAttrib = glGetAttribLocation(mShaderProgram, "vPosition");
     GLint terrainNormalAttrib = glGetAttribLocation(mShaderProgram, "vNormal");
-    mVPLocation = glGetUniformLocation(mShaderProgram, "VPMatrix");
-    mTerrainSizeLocation = glGetUniformLocation(mShaderProgram, "terrainSize");
+    muVPLocation = glGetUniformLocation(mShaderProgram, "uVPMatrix");
+    muInvViewLocation = glGetUniformLocation(mShaderProgram, "uInvViewMatrix");
+    muHeightMapTerrainRatioLocation = glGetUniformLocation(mShaderProgram, "uHeightMapTerrainRatio");
+    muDrawGridLocation = glGetUniformLocation(mShaderProgram, "uDrawGrid");
 
     //Generate & bind vao
     glGenVertexArrays(1, &mVao);
@@ -329,7 +332,7 @@ void Terrain::setBuffers()
     if(mUseNormals)
     {
         glEnableVertexAttribArray(terrainNormalAttrib);
-        glVertexAttribPointer(terrainNormalAttrib, 3, GL_FLOAT, GL_FALSE, 12, reinterpret_cast<const GLvoid*>(12*3*mTotalVertices));
+        glVertexAttribPointer(terrainNormalAttrib, 3, GL_FLOAT, GL_FALSE, 12, reinterpret_cast<const GLvoid*>(mFloatsPerVertex/2 * mTotalVertices * sizeof(GLfloat)));
     }
 
     //Generate & bind ibo
@@ -349,8 +352,10 @@ void Terrain::setBuffers()
 void Terrain::draw()
 {
     glUseProgram(mShaderProgram);
-    glUniformMatrix4fv(mVPLocation, 1, GL_FALSE, value_ptr(mVPMatrix));
-    glUniformMatrix4fv(mTerrainSizeLocation, 1, GL_FALSE, value_ptr(mTerrainSize));
+    glUniformMatrix4fv(muVPLocation, 1, GL_FALSE, value_ptr(mVPMatrix));
+    glUniformMatrix3fv(muInvViewLocation, 1, GL_FALSE, value_ptr(mInvViewMatrix));
+    glUniform1i(muHeightMapTerrainRatioLocation, mHeightMapTerrainRatio);
+    glUniform1i(muDrawGridLocation, mDrawGrid);
 
     // Bind Attributes
     glBindVertexArray(mVao);
@@ -359,7 +364,29 @@ void Terrain::draw()
     /* int size; */
     /* glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size); */
     /* std::cout << "buffer size = " << size << ", vertice numeber = " << getVerticeNumber() << ", indice number = " << totalIndices << std::endl; // size/sizeof(GLuint)*/
-    glDrawElements(GL_TRIANGLE_STRIP, mTotalIndices, GL_UNSIGNED_INT, 0);
+
+    if(mDrawGrid == 0)
+    {
+        glUniform1i(muDrawGridLocation, mDrawGrid);
+        glDrawElements(GL_TRIANGLE_STRIP, mTotalIndices, GL_UNSIGNED_INT, 0);
+    }
+    else if(mDrawGrid == 1)
+    {
+        glUniform1i(muDrawGridLocation, mDrawGrid);
+        glDrawElements(GL_LINE_STRIP, mTotalIndices, GL_UNSIGNED_INT, 0);
+    }
+    else
+    {
+        mDrawGrid = 2;
+        glUniform1i(muDrawGridLocation, mDrawGrid);
+        glPolygonOffset(1, 1);
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glDrawElements(GL_TRIANGLE_STRIP, mTotalIndices, GL_UNSIGNED_INT, 0);
+
+        mDrawGrid = 3;
+        glUniform1i(muDrawGridLocation, mDrawGrid);
+        glDrawElements(GL_LINE_STRIP, mTotalIndices, GL_UNSIGNED_INT, 0);
+    }
 
     //glBindBuffer(GL_ARRAY_BUFFER, 0);
     //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -369,31 +396,39 @@ void Terrain::draw()
 void Terrain::debug()
 {
 
-
     std::cout << std::endl << std::endl;
-    std::cout << "vertices(" << mTotalVertices << "):" << std::endl;
-    for(int i = 0; i < 3*mTotalVertices; i++)
+    std::cout << "Normals(:" << mTotalVertices << "): " << std::endl;
+    for(int i = 0; i < 3*mTotalVertices; i+= 3)
     {
-        if((i % 3) == 0) std::cout << std::endl << mVertices[i];
-        else std::cout << ", " << mVertices[i];
+        printf("vertice:\t x = %5.2f, y = %5.2f, z = %5.2f\n" , mVertices[i], mVertices[i+1], mVertices[i+2]);
+        printf("normal:\t\t x = %5.2f, y = %5.2f, z = %5.2f\n" , mVertices[3*mTotalVertices+i+1], mVertices[3*mTotalVertices+i+2], mVertices[3*mTotalVertices+i+3]);
     }
     std::cout << std::endl << std::endl;
+
+/*     std::cout << std::endl << std::endl; */
+/*     std::cout << "vertices(" << mTotalVertices << "):" << std::endl; */
+/*     for(int i = 0; i < 3*mTotalVertices; i++) */
+/*     { */
+/*         if((i % 3) == 0) std::cout << std::endl << mVertices[i]; */
+/*         else std::cout << ", " << mVertices[i]; */
+/*     } */
+/*     std::cout << std::endl << std::endl; */
     
-    std::cout << "vertices(" << mTotalVertices << "):" << std::endl;
-    for(int i = 0; i < mTotalVertices; i++)
-    {
-        if((i % mWidth) == 0) std::cout << std::endl << i;
-        else std::cout << "\t" << i;
-    }
-    std::cout << std::endl << std::endl;
+/*     std::cout << "vertices(" << mTotalVertices << "):" << std::endl; */
+/*     for(int i = 0; i < mTotalVertices; i++) */
+/*     { */
+/*         if((i % mWidth) == 0) std::cout << std::endl << i; */
+/*         else std::cout << "\t" << i; */
+/*     } */
+/*     std::cout << std::endl << std::endl; */
 
-    std::cout << "indices(" << mTotalIndices << "):" << std::endl;
-    std::cout << mIndices[0];
-    for(int i = 1; i < mTotalIndices; i++)
-    {
-        std::cout << ", " << mIndices[i];
-    }
-    std::cout << std::endl << std::endl;
+/*     std::cout << "indices(" << mTotalIndices << "):" << std::endl; */
+/*     std::cout << mIndices[0]; */
+/*     for(int i = 1; i < mTotalIndices; i++) */
+/*     { */
+/*         std::cout << ", " << mIndices[i]; */
+/*     } */
+/*     std::cout << std::endl << std::endl; */
 
 
 

@@ -28,6 +28,7 @@ float oldTime, newTime;
 int loops;
 
 Camera camera;
+int gDrawGrid = 0;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -214,23 +215,22 @@ int main(){
     /* heightmap->linkTexture(prog, "heightMap"); */
     /* heightmap->linkTexture(terrainprog, "heightMap"); */
     /* //heightmap->linkTexture(grassprog, "textureMat"); */
-    int noiseDimX = 1000;
-    int noiseDimY = 1000;
-
+    int noiseDimX = 512;
+    int noiseDimY = 512;
     Terrain *terrain = new Terrain(terrainprog, noiseDimX, noiseDimY, noiseDimX, noiseDimY, Noise::PERLIN, 9, 8, 2.0, 3.0);
     terrain->setVPMatrix(camera.getVPMatrix());
+    terrain->setInvViewMatrix(camera.getInvViewMatrix());
     terrain->enableNormals();
     terrain->computeTerrain();
     terrain->genHeightMapTexture();
 	terrain->saveNoiseToFile();
 
     terrain->linkHeightMapTexture(prog);
-
-    //terrain->debug();
-
+    /* terrain->debug(); */
 
 
-//GRASS
+
+    //GRASS
     Shader grassshader;
     grassshader.loadShader("../src/shader/grass.vs", Shader::VERTEX);
     grassshader.loadShader("../src/shader/grass.gs", Shader::GEOMETRY);
@@ -333,11 +333,13 @@ int main(){
         /* std::cout << "view: " << camera.getPos().x << "< " << camera.getPos().y << "< " << camera.getPos().z << std::endl; */
         //neu
 
-        /* model->setProjection(camera.getProjectionMatrix()); */
-        /* model->setView(camera.getViewMatrix()); */
-        /* model->draw(); */
+        model->setProjection(camera.getProjectionMatrix());
+        model->setView(camera.getViewMatrix());
+        model->draw();
 
         terrain->setVPMatrix(camera.getVPMatrix());
+        terrain->setInvViewMatrix(camera.getInvViewMatrix());
+        terrain->setGrid(gDrawGrid);
         terrain->draw();
         /* renderHeightmap(0.1, 10 , noise.getTextureData()); */
 
@@ -399,6 +401,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             break;
         case GLFW_KEY_K :
             if(action == GLFW_PRESS) camera.setCamSpeed( -10.0 );
+            break;
+        case GLFW_KEY_G :
+            if(action == GLFW_PRESS) gDrawGrid = (gDrawGrid + 1) % 3;
             break;
         default: std::cout << "Key has no function!" << std::endl;
             break;
