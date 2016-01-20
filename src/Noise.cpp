@@ -53,8 +53,8 @@ void Noise::setParams(int x, int y, NoiseType noiseType, int seed, int octaves, 
     {
         mGradientNoise[i] = new double[y]();
     }
-    mNoise = new double[mWidth * mHeight];
-    mNoiseF = new float[mWidth * mHeight];
+    mNoise = new double[mWidth * mHeight]();
+    mNoiseF = new float[mWidth * mHeight]();
 }
 /*
 void Noise::generate(int seed){

@@ -216,7 +216,6 @@ int main(){
     /* heightmap->linkTexture(prog, "heightMap"); */
     /* heightmap->linkTexture(terrainprog, "heightMap"); */
     /* //heightmap->linkTexture(grassprog, "textureMat"); */
-
     int noiseDimX = 512;
     int noiseDimY = 512;
     Terrain *terrain = new Terrain(terrainprog, noiseDimX, noiseDimY, noiseDimX, noiseDimY, Noise::PERLIN, 9, 8, 2.0, 3.0);
@@ -232,7 +231,7 @@ int main(){
 
 
 
-//GRASS
+    //GRASS
     Shader grassshader;
     grassshader.loadShader("../src/shader/grass.vs", Shader::VERTEX);
     grassshader.loadShader("../src/shader/grass.gs", Shader::GEOMETRY);
@@ -252,8 +251,8 @@ int main(){
 //        };
 
     //grass.generatePositionsFromTexture(noise.getTextureDataF(), noise.getWidth(), noise.getHeight(), 0.2f, 0.7f);
-    grass.generatePositionsFromTexture(terrain->getNoiseValues(), terrain->getWidth(), terrain->getHeight(), 0.2f, 0.7f);
 
+    grass.setTerrainVao(terrain->getVAO(), terrain->getTotalIndices());
     grass.setBuffers();
 
     grass.setUniforms();

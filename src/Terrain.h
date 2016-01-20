@@ -95,6 +95,8 @@ class Terrain {
             mNoise.saveToFile("terrainNoise.tga");
         }
 
+        GLuint getVAO(){return mVao;}
+        int getTotalIndices();
 
         void debug();
 
@@ -103,7 +105,6 @@ class Terrain {
         int getVerticeNumber();
         int getIndicesPerRow();
         int getDegensRequired();
-        int getTotalIndices();
 
         int getIndexLeftPosition(int index);
         int getIndexRightPosition(int index);

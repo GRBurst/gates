@@ -16,7 +16,7 @@ out vec3 fPos;
 
 vec2 calculateUV()
 {
-    return vec2((5.0 + vPosition.x) / 10.0, (5.0 + vPosition.z) / 10.0);
+    return vec2((25.0 + vPosition.x) / 50.0, (25.0 + vPosition.y) / 50.0);
     //return vec2(0.2, 0.1);
 }
 

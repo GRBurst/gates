@@ -48,8 +48,8 @@ void main()
 {
     //vec3 diff = dot(normalize(fNormal), normalize(fPos - lightPos)) * lightCol;
 
-    //vec3 colorRes = texture(heightMap, fUV).rrr;
     vec3 colorRes = fColor;
+    //vec3 colorRes = texture(heightMap, fUV).rrr;
     float initColor = colorRes.r;
 
     vec4 terrainColor;
