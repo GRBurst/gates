@@ -6,10 +6,19 @@ uniform sampler2D textureMat;
 out vec4 color;
 in vec3 vcolor;
 vec4 colorRes;
+uniform float fAlphaTest;
+uniform float fAlphaMultiplier; 
 
 void main()
 {
 	//color = vec4(1.0, 1.0, 0.0, 1.0);
-    color = vec4(texture2D(textureMat, texCoord));
+	vec4 texColor = texture2D(textureMat, texCoord);
+	float fNewAlpha = texColor.a*fAlphaMultiplier;
+	if(fNewAlpha < fAlphaTest)
+		discard;
+	if(fNewAlpha > 1.0f)
+		fNewAlpha = 1.0f;	
+	
+    color = texture2D(textureMat, texCoord);
     //color = vec4(texCoord, 1.0, 0.5);
 }

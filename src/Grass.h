@@ -34,12 +34,14 @@ private:
 	float *fdata;
 
 	std::vector<GLfloat> vfdata;
-	GLint gVPLocation, cameraPosLocation;
+	GLint uVPLocation, uCameraPosLocation, uAlphaTest, uAlphaMultiplier;
 	glm::mat4 view;
 	glm::mat4 projection;
 	glm::vec3 cameraPos;
 	Texture *texture;
 	int mTotalIndices;
+	float fAlphaTest;
+	float fAlphaMultiplier;
 };
 
 #endif /* SRC_GRASS_H_ */

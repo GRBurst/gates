@@ -7,7 +7,10 @@
 
 #include "Grass.h"
 
-Grass::Grass()
+Grass::Grass() : shaderProgram(0), vao(0), vbo(0),
+				fdata(0), vfdata(std::vector<GLfloat>(0)), uVPLocation(0),
+				uCameraPosLocation(0), view(glm::mat4(0)), projection(glm::mat4(0)),
+				cameraPos(glm::vec3(0)), texture(0), mTotalIndices(0)
 {
 	// TODO Auto-generated constructor stub
 
@@ -20,7 +23,7 @@ Grass::~Grass()
 
 
 void Grass::loadTexture(){
-	texture = new Texture("../src/textures/billboardgrass.png");
+	texture = new Texture("../src/textures/grass.png");
 	texture->linkTexture(shaderProgram, "textureMat");
 	texture->bind();
 	texture->loadCommonOptions();
@@ -68,9 +71,13 @@ void Grass::setShaderProgram(GLint shaderProgram){
 
 void Grass::draw(){
 	glUseProgram(shaderProgram);
+	glEnable(GL_BLEND);
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	GLenum err = GL_NO_ERROR;
-	glUniformMatrix4fv(gVPLocation, 1, GL_FALSE, glm::value_ptr(projection * view));
-	glUniform3fv(cameraPosLocation, 1, value_ptr(cameraPos));
+	glUniformMatrix4fv(uVPLocation, 1, GL_FALSE, glm::value_ptr(projection * view));
+	glUniform3fv(uCameraPosLocation, 1, value_ptr(cameraPos));
+	glUniform1f(uAlphaTest, 0.25f);
+	glUniform1f(uAlphaMultiplier, 1.5f);
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(vao);
     //glDisable(GL_ALPHA_TEST);
@@ -83,7 +90,8 @@ void Grass::draw(){
    		std::cout << "Fehler 79(): " << err << std::endl;
    	std::cout.flush();
 	glBindVertexArray(0);
-
+	glDisable(GL_BLEND);
+	//glEnable(GL_CULL_FACE);
 }
 
 
@@ -126,8 +134,10 @@ void Grass::setBuffers(){
 }
 
 void Grass::setUniforms(){
-    gVPLocation = glGetUniformLocation(shaderProgram, "gVP");
-    cameraPosLocation = glGetUniformLocation(shaderProgram, "gCameraPos");
+    uVPLocation = glGetUniformLocation(shaderProgram, "gVP");
+    uCameraPosLocation = glGetUniformLocation(shaderProgram, "gCameraPos");
+    uAlphaTest = glGetUniformLocation(shaderProgram, "fAlphaTest");
+    uAlphaMultiplier = glGetUniformLocation(shaderProgram, "fAlphaMultiplier");
 }
 
 void Grass::setViewAndProjectionMatrix(glm::mat4 view, glm::mat4 projection){

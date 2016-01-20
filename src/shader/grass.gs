@@ -24,19 +24,19 @@ void main()
 		    texCoord = vec2(0.0, 0.0);
 		    EmitVertex();
 		 
+		 	pos2.y += 0.2 * heightDiff;
+		    gl_Position = gVP * vec4(pos2, 1.0);
+		    texCoord = vec2(1.0, 0.0);
+		    EmitVertex();
+		    
 		 	pos.y += 0.05;
 		    gl_Position = gVP * vec4(pos, 1.0);
 		    texCoord = vec2(0.0, 1.0);
 		    EmitVertex();
+					
 		
-			pos = pos2;
-			pos.y += 0.2 * heightDiff;
-		    gl_Position = gVP * vec4(pos, 1.0);
-		    texCoord = vec2(1.0, 0.0);
-		    EmitVertex();
-		
-		    pos.y += 0.05;
-		    gl_Position = gVP * vec4(pos, 1.0);
+		    pos2.y += 0.05;
+		    gl_Position = gVP * vec4(pos2, 1.0);
 		    texCoord = vec2(1.0, 1.0);
 		    EmitVertex();
 		    EndPrimitive();
