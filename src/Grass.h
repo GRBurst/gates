@@ -11,6 +11,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
+#include <random>
+#include <GLFW/glfw3.h>
 #include "Texture.h"
 
 class Grass
@@ -29,17 +31,21 @@ public:
 	void loadTexture();
 	void setTerrainVao(GLuint vao, int totalIndices);
 private:
-	GLint shaderProgram;
-	GLuint vao, vbo;
-	float *fdata;
 
-	std::vector<GLfloat> vfdata;
-	GLint gVPLocation, cameraPosLocation;
+
+	Texture *texture;
+
 	glm::mat4 view;
 	glm::mat4 projection;
 	glm::vec3 cameraPos;
-	Texture *texture;
-	int mTotalIndices;
+	std::default_random_engine generator;
+	std::vector<GLfloat> vfdata;
+	GLint shaderProgram;
+	GLint uVPLocation, uCameraPosLocation, uAlphaTest, uAlphaMultiplier, uColor, uTime;
+	GLuint vao, vbo;
+
+	float *fdata;
+	int mTotalIndices, randomSeed;
 };
 
 #endif /* SRC_GRASS_H_ */

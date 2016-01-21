@@ -37,8 +37,8 @@ void main()
     vec4 pos = uVPMatrix * vec4(vPosition.x, hScale * height, vPosition.z, 1.0);
 
     fUV = calculateUV();
-    fNormal = uInvViewMatrix * vNormal;
-    //fNormal = vNormal;
+    //fNormal = uInvViewMatrix * vNormal;
+    fNormal = vNormal;
 
     fPos = vec3(pos);
     gl_Position = pos;
