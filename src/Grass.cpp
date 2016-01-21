@@ -69,15 +69,20 @@ void Grass::setShaderProgram(GLint shaderProgram){
 	this->shaderProgram = shaderProgram;
 }
 
+
 void Grass::draw(){
+	float time = glfwGetTime();
+
 	glUseProgram(shaderProgram);
-	glEnable(GL_BLEND);
-	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//	glEnable(GL_BLEND);
+//	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	GLenum err = GL_NO_ERROR;
 	glUniformMatrix4fv(uVPLocation, 1, GL_FALSE, glm::value_ptr(projection * view));
 	glUniform3fv(uCameraPosLocation, 1, value_ptr(cameraPos));
-	glUniform1f(uAlphaTest, 0.25f);
-	glUniform1f(uAlphaMultiplier, 1.5f);
+	glUniform1f(uAlphaTest, 1.5f);
+	glUniform1f(uAlphaMultiplier, 2.5f);
+	glUniform1f(uTime, time);
+
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(vao);
     //glDisable(GL_ALPHA_TEST);
@@ -138,6 +143,7 @@ void Grass::setUniforms(){
     uCameraPosLocation = glGetUniformLocation(shaderProgram, "gCameraPos");
     uAlphaTest = glGetUniformLocation(shaderProgram, "fAlphaTest");
     uAlphaMultiplier = glGetUniformLocation(shaderProgram, "fAlphaMultiplier");
+    uTime = glGetUniformLocation(shaderProgram, "uTime");
 }
 
 void Grass::setViewAndProjectionMatrix(glm::mat4 view, glm::mat4 projection){

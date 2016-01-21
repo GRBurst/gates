@@ -219,7 +219,8 @@ int main(){
     /* //heightmap->linkTexture(grassprog, "textureMat"); */
     int noiseDimX = 512;
     int noiseDimY = 512;
-    Terrain *terrain = new Terrain(terrainprog, noiseDimX, noiseDimY, noiseDimX, noiseDimY, Noise::PERLIN, 9, 8, 2.0, 3.0);
+    int seed = 9;
+    Terrain *terrain = new Terrain(terrainprog, noiseDimX, noiseDimY, noiseDimX, noiseDimY, Noise::PERLIN, seed, 8, 2.0, 3.0);
     terrain->setVPMatrix(camera.getVPMatrix());
     terrain->setInvViewMatrix(camera.getInvViewMatrix());
     terrain->enableNormals();
