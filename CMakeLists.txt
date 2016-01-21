@@ -84,6 +84,7 @@ set(Game_HEAD   src/main.h
                 src/Terrain.h
                 src/Texture.h
                 src/WorleyNoise.h
+		src/PerlinNoise.h
     )
 
 set(Game_SRC    src/main.cpp
@@ -96,6 +97,7 @@ set(Game_SRC    src/main.cpp
                 src/Terrain.cpp
                 src/Texture.cpp
                 src/WorleyNoise.cpp
+		src/PerlinNoise.cpp
     )
 
 #message(${Game_SRC})
