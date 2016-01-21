@@ -12,6 +12,7 @@
 #include "Terrain.h"
 #include "Texture.h"
 #include "Grass.h"
+#include "WorleyNoise.h"
 
 
 using namespace glm;
@@ -220,7 +221,11 @@ int main(){
     /* //heightmap->linkTexture(grassprog, "textureMat"); */
     int noiseDimX = 512;
     int noiseDimY = 512;
+    WorleyNoise wNoise(noiseDimY, noiseDimY);
+    wNoise.generateNoiseImage();
+    wNoise.saveToFile("wnoise.tga");
     Terrain *terrain = new Terrain(terrainprog, noiseDimX, noiseDimY, noiseDimX, noiseDimY, Noise::PERLIN, 9, 8, 2.0, 3.0);
+    terrain->setNoiseValues(wNoise.getNoiseValues());
     terrain->setVPMatrix(camera.getVPMatrix());
     terrain->setInvViewMatrix(camera.getInvViewMatrix());
     terrain->enableNormals();
