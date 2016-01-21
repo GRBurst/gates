@@ -1,12 +1,12 @@
 #ifndef TERRAIN_H_
 #define TERRAIN_H_
-
+#include "PerlinNoise.h"
 #include <GL/glew.h>
 #include <iostream>
 #include <stdio.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "Noise.h"
+#include "NoiseType.h"
 #include "Texture.h"
 
 /*
@@ -23,17 +23,13 @@ class Terrain {
 
     public:
         Terrain(GLint shaderProgram, int width, int height);
-        Terrain(GLint shaderProgram, int width, int height, int x, int y, Noise::NoiseType noiseType, int seed, int octaves, double frequency, double amplitude);
+        Terrain(GLint shaderProgram, int width, int height, PerlinNoise &noise);
         ~Terrain();
 
-        void setNoiseParams(int x, int y, Noise::NoiseType noiseType, int seed, int octaves, double frequency, double amplitude)
-        {
-            mNoise.setParams(x, y, noiseType, seed, octaves, frequency, amplitude);
-        };
         void generateHeights()
         {
-            mNoise.generateNoiseImage();
-            mNoiseValues = mNoise.getTextureDataF();
+        	mNoise.generateNoiseImage();
+        	mNoiseValues = mNoise.getTextureData();
         };
         void computeTerrain()
         {
@@ -126,8 +122,9 @@ class Terrain {
         int mWidth, mHeight;
         int mTotalIndices, mTotalVertices;
 
-        Noise mNoise;
+        PerlinNoise mNoise;
         float* mNoiseValues;
+        NoiseType noiseType;
 
         Texture mHeightMapTexture;
         bool mUseHeightMapTexture;

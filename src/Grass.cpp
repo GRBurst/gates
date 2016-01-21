@@ -23,7 +23,7 @@ Grass::~Grass()
 
 
 void Grass::loadTexture(){
-	texture = new Texture("../src/textures/billboardgrass.png");
+	texture = new Texture("../src/textures/grass.png");
 	texture->linkTexture(shaderProgram, "textureMat");
 	texture->bind();
 	texture->loadCommonOptions();
@@ -79,8 +79,8 @@ void Grass::draw(){
 	GLenum err = GL_NO_ERROR;
 	glUniformMatrix4fv(uVPLocation, 1, GL_FALSE, glm::value_ptr(projection * view));
 	glUniform3fv(uCameraPosLocation, 1, value_ptr(cameraPos));
-	glUniform1f(uAlphaTest, 1.5f);
-	glUniform1f(uAlphaMultiplier, 2.5f);
+	glUniform1f(uAlphaTest, 0.25f);
+	glUniform1f(uAlphaMultiplier, 1.5f);
 	glUniform1f(uTime, time);
 
     glActiveTexture(GL_TEXTURE0);
@@ -95,44 +95,19 @@ void Grass::draw(){
    		std::cout << "Fehler 79(): " << err << std::endl;
    	std::cout.flush();
 	glBindVertexArray(0);
-	glDisable(GL_BLEND);
+
 	//glEnable(GL_CULL_FACE);
 }
 
 
 void Grass::setBuffers(){
 	GLint posAttrib = glGetAttribLocation(shaderProgram, "vPosition");
-
-	//Erzeuge Vertex Array Object und Vertex Buffer Object
-	//glGenVertexArrays(1, &vao);
-	//glGenBuffers(1, &vbo);
+	//Bind Vertex Array of Terrain
 	glBindVertexArray(vao);
-
-	//Binde VBO an VAO
-//    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-//	glBufferData(GL_ARRAY_BUFFER, vfdata.size() * sizeof(GLfloat), &vfdata.front(), GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(posAttrib);
     glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
 
-
-	//Unbind VBO
-	//Setze Texture in ShaderProgram an TEXTURE0
-	/* if (textureCount >= 1) */
-	/* { */
-	/* 	texture->setTexture(shaderProgram, 0, "mainTexture"); */
-	/* } */
-
-	/* //Setze Texture in ShaderProgram an TEXTURE1 */
-	/* if (textureCount >= 2) */
-	/* { */
-	/* 	normalmap->setTexture(shaderProgram, 1, "normalMap"); */
-	/* } */
-	/* //glBindBuffer(GL_ARRAY_BUFFER, 0); */
-	/* if (textureCount >= 3) */
-	/* { */
-	/* 	heightmap->setTexture(shaderProgram, 2, "heightMap"); */
-	/* } */
 
 	//Unbinde VAO
 	glBindVertexArray(0);
