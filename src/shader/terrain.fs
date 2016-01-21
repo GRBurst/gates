@@ -11,7 +11,7 @@ uniform int uHeightMapTerrainRatio;
 uniform int uDrawGrid;
 
 vec3 lightCol = vec3(1.0, 1.0, 1.0);
-vec3 lightPos = vec3(0.0, 10.0, 0.0);
+vec3 lightPos = vec3(0.0, 100.0, 0.0);
 
 out vec4 color;
 /* vec4 phong() */

@@ -75,6 +75,7 @@ class Terrain {
         {
             return mNoiseValues;
         };
+        void setNoiseValues(float* noiseVal){mNoiseValues = noiseVal; };
         /* float* getHeightValues() */
         /* { */
         /*     return mNoiseValues; */

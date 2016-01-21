@@ -83,6 +83,7 @@ set(Game_HEAD   src/main.h
                 src/Shader.h
                 src/Terrain.h
                 src/Texture.h
+                src/WorleyNoise.h
     )
 
 set(Game_SRC    src/main.cpp
@@ -94,6 +95,7 @@ set(Game_SRC    src/main.cpp
                 src/Shader.cpp
                 src/Terrain.cpp
                 src/Texture.cpp
+                src/WorleyNoise.cpp
     )
 
 #message(${Game_SRC})
