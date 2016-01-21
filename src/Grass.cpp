@@ -23,7 +23,7 @@ Grass::~Grass()
 
 
 void Grass::loadTexture(){
-	texture = new Texture("../src/textures/grass.png");
+	texture = new Texture("../src/textures/billboardgrass.png");
 	texture->linkTexture(shaderProgram, "textureMat");
 	texture->bind();
 	texture->loadCommonOptions();
@@ -79,15 +79,15 @@ void Grass::draw(){
 	GLenum err = GL_NO_ERROR;
 	glUniformMatrix4fv(uVPLocation, 1, GL_FALSE, glm::value_ptr(projection * view));
 	glUniform3fv(uCameraPosLocation, 1, value_ptr(cameraPos));
-	glUniform1f(uAlphaTest, 0.25f);
-	glUniform1f(uAlphaMultiplier, 1.5f);
+	glUniform1f(uAlphaTest, 0.75f);
+	glUniform1f(uAlphaMultiplier, 1.2f);
 	glUniform1f(uTime, time);
 
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(vao);
     //glDisable(GL_ALPHA_TEST);
 
-    glDrawElements(GL_TRIANGLE_STRIP, mTotalIndices, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, mTotalIndices, GL_UNSIGNED_INT, 0);
 	//glDrawArrays(GL_POINTS, 0, vfdata.size()/3);
 
        err = glGetError();

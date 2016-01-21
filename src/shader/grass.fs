@@ -34,7 +34,7 @@ vec4 phong(vec4 _color)
 
 void main()
 {
-	color = vec4(1.0, 1.0, 0.0, 1.0);
+	//color = vec4(1.0, 1.0, 0.0, 1.0);
 	vec4 texColor = texture2D(textureMat, texCoord);
 	float fNewAlpha = texColor.a*fAlphaMultiplier;
 	if(fNewAlpha < fAlphaTest)
@@ -43,6 +43,6 @@ void main()
 		fNewAlpha = 1.0f;
 	float colorDeviation = 0.6f + ((height * 2) - 1) / 2.0f;	
 	vec3  mixedColor = vec3(texColor) * vec3(colorDeviation, colorDeviation, colorDeviation);
-    //color = vec4(texColor.rgb, fNewAlpha);
+    color = vec4(texColor.rgb, fNewAlpha);
     //color = vec4(texCoord, 1.0, 0.5);
 }
