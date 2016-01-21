@@ -7,7 +7,7 @@
 /* #include "inputCallback.h" */
 #include "Camera.h"
 #include "ModelLoader.h"
-#include "Noise.h"
+#include "PerlinNoise.h"
 #include "Shader.h"
 #include "Terrain.h"
 #include "Texture.h"
@@ -229,7 +229,13 @@ int main(){
     /* terrain->setNoiseValues(wNoise.getNoiseValues()); */
     
     int seed = 9;
-    Terrain *terrain = new Terrain(terrainprog, noiseDimX, noiseDimY, noiseDimX, noiseDimY, Noise::PERLIN, seed, 8, 2.0, 3.0);
+    int octaves = 8;
+    double frequency = 4.0;
+    double amplitude = 1.0;
+    PerlinNoise noise;
+    noise.setParams(noiseDimX, noiseDimY, seed);
+    noise.setOctavesFreqAmp(octaves, frequency, amplitude);
+    Terrain *terrain = new Terrain(terrainprog, noiseDimX, noiseDimY, noise);
     terrain->setVPMatrix(camera.getVPMatrix());
     terrain->setInvViewMatrix(camera.getInvViewMatrix());
     terrain->enableNormals();

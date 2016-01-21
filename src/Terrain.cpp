@@ -24,10 +24,10 @@ Terrain::Terrain(GLint shaderProgram, int width, int height)
     Texture mHeightMapTexture();
 }
 
-Terrain::Terrain(GLint shaderProgram, int width, int height, int x, int y, Noise::NoiseType noiseType, int seed, int octaves, double frequency, double amplitude) 
+Terrain::Terrain(GLint shaderProgram, int width, int height, PerlinNoise &noise)
     : Terrain(shaderProgram, width, height)
 {
-    mNoise.setParams(x, y, noiseType, seed, octaves, frequency, amplitude);
+	this->mNoise = noise;
 }
 
 Terrain::~Terrain()
@@ -281,7 +281,7 @@ void Terrain::genHeightMapTexture()
 {
     mUseHeightMapTexture = true;
     mHeightMapTexture.bind();
-    mHeightMapTexture.setData(mNoise.getTextureDataF(), mNoise.getWidth(), mNoise.getHeight());
+    mHeightMapTexture.setData(mNoise.getTextureData(), mNoise.getWidth(), mNoise.getHeight());
     mHeightMapTexture.loadHeightmapOptions();
     mHeightMapTexture.linkTexture(mShaderProgram, "heightMap");
 }
