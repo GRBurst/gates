@@ -83,10 +83,10 @@ void Grass::draw(){
 	glUniform1f(uAlphaMultiplier, 1.2f);
 	glUniform1f(uTime, time);
 
-    glActiveTexture(GL_TEXTURE0);
+    //glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(vao);
     //glDisable(GL_ALPHA_TEST);
-
+    glProvokingVertex(GL_LAST_VERTEX_CONVENTION);
     glDrawElements(GL_TRIANGLES, mTotalIndices, GL_UNSIGNED_INT, 0);
 	//glDrawArrays(GL_POINTS, 0, vfdata.size()/3);
 
