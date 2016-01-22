@@ -263,13 +263,15 @@ void ModelLoader::setStride(){
 					saveBuffer++;
 				}
 			}
-			if (!this->fileNormals.empty()){
-				*saveBuffer = normals.at(i).x;
-				saveBuffer++;
-				*saveBuffer = normals.at(i).y;
-				saveBuffer++;
-				*saveBuffer = normals.at(i).z;
-				saveBuffer++;
+			else{
+				if (!this->fileNormals.empty()){
+					*saveBuffer = normals.at(i).x;
+					saveBuffer++;
+					*saveBuffer = normals.at(i).y;
+					saveBuffer++;
+					*saveBuffer = normals.at(i).z;
+					saveBuffer++;
+				}
 			}
 
 		}

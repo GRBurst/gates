@@ -270,7 +270,7 @@ int main(){
     //Outsource
 
 
-    ModelLoader model("../objects/box.obj", prog);
+    ModelLoader model("../objects/flat_torus.obj", prog);
 	model.loadFile();
 
 	model.setBuffers();
