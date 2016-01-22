@@ -122,7 +122,7 @@ void initOpenGL()
     glClearColor( 0.0, 0.0, 0.0, 1.0 );
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LESS );
-    //glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 }
@@ -270,7 +270,7 @@ int main(){
     //Outsource
 
 
-    ModelLoader model("../objects/flat_torus.obj", prog);
+    ModelLoader model("../objects/inner_plane.obj", prog);
 	model.loadFile();
 
 	model.setBuffers();
