@@ -270,7 +270,7 @@ int main(){
     //Outsource
 
 
-    ModelLoader model("../objects/sphere.obj", prog);
+    ModelLoader model("../objects/box.obj", prog);
 	model.loadFile();
 
 	model.setBuffers();

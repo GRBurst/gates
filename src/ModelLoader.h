@@ -52,6 +52,7 @@ private:
 	vec3 lightPosition;
 	vec3 cameraPosition;
 	vector<int> vertexIndices, normalIndices, uvIndices;
+	int bufferSize;
 	mat4 view = lookAt(vec3(0.0f, 0.0f, 5.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
 	mat4 projection;
 	mat4 model = mat4(1.0f);
