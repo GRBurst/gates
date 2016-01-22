@@ -210,14 +210,6 @@ int main(){
     terrainshader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT);
     GLint terrainprog = terrainshader.linkShaders();
 
-    /* Texture *heightmap = new Texture(); */
-    /* heightmap->bind(); */
-
-    /* heightmap->setData(noise.getTextureDataF(), noiseDimX, noiseDimY); */
-    /* heightmap->loadHeightmapOptions(); */
-    /* heightmap->linkTexture(prog, "heightMap"); */
-    /* heightmap->linkTexture(terrainprog, "heightMap"); */
-    /* //heightmap->linkTexture(grassprog, "textureMat"); */
     int noiseDimX = 256;
     int noiseDimY = 256;
     WorleyNoise wNoise(noiseDimY, noiseDimY);
@@ -225,27 +217,26 @@ int main(){
     wNoise.generateNoiseImage();
     wNoise.saveToFile("wnoise.tga");
 
-    /* Terrain *terrain = new Terrain(terrainprog, noiseDimX, noiseDimY, noiseDimX, noiseDimY, Noise::PERLIN, 9, 8, 2.0, 3.0); */
-    /* terrain->setNoiseValues(wNoise.getNoiseValues()); */
+    /* Terrain terrainTerrain(terrainprog, noiseDimX, noiseDimY, noiseDimX, noiseDimY, Noise::PERLIN, 9, 8, 2.0, 3.0); */
+    /* terrain.setNoiseValues(wNoise.getNoiseValues()); */
     
     int seed = 9;
     int octaves = 8;
     double frequency = 4.0;
     double amplitude = 1.0;
-    /* PerlinNoise *noise = new PerlinNoise(); */
     PerlinNoise noise;
     noise.setParams(noiseDimX, noiseDimY, seed);
     noise.setOctavesFreqAmp(octaves, frequency, amplitude);
-    Terrain *terrain = new Terrain(terrainprog, noiseDimX, noiseDimY, &noise);
-    terrain->setVPMatrix(camera.getVPMatrix());
-    terrain->setInvViewMatrix(camera.getInvViewMatrix());
-    terrain->enableNormals();
-    terrain->computeTerrain();
-    terrain->genHeightMapTexture();
-	terrain->saveNoiseToFile();
+    Terrain terrain(terrainprog, noiseDimX, noiseDimY, &noise);
+    terrain.setVPMatrix(camera.getVPMatrix());
+    terrain.setInvViewMatrix(camera.getInvViewMatrix());
+    terrain.enableNormals();
+    terrain.computeTerrain();
+    terrain.genHeightMapTexture();
+	terrain.saveNoiseToFile();
 
-    terrain->linkHeightMapTexture(prog);
-    /* terrain->debug(); */
+    terrain.linkHeightMapTexture(prog);
+    /* terrain.debug(); */
 
 
 
@@ -270,7 +261,7 @@ int main(){
 
     //grass.generatePositionsFromTexture(noise.getTextureDataF(), noise.getWidth(), noise.getHeight(), 0.2f, 0.7f);
 
-    grass.setTerrainVao(terrain->getVAO(), terrain->getTotalIndices());
+    grass.setTerrainVao(terrain.getVAO(), terrain.getTotalIndices());
     grass.setBuffers();
 
     grass.setUniforms();
@@ -279,13 +270,13 @@ int main(){
     //Outsource
 
 
-    ModelLoader *model = new ModelLoader("../objects/sphere.obj", prog);
-	model->loadFile();
+    ModelLoader model("../objects/sphere.obj", prog);
+	model.loadFile();
 
-	model->setBuffers();
-	model->setStandardUniformLocations();
+	model.setBuffers();
+	model.setStandardUniformLocations();
 	glm::vec3 trans(1.0, 0.0, -1.0);
-	model->translate(trans);
+	model.translate(trans);
 
 //    GLuint posAttrib = glGetAttribLocation(prog, "vPosition");
 //    GLuint VAO;
@@ -326,7 +317,7 @@ int main(){
 
 
 	double xpos, ypos;
-    //model->setView(camera.getViewMatrix());
+    //model.setView(camera.getViewMatrix());
 
     while(!(glfwWindowShouldClose(window)))
     {
@@ -353,14 +344,14 @@ int main(){
         /* std::cout << "view: " << camera.getPos().x << "< " << camera.getPos().y << "< " << camera.getPos().z << std::endl; */
         //neu
 
-        model->setProjection(camera.getProjectionMatrix());
-        model->setView(camera.getViewMatrix());
-        model->draw();
+        model.setProjection(camera.getProjectionMatrix());
+        model.setView(camera.getViewMatrix());
+        model.draw();
 
-        terrain->setVPMatrix(camera.getVPMatrix());
-        terrain->setInvViewMatrix(camera.getInvViewMatrix());
-        terrain->setGrid(gDrawGrid);
-        terrain->draw();
+        terrain.setVPMatrix(camera.getVPMatrix());
+        terrain.setInvViewMatrix(camera.getInvViewMatrix());
+        terrain.setGrid(gDrawGrid);
+        terrain.draw();
         /* renderHeightmap(0.1, 10 , noise.getTextureData()); */
 
         //processInput
