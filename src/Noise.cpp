@@ -19,7 +19,6 @@ Noise::~Noise()
 }
 
 void Noise::setParams(int x, int y, int seed){
-	Noise noise;
 	this->mWidth = x;
 	this->mHeight = y;
 	this->mSeed = seed;

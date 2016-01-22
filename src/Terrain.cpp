@@ -24,7 +24,7 @@ Terrain::Terrain(GLint shaderProgram, int width, int height)
     Texture mHeightMapTexture();
 }
 
-Terrain::Terrain(GLint shaderProgram, int width, int height, PerlinNoise &noise)
+Terrain::Terrain(GLint shaderProgram, int width, int height, Noise *noise)
     : Terrain(shaderProgram, width, height)
 {
 	this->mNoise = noise;
@@ -71,9 +71,9 @@ glm::vec3 Terrain::computePosition(int x, int z)
     float zRatio = 1.0f - (static_cast<float>(z) / static_cast<float>(mHeight - 1));
 
     float xPosition = mTerrainMinPos + (xRatio * mTerrainPosRange);
-    float yPosition = mNoiseValues[z * mHeightMapTerrainRatio * mNoise.getWidth() + x];
+    float yPosition = mNoiseValues[z * mHeightMapTerrainRatio * mNoise->getWidth() + x];
     float zPosition = mTerrainMinPos + (zRatio * mTerrainPosRange);
-    /* double zPosition = mNoise.calculateNoiseValue((double)x * (double)muHeightMapTerrainRatio, (double)y * (double)muHeightMapTerrainRatio); */
+    /* double zPosition = mNoise->calculateNoiseValue((double)x * (double)muHeightMapTerrainRatio, (double)y * (double)muHeightMapTerrainRatio); */
     /* std::cout << "zPosition = " << zPosition << std::endl; */
 
     return glm::vec3(xPosition, yPosition, -zPosition);
@@ -281,7 +281,7 @@ void Terrain::genHeightMapTexture()
 {
     mUseHeightMapTexture = true;
     mHeightMapTexture.bind();
-    mHeightMapTexture.setData(mNoise.getTextureData(), mNoise.getWidth(), mNoise.getHeight());
+    mHeightMapTexture.setData(mNoise->getTextureData(), mNoise->getWidth(), mNoise->getHeight());
     mHeightMapTexture.loadHeightmapOptions();
     mHeightMapTexture.linkTexture(mShaderProgram, "heightMap");
 }

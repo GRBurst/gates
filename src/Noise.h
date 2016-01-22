@@ -28,7 +28,10 @@ class Noise
 
         void setParams(int x, int y, int seed);
 
-		float* getTextureData();
+		virtual float* getTextureData();
+		virtual void generateNoiseImage() = 0;
+		virtual void setOctavesFreqAmp(int octaves, double frequency, double amplitude) = 0;
+
 		bool saveToFile(const char* filename);
 		int getWidth(){ return mWidth;}
 		int getHeight(){return mHeight;}

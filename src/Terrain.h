@@ -23,13 +23,13 @@ class Terrain {
 
     public:
         Terrain(GLint shaderProgram, int width, int height);
-        Terrain(GLint shaderProgram, int width, int height, PerlinNoise &noise);
+        Terrain(GLint shaderProgram, int width, int height, Noise *noise);
         ~Terrain();
 
         void generateHeights()
         {
-        	mNoise.generateNoiseImage();
-        	mNoiseValues = mNoise.getTextureData();
+        	mNoise->generateNoiseImage();
+        	mNoiseValues = mNoise->getTextureData();
         };
         void computeTerrain()
         {
@@ -60,11 +60,11 @@ class Terrain {
         };
         glm::ivec2 getHeightMapDimension()
         {
-            return glm::ivec2(mNoise.getDimension());
+            return glm::ivec2(mNoise->getDimension());
         };
         float getHeightMapValue(glm::ivec2 coordinate)
         {
-            return mNoiseValues[(coordinate.y * (mNoise.getDimension()).x) + coordinate.x];
+            return mNoiseValues[(coordinate.y * (mNoise->getDimension()).x) + coordinate.x];
         };
         float getTerrainHeight(glm::ivec2 coordinate)
         {
@@ -89,7 +89,7 @@ class Terrain {
 
         void saveNoiseToFile()
         {
-            mNoise.saveToFile("terrainNoise.tga");
+            mNoise->saveToFile("terrainNoise.tga");
         }
 
         GLuint getVAO(){return mVao;}
@@ -123,7 +123,7 @@ class Terrain {
         int mWidth, mHeight;
         int mTotalIndices, mTotalVertices;
 
-        PerlinNoise mNoise;
+        Noise *mNoise;
         float* mNoiseValues;
         NoiseType noiseType;
 

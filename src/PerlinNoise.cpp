@@ -20,6 +20,41 @@ PerlinNoise::~PerlinNoise()
 	// TODO Auto-generated destructor stub
 }
 
+void PerlinNoise::printParams()
+{
+    std::cout << "mWidth = " << mWidth << std::endl;
+    std::cout << "mHeight = " << mHeight << std::endl;
+    std::cout << "mSeed = " << mSeed << std::endl;
+    std::cout << "mOctaves = " << mOctaves << std::endl;
+    std::cout << "mStart = " << mStart << std::endl;
+    std::cout << "mFrequency = " << mFrequency << std::endl;
+    std::cout << "mAmplitude = " << mAmplitude << std::endl;
+    std::cout << "mMin = " << mMin << std::endl;
+    std::cout << "mMax = " << mMax << std::endl;
+	std::cout << "mSampleSize = " << mSampleSize << std::endl;// = 256;
+
+    /* std::cout << "first gradients = " */ 
+
+    std::cout << "mNoise values:" << std::endl;
+	for(int y = 0; y < mHeight; y++){
+	    for(int x = 0; x < mWidth; x++){
+            if(x == mWidth-1) std::cout << mNoise[y * mWidth + x] << std::endl;
+            else std::cout << mNoise[y * mWidth + x] << ", ";// = (mNoise[y * mWidth + x] - mMin) / mMax;
+		}
+	}
+	
+    /* std::cout << "mGradientTable2d values:" << std::endl; */
+    /* for (std::vector<glm::dvec2>::iterator it = mGradientTable2d.begin() ; it != mGradientTable2d.end(); ++it) */
+    /*         std::cout << "x = " << it->x << ", y =  " <<  it->y << std::endl; */
+		
+	/* for (int i = 0; i < mWidth; i++){ */
+	/* 	mGradientNoise[i] = new double[mHeight](); */
+	/* } */
+    std::cout << "mPermutationTable values:" << std::endl;
+    for (std::vector<int>::iterator it = mPermutationTable.begin() ; it != mPermutationTable.end(); ++it)
+        std::cout << ' ' << *it;
+}
+
 void PerlinNoise::setOctavesFreqAmp(int octaves, double frequency, double amplitude){
 
 	this->mOctaves = octaves;
@@ -34,9 +69,11 @@ void PerlinNoise::generateNoiseImage(){
 		initPermutationTable();
 		initGradientTable();
 	}
+
+    /* printParams(); */
 	for(int x = 0; x < mWidth; x++){
 		for(int y = 0; y < mHeight; y++){
-			float value = static_cast<float>(noise(x, y));
+			float value = static_cast<float>(noise(static_cast<double>(x), static_cast<double>(y)));
 			mNoise[y * mWidth + x] = value;
 			if (value < mMin)
 				mMin = value;
@@ -44,12 +81,15 @@ void PerlinNoise::generateNoiseImage(){
 				mMax = value;
 		}
 	}
-	mMax = mMax - mMin;
-	for(int x = 0; x < mWidth; x++){
-		for(int y = 0; y < mHeight; y++){
-			mNoise[y * mWidth + x] = (mNoise[y * mWidth + x] - mMin) / mMax;
-		}
-	}
+    if((mMin < 0.0) || (mMax > 1.0))
+    {
+	    mMax = mMax - mMin;
+        for(int x = 0; x < mWidth; x++){
+            for(int y = 0; y < mHeight; y++){
+                mNoise[y * mWidth + x] = (mNoise[y * mWidth + x] - mMin) / mMax;
+            }
+        }
+    }
 
 
 }
@@ -70,7 +110,7 @@ double PerlinNoise::noise(double x, double y){
 	return result;
 }
 
-//double Noise::clamp(double x, double min, double max){
+//double clamp(double x, double min, double max){
 //	if (x > max)
 //		x = max;
 //	if (x < min)
@@ -147,8 +187,8 @@ double PerlinNoise::interpolationPolynomial2D(double t){
 
 void PerlinNoise::initPermutationTable(){
 	std::default_random_engine generator(mSeed);
-	iota(mPermutationTable.begin(), mPermutationTable.end(), 0);
 	mPermutationTable = std::vector<int>(mSampleSize);
+	iota(mPermutationTable.begin(), mPermutationTable.end(), 0);
 //	for(std::vector<int>::iterator it = mPermutationTable.begin(); it != mPermutationTable.end(); it++){
 //		std::cout << *it << std::endl;
 //	}

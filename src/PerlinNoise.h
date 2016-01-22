@@ -21,7 +21,8 @@ class PerlinNoise : public Noise
 {
 	public:
 		PerlinNoise();
-		virtual ~PerlinNoise();
+		~PerlinNoise();
+        void printParams();
 		void setOctavesFreqAmp(int octaves, double frequency, double amplitude);
 		void generate(int seed);
 		void generateNoiseImage();
@@ -40,7 +41,7 @@ class PerlinNoise : public Noise
 		int mSampleSize = 256;
 		int mOctaves;
 		bool mStart = true;
-		double mFrequency, mAmplitude, mMax = 0.5, mMin = 0.5;
+		double mFrequency, mAmplitude, mMax = 0.0, mMin = 1.0;
 
 		std::vector<int> mPermutationTable;
 		std::vector<glm::dvec2> mGradientTable2d;

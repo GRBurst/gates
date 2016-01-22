@@ -232,10 +232,11 @@ int main(){
     int octaves = 8;
     double frequency = 4.0;
     double amplitude = 1.0;
+    /* PerlinNoise *noise = new PerlinNoise(); */
     PerlinNoise noise;
     noise.setParams(noiseDimX, noiseDimY, seed);
     noise.setOctavesFreqAmp(octaves, frequency, amplitude);
-    Terrain *terrain = new Terrain(terrainprog, noiseDimX, noiseDimY, noise);
+    Terrain *terrain = new Terrain(terrainprog, noiseDimX, noiseDimY, &noise);
     terrain->setVPMatrix(camera.getVPMatrix());
     terrain->setInvViewMatrix(camera.getInvViewMatrix());
     terrain->enableNormals();
