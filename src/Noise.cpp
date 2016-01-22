@@ -7,7 +7,7 @@
 
 #include "Noise.h"
 
-Noise::Noise() : mWidth(256), mHeight(256), mSeed(1024), mNoiseType(PERLIN), mNoise(0)
+Noise::Noise() : mXDim(256), mYDim(256), mZDim(1), mSeed(1024), mOctaves(1), mFrequency(1.0), mAmplitude(1.0), mNoiseType(PERLIN)
 {
 	// TODO Auto-generated constructor stub
 
@@ -19,10 +19,10 @@ Noise::~Noise()
 }
 
 void Noise::setParams(int x, int y, int seed){
-	this->mWidth = x;
-	this->mHeight = y;
+	this->mXDim = x;
+	this->mYDim = y;
 	this->mSeed = seed;
-	mNoise = new float[mWidth * mHeight];
+	mNoiseValues.resize(mXDim * mYDim);
 }
 
 
@@ -36,26 +36,26 @@ void Noise::setParams(int x, int y, int seed){
 
 
 float *Noise::getTextureData(){
-	return mNoise;
+	return &mNoiseValues[0];
 }
 
 
 bool Noise::saveToFile(const char* filename){
-	char* bmp = new char[mWidth*mHeight];
+	char* bmp = new char[mXDim*mYDim];
 	char* it = bmp;
-	for (int x = 0; x < this-> mWidth * this->mHeight; x++){
-		*it = (char)(mNoise[x] * 255);
+	for (int x = 0; x < this-> mXDim * this->mYDim; x++){
+		*it = (char)(mNoiseValues[x] * 255);
 		it++;
-			//std::cout<< (y + x) + y * mWidth << std::endl;
-			//std::cout << mNoise[x][y] << std::endl;
+			//std::cout<< (y + x) + y * mXDim << std::endl;
+			//std::cout << mNoiseValues[x][y] << std::endl;
 	}
 
 
-	uint16_t header[9] = {0, 3, 0, 0 ,0 ,0, (uint16_t)mWidth, (uint16_t)mHeight, 8};
+	uint16_t header[9] = {0, 3, 0, 0 ,0 ,0, (uint16_t)mXDim, (uint16_t)mYDim, 8};
 	std::ofstream file(filename, std::ios::binary);
 	if(file.is_open()){
 		file.write((char*) (&header), sizeof(header));
-		file.write(bmp, sizeof(char)*mWidth*mHeight);
+		file.write(bmp, sizeof(char)*mXDim*mYDim);
 		file.close();
 	}
 	else{

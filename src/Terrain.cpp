@@ -71,7 +71,7 @@ glm::vec3 Terrain::computePosition(int x, int z)
     float zRatio = 1.0f - (static_cast<float>(z) / static_cast<float>(mHeight - 1));
 
     float xPosition = mTerrainMinPos + (xRatio * mTerrainPosRange);
-    float yPosition = mNoiseValues[z * mHeightMapTerrainRatio * mNoise->getWidth() + x];
+    float yPosition = mNoiseValues[z * mHeightMapTerrainRatio * mNoise->getXDim() + x];
     float zPosition = mTerrainMinPos + (zRatio * mTerrainPosRange);
     /* double zPosition = mNoise->calculateNoiseValue((double)x * (double)muHeightMapTerrainRatio, (double)y * (double)muHeightMapTerrainRatio); */
     /* std::cout << "zPosition = " << zPosition << std::endl; */
@@ -281,7 +281,7 @@ void Terrain::genHeightMapTexture()
 {
     mUseHeightMapTexture = true;
     mHeightMapTexture.bind();
-    mHeightMapTexture.setData(mNoise->getTextureData(), mNoise->getWidth(), mNoise->getHeight());
+    mHeightMapTexture.setData(mNoise->getTextureData(), mNoise->getXDim(), mNoise->getYDim());
     mHeightMapTexture.loadHeightmapOptions();
     mHeightMapTexture.linkTexture(mShaderProgram, "heightMap");
 }

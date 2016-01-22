@@ -23,12 +23,11 @@ class PerlinNoise : public Noise
 		PerlinNoise();
 		~PerlinNoise();
         void printParams();
-		void setOctavesFreqAmp(int octaves, double frequency, double amplitude);
 		void generate(int seed);
 		void generateNoiseImage();
 
 		double calculateNoiseValue(double x, double y);
-		glm::ivec2 getDimension(){ return glm::ivec2(mWidth, mHeight);}
+		glm::ivec2 getDimension(){ return glm::ivec2(mXDim, mYDim);}
 	private:
 		glm::dvec2 interpolationPolynomial2D(glm::dvec2 vec);
 		double interpolationPolynomial2D(double t);
@@ -39,9 +38,8 @@ class PerlinNoise : public Noise
 		double lerp(double alpha, double x0, double x1);
 
 		int mSampleSize = 256;
-		int mOctaves;
 		bool mStart = true;
-		double mFrequency, mAmplitude, mMax = 0.0, mMin = 1.0;
+		double mMax = 0.0, mMin = 1.0;
 
 		std::vector<int> mPermutationTable;
 		std::vector<glm::dvec2> mGradientTable2d;

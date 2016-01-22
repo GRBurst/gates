@@ -10,26 +10,34 @@
  */
 
 WorleyNoise::WorleyNoise()
-{}
+{
+    // Params
+    mDistSeed = 24793197;
 
-WorleyNoise::WorleyNoise(int xDim, int yDim, int zDim)
-    : mXDim(xDim)
-    , mYDim(yDim)
-    , mZDim(zDim)
-{}
+    mAvgNumFeaturePoints = 2.5;
+    mNumDistF = 3;
+}
 
 void WorleyNoise::generateNoiseImage()
 {
+    mNoiseValues.resize(mXDim * mYDim * mZDim);
     for(int z = 0; z < mZDim; z++){
         for(int y = 0; y < mYDim; y++){
             for(int x = 0; x < mXDim; x++){
                 /* int index = ((mXDim * mYDim * z) + (y * mXDim + x)); */
                 /* mNoiseValues.at(index) = (cellNoise(glm::vec3( */
-                mNoiseValues.push_back(2.5f * cellNoise(glm::vec3(
+                /* float value = static_cast<float>(cellNoise(static_cast<double>(x), static_cast<double>(y))); */
+                float value = 2.5f * cellNoise(glm::vec3(
                                 static_cast<float>(x) / 32.0f, 
                                 static_cast<float>(y) / 16.0f, 
                                 static_cast<float>(z)
-                                )));
+                                ));
+                mNoiseValues[y * mXDim + x] = value;
+                /* mNoiseValues.push_back(2.5f * cellNoise(glm::vec3( */
+                /*                 static_cast<float>(x) / 32.0f, */ 
+                /*                 static_cast<float>(y) / 16.0f, */ 
+                /*                 static_cast<float>(z) */
+                /*                 ))); */
             }
         }
     }

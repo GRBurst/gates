@@ -2,6 +2,7 @@
 #define SRC_WORLEYNOISE_H_
 #define _USE_MATH_DEFINES
 
+#include "Noise.h"
 #include <random>
 #include <iostream>
 #include <stdio.h>
@@ -13,7 +14,7 @@
 #include <queue>
 #include <glm/glm.hpp>
 
-class WorleyNoise
+class WorleyNoise : public Noise
 {
     public:
         enum NoiseDistanceFunction
@@ -22,19 +23,19 @@ class WorleyNoise
             MANHATTEN,
         };
         WorleyNoise();
-        WorleyNoise(int xDim, int yDim, int zDim = 1);
+        /* WorleyNoise(int xDim, int yDim, int zDim = 1); */
 
-        void setParams() {};
+        /* void setParams() {}; */
         void init();
         void generateNoiseImage();
         bool saveToFile(const char* filename);
 
         int getXDim();
-        void setXDim(int xDim){ this->mXDim = xDim; };
+        void setXDim(int xDim){ mXDim = xDim; };
         int getYDim();
-        void setYDim(int yDim){ this->mYDim = yDim; };
+        void setYDim(int yDim){ mYDim = yDim; };
         int getZDim();
-        void setZDim(int zDim){ this->mZDim = zDim; };
+        void setZDim(int zDim){ mZDim = zDim; };
         
         float* getNoiseValues() {return &mNoiseValues[0]; };
 
@@ -48,9 +49,8 @@ class WorleyNoise
     private:
         const uint OFFSET_BASIS = 2166136261;
         const uint FNV_PRIME = 16777619;
-        std::vector<float> mNoiseValues;
+        /* std::vector<float> mNoiseValues; */
         std::function< void(float) > mDistFunc;
-        int mXDim, mYDim, mZDim;
         unsigned int mDistSeed;
         double mAvgNumFeaturePoints;
         int mNumDistF;

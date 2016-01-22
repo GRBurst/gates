@@ -6,11 +6,11 @@
  */
 
 #include "PerlinNoise.h"
-PerlinNoise::PerlinNoise() :mOctaves(1), mFrequency(1.0), mAmplitude(1.0)
+PerlinNoise::PerlinNoise()
 {
-	mGradientNoise = new double* [mWidth];
-	for (int i = 0; i < mWidth; i++){
-		mGradientNoise[i] = new double[mHeight]();
+	mGradientNoise = new double* [mXDim];
+	for (int i = 0; i < mXDim; i++){
+		mGradientNoise[i] = new double[mYDim]();
 	}
 }
 
@@ -22,8 +22,8 @@ PerlinNoise::~PerlinNoise()
 
 void PerlinNoise::printParams()
 {
-    std::cout << "mWidth = " << mWidth << std::endl;
-    std::cout << "mHeight = " << mHeight << std::endl;
+    std::cout << "mXDim = " << mXDim << std::endl;
+    std::cout << "mYDim = " << mYDim << std::endl;
     std::cout << "mSeed = " << mSeed << std::endl;
     std::cout << "mOctaves = " << mOctaves << std::endl;
     std::cout << "mStart = " << mStart << std::endl;
@@ -35,11 +35,11 @@ void PerlinNoise::printParams()
 
     /* std::cout << "first gradients = " */ 
 
-    std::cout << "mNoise values:" << std::endl;
-	for(int y = 0; y < mHeight; y++){
-	    for(int x = 0; x < mWidth; x++){
-            if(x == mWidth-1) std::cout << mNoise[y * mWidth + x] << std::endl;
-            else std::cout << mNoise[y * mWidth + x] << ", ";// = (mNoise[y * mWidth + x] - mMin) / mMax;
+    std::cout << "mNoiseValues values:" << std::endl;
+	for(int y = 0; y < mYDim; y++){
+	    for(int x = 0; x < mXDim; x++){
+            if(x == mXDim-1) std::cout << mNoiseValues[y * mXDim + x] << std::endl;
+            else std::cout << mNoiseValues[y * mXDim + x] << ", ";
 		}
 	}
 	
@@ -47,20 +47,12 @@ void PerlinNoise::printParams()
     /* for (std::vector<glm::dvec2>::iterator it = mGradientTable2d.begin() ; it != mGradientTable2d.end(); ++it) */
     /*         std::cout << "x = " << it->x << ", y =  " <<  it->y << std::endl; */
 		
-	/* for (int i = 0; i < mWidth; i++){ */
-	/* 	mGradientNoise[i] = new double[mHeight](); */
+	/* for (int i = 0; i < mXDim; i++){ */
+	/* 	mGradientNoise[i] = new double[mYDim](); */
 	/* } */
     std::cout << "mPermutationTable values:" << std::endl;
     for (std::vector<int>::iterator it = mPermutationTable.begin() ; it != mPermutationTable.end(); ++it)
         std::cout << ' ' << *it;
-}
-
-void PerlinNoise::setOctavesFreqAmp(int octaves, double frequency, double amplitude){
-
-	this->mOctaves = octaves;
-	this->mFrequency = frequency;
-	this->mAmplitude = amplitude;
-
 }
 
 void PerlinNoise::generateNoiseImage(){
@@ -71,10 +63,10 @@ void PerlinNoise::generateNoiseImage(){
 	}
 
     /* printParams(); */
-	for(int x = 0; x < mWidth; x++){
-		for(int y = 0; y < mHeight; y++){
+	for(int x = 0; x < mXDim; x++){
+		for(int y = 0; y < mYDim; y++){
 			float value = static_cast<float>(noise(static_cast<double>(x), static_cast<double>(y)));
-			mNoise[y * mWidth + x] = value;
+			mNoiseValues[y * mXDim + x] = value;
 			if (value < mMin)
 				mMin = value;
 			if (value > mMax)
@@ -84,9 +76,9 @@ void PerlinNoise::generateNoiseImage(){
     if((mMin < 0.0) || (mMax > 1.0))
     {
 	    mMax = mMax - mMin;
-        for(int x = 0; x < mWidth; x++){
-            for(int y = 0; y < mHeight; y++){
-                mNoise[y * mWidth + x] = (mNoise[y * mWidth + x] - mMin) / mMax;
+        for(int x = 0; x < mXDim; x++){
+            for(int y = 0; y < mYDim; y++){
+                mNoiseValues[y * mXDim + x] = (mNoiseValues[y * mXDim + x] - mMin) / mMax;
             }
         }
     }
@@ -97,8 +89,8 @@ void PerlinNoise::generateNoiseImage(){
 double PerlinNoise::noise(double x, double y){
 	double result = 0.0;
 	double amp = mAmplitude;
-	x = x / (double)mWidth;
-	y = y / (double)mHeight;
+	x = x / (double)mXDim;
+	y = y / (double)mYDim;
 	x *= mFrequency;
 	y *= mFrequency;
 	for(int i = 0; i < mOctaves; i++){

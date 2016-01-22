@@ -87,9 +87,9 @@ class Terrain {
 
         void setGrid(int mode) {mDrawGrid = mode;};
 
-        void saveNoiseToFile()
+        void saveNoiseToFile(const char* filename = "terrainNoise.tga")
         {
-            mNoise->saveToFile("terrainNoise.tga");
+            mNoise->saveToFile(filename);
         }
 
         GLuint getVAO(){return mVao;}

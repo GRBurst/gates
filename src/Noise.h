@@ -9,6 +9,7 @@
 #define SRC_NOISE_H_
 
 #include <random>
+#include <vector>
 #include <memory>
 #include <iostream>
 #include <stdio.h>
@@ -30,19 +31,24 @@ class Noise
 
 		virtual float* getTextureData();
 		virtual void generateNoiseImage() = 0;
-		virtual void setOctavesFreqAmp(int octaves, double frequency, double amplitude) = 0;
+		virtual void setOctavesFreqAmp(int octaves, double frequency, double amplitude)
+        {
+            mOctaves = octaves; mFrequency = frequency; mAmplitude = amplitude;
+        };
 
 		bool saveToFile(const char* filename);
-		int getWidth(){ return mWidth;}
-		int getHeight(){return mHeight;}
+		int getXDim(){ return mXDim;}
+		int getYDim(){ return mYDim;}
 		double calculateNoiseValue(double x, double y);
-		glm::ivec2 getDimension(){ return glm::ivec2(mWidth, mHeight);}
+		glm::ivec2 getDimension(){ return glm::ivec2(mXDim, mYDim);}
 	protected:
 
-		int mWidth, mHeight, mSeed;
+		int mXDim, mYDim, mZDim, mSeed;
 		NoiseType mNoiseType;
+		int mOctaves;
+		double mFrequency, mAmplitude;
 
-		float* mNoise;
+        std::vector<float> mNoiseValues;
 
 };
 

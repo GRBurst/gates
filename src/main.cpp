@@ -123,7 +123,7 @@ void initOpenGL()
     glClearColor( 0.0, 0.0, 0.0, 1.0 );
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LESS );
-    glEnable(GL_CULL_FACE);
+    /* glEnable(GL_CULL_FACE); */
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 }
@@ -215,16 +215,12 @@ int main(){
     terrainshader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT);
     GLint terrainprog = terrainshader.linkShaders();
 
-    int noiseDimX = 256;
-    int noiseDimY = 256;
-    WorleyNoise wNoise(noiseDimY, noiseDimY);
-    wNoise.init();
-    wNoise.generateNoiseImage();
-    wNoise.saveToFile("wnoise.tga");
-
     /* Terrain terrainTerrain(terrainprog, noiseDimX, noiseDimY, noiseDimX, noiseDimY, Noise::PERLIN, 9, 8, 2.0, 3.0); */
     /* terrain.setNoiseValues(wNoise.getNoiseValues()); */
     
+
+    int noiseDimX = 256;
+    int noiseDimY = 256;
     int seed = 9;
     int octaves = 8;
     double frequency = 4.0;
@@ -238,10 +234,26 @@ int main(){
     terrain.enableNormals();
     terrain.computeTerrain();
     terrain.genHeightMapTexture();
-	terrain.saveNoiseToFile();
+	terrain.saveNoiseToFile("PerlinNoise_Terrain.tga");
 
     terrain.linkHeightMapTexture(prog);
     /* terrain.debug(); */
+   
+    // Next Terrain
+    WorleyNoise wNoise;
+    /* wNoise.setParams(noiseDimX, noiseDimY, seed); */
+    /* wNoise.setOctavesFreqAmp(octaves, frequency, amplitude); */
+    /* wNoise.init(); */
+    /* wNoise.generateNoiseImage(); */
+    /* wNoise.saveToFile("WorleyNoise_Terrain.tga"); */
+    Terrain nextTerrain(terrainprog, noiseDimX, noiseDimY, &wNoise);
+    nextTerrain.setVPMatrix(camera.getVPMatrix());
+    nextTerrain.setInvViewMatrix(camera.getInvViewMatrix());
+    nextTerrain.enableNormals();
+    nextTerrain.computeTerrain();
+    nextTerrain.genHeightMapTexture();
+	nextTerrain.saveNoiseToFile("WorleyNoise_Terrain.tga");
+    nextTerrain.linkHeightMapTexture(prog);
 
 
 
@@ -275,7 +287,7 @@ int main(){
     //Outsource
 
 
-    ModelLoader model("../objects/inner_plane.obj", prog);
+    ModelLoader model("../objects/sphere.obj", prog);
 	model.loadFile();
 
 	model.setBuffers();
@@ -349,9 +361,11 @@ int main(){
         /* std::cout << "view: " << camera.getPos().x << "< " << camera.getPos().y << "< " << camera.getPos().z << std::endl; */
         //neu
 
+        portal.enableStencil();
+        portal.renderOutside();
         // Portal
-        /* portal.drawPortal(camera); */
-        portal.drawPortal();
+        /* portal.drawPortal(); */
+        /* portal.drawFill(); */
 
         // sphere
         model.setProjection(camera.getProjectionMatrix());
@@ -377,6 +391,15 @@ int main(){
 
  		//END GRASS
 
+        // next terrain
+        portal.renderInside();
+
+        nextTerrain.setVPMatrix(camera.getVPMatrix());
+        nextTerrain.setInvViewMatrix(camera.getInvViewMatrix());
+        nextTerrain.setGrid(gDrawGrid);
+        nextTerrain.draw();
+
+        portal.disableStencil();
 
         glfwSwapBuffers( window );
         glFlush();
@@ -407,16 +430,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             if(action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
             break;
         case GLFW_KEY_W :
-            if(action == GLFW_PRESS) camera.moveForward( float(frameTime) );
+            if(action == GLFW_REPEAT) camera.moveForward( float(frameTime) );
             break;
         case GLFW_KEY_S :
-            if(action == GLFW_PRESS) camera.moveBack( float(frameTime) );
+            if(action == GLFW_REPEAT) camera.moveBack( float(frameTime) );
             break;
         case GLFW_KEY_A :
-            if(action == GLFW_PRESS) camera.moveLeft( float(frameTime) );
+            if(action == GLFW_REPEAT) camera.moveLeft( float(frameTime) );
             break;
         case GLFW_KEY_D :
-            if(action == GLFW_PRESS) camera.moveRight( float(frameTime) );
+            if(action == GLFW_REPEAT) camera.moveRight( float(frameTime) );
             break;
         case GLFW_KEY_I :
             if(action == GLFW_PRESS) camera.setCamSpeed( 10.0 );
