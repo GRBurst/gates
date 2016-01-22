@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "ModelLoader.h"
 #include "PerlinNoise.h"
+#include "Portal.h"
 #include "Shader.h"
 #include "Terrain.h"
 #include "Texture.h"
@@ -204,6 +205,10 @@ int main(){
     /* shader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT); */
     GLint prog = shader.linkShaders();
 
+    // Portal
+    Portal portal(prog);
+    portal.init( &camera );
+
     // Terrain
     Shader terrainshader;
     terrainshader.loadShader("../src/shader/terrain.vs", Shader::VERTEX);
@@ -344,10 +349,16 @@ int main(){
         /* std::cout << "view: " << camera.getPos().x << "< " << camera.getPos().y << "< " << camera.getPos().z << std::endl; */
         //neu
 
+        // Portal
+        /* portal.drawPortal(camera); */
+        portal.drawPortal();
+
+        // sphere
         model.setProjection(camera.getProjectionMatrix());
         model.setView(camera.getViewMatrix());
         model.draw();
 
+        // terrain
         terrain.setVPMatrix(camera.getVPMatrix());
         terrain.setInvViewMatrix(camera.getInvViewMatrix());
         terrain.setGrid(gDrawGrid);
@@ -396,22 +407,22 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             if(action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
             break;
         case GLFW_KEY_W :
-            if(action == GLFW_REPEAT) camera.moveForward( float(frameTime) );
+            if(action == GLFW_PRESS) camera.moveForward( float(frameTime) );
             break;
         case GLFW_KEY_S :
-            if(action == GLFW_REPEAT) camera.moveBack( float(frameTime) );
+            if(action == GLFW_PRESS) camera.moveBack( float(frameTime) );
             break;
         case GLFW_KEY_A :
-            if(action == GLFW_REPEAT) camera.moveLeft( float(frameTime) );
+            if(action == GLFW_PRESS) camera.moveLeft( float(frameTime) );
             break;
         case GLFW_KEY_D :
-            if(action == GLFW_REPEAT) camera.moveRight( float(frameTime) );
+            if(action == GLFW_PRESS) camera.moveRight( float(frameTime) );
             break;
         case GLFW_KEY_I :
             if(action == GLFW_PRESS) camera.setCamSpeed( 10.0 );
             break;
         case GLFW_KEY_K :
-            if(action == GLFW_PRESS) camera.setCamSpeed( -10.0 );
+            if(action == GLFW_PRESS) camera.setCamSpeed( 0.1 );
             break;
         case GLFW_KEY_G :
             if(action == GLFW_PRESS) gDrawGrid = (gDrawGrid + 1) % 3;
