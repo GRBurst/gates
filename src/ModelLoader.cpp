@@ -135,7 +135,7 @@ void ModelLoader::loadFile(){
 			value = lineValues.substr(0, spacePos);
 			vector.z = (float)atof(value.c_str());
 
-//			fileNormals.push_back(vector);
+			fileNormals.push_back(vector);
 		}
 
 		if (line.at(0) == 'f' && line.at(1) == ' '){
@@ -163,7 +163,7 @@ void ModelLoader::loadFile(){
 
 				vertexIndices.push_back(atoi(vertexIndex.c_str()));
 				uvIndices.push_back(atoi(uvIndex.c_str()));
-//				normalIndices.push_back(atoi(normalIndex.c_str()));
+				normalIndices.push_back(atoi(normalIndex.c_str()));
 			}
 			faces++;
 
@@ -203,8 +203,12 @@ void ModelLoader::setStride(){
 		GLfloat *saveBuffer;
 		if (!this->fileNormals.empty()){
 			this->calculateTangents();
+			vertexBuffer = new GLfloat[vertices.size() * 3 + uvs.size() * 2+ tangents.size() * 3 + bitangents.size() * 3+ normals.size() * 3];
 		}
-		vertexBuffer = new GLfloat[vertices.size() * 3 + uvs.size() * 2];// + tangents.size() * 3 + bitangents.size() * 3+ normals.size() * 3 ];
+		else{
+			vertexBuffer = new GLfloat[vertices.size() * 3 + uvs.size() * 2];
+		}
+
 		saveBuffer = vertexBuffer;
 		for (unsigned long i = 0; i < vertices.size(); i++){
 			*saveBuffer = vertices.at(i).x;
@@ -214,6 +218,11 @@ void ModelLoader::setStride(){
 			*saveBuffer = vertices.at(i).z;
 			saveBuffer++;
 			//std::cout << vertices.at(i).x << ", " << vertices.at(i).y << ", " << vertices.at(i).z << std::endl;
+
+			*saveBuffer = uvs.at(i).x;
+			saveBuffer++;
+			*saveBuffer = uvs.at(i).y;
+			saveBuffer++;
 			if (!this->fileNormals.empty()){
 				*saveBuffer = normals.at(i).x;
 				saveBuffer++;
@@ -234,10 +243,6 @@ void ModelLoader::setStride(){
 				*saveBuffer = bitangents.at(i).z;
 				saveBuffer++;
 			}
-			*saveBuffer = uvs.at(i).x;
-			saveBuffer++;
-			*saveBuffer = uvs.at(i).y;
-			saveBuffer++;
 		}
 		vertexCount = vertices.size();
 		normalCount = normals.size();
@@ -269,11 +274,11 @@ void ModelLoader::setBuffers(){
 	cout << "Buffers for "<< shaderProgram << " set" << endl;
 
 	GLint posAttrib = glGetAttribLocation(shaderProgram, "vPosition");
-	GLint normAttrib = glGetAttribLocation(shaderProgram, "normal");
+	GLint normAttrib = glGetAttribLocation(shaderProgram, "vNormal");
 	GLint uvAttrib = glGetAttribLocation(shaderProgram, "vUV");
 
-	GLint tanAttrib = glGetAttribLocation(shaderProgram, "tangent");
-	GLint bitAttrib = glGetAttribLocation(shaderProgram, "bitangent");
+	GLint tanAttrib = glGetAttribLocation(shaderProgram, "vTangent");
+	GLint bitAttrib = glGetAttribLocation(shaderProgram, "vBitangent");
 
 	//Erzeuge Vertex Array Object und Vertex Buffer Object
 	glGenVertexArrays(1, &VAO);
@@ -282,7 +287,7 @@ void ModelLoader::setBuffers(){
 
 	//Binde VBO an VAO
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, (vertices.size() * 3 + vertices.size() * 2) * sizeof(GLfloat), vertexBuffer, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, (vertexCount * 14) * sizeof(GLfloat), vertexBuffer, GL_STATIC_DRAW);
 	//location, attribute size vec3, data type, bool normalized?, stride size, offset to first dataobject in array
 //	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 //	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), elementBuffer, GL_STATIC_DRAW);
