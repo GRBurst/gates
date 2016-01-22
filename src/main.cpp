@@ -275,7 +275,7 @@ int main(){
     //Outsource
 
 
-    ModelLoader model("../objects/sphere.obj", prog);
+    ModelLoader model("../objects/flat_torus.obj", prog);
 	model.loadFile();
 
 	model.setBuffers();
