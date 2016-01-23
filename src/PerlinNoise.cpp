@@ -56,35 +56,31 @@ void PerlinNoise::printParams()
 }
 
 void PerlinNoise::generateNoiseImage(){
-	if(mStart){
-		mStart = false;
-		initPermutationTable();
-		initGradientTable();
-	}
+    if(mStart){
+        mStart = false;
+        initPermutationTable();
+        initGradientTable();
+    }
 
     /* printParams(); */
-	for(int x = 0; x < mXDim; x++){
-		for(int y = 0; y < mYDim; y++){
-			float value = static_cast<float>(noise(static_cast<double>(x), static_cast<double>(y)));
-			mNoiseValues[y * mXDim + x] = value;
-			if (value < mMin)
-				mMin = value;
-			if (value > mMax)
-				mMax = value;
-		}
-	}
-    if((mMin < 0.0) || (mMax > 1.0))
-    {
-	    mMax = mMax - mMin;
-        for(int x = 0; x < mXDim; x++){
-            for(int y = 0; y < mYDim; y++){
-                mNoiseValues[y * mXDim + x] = (mNoiseValues[y * mXDim + x] - mMin) / mMax;
-            }
+    for(int x = 0; x < mXDim; x++){
+        for(int y = 0; y < mYDim; y++){
+            float value = static_cast<float>(noise(static_cast<double>(x), static_cast<double>(y)));
+            mNoiseValues[y * mXDim + x] = value;
+            if (value < mMin)
+                mMin = value;
+            if (value > mMax)
+                mMax = value;
         }
     }
-    std::cout << "min = " << mMin << ", max = " << mMax << std::endl;
 
-
+    mMax = mMax - mMin;
+    for(int x = 0; x < mXDim; x++){
+        for(int y = 0; y < mYDim; y++){
+            mNoiseValues[y * mXDim + x] = (mNoiseValues[y * mXDim + x] - mMin) / mMax;
+        }
+    }
+    std::cout << "perlinNoise: min = " << mMin << ", max = " << mMax << std::endl;
 }
 
 double PerlinNoise::noise(double x, double y){
