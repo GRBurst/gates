@@ -15,10 +15,11 @@ Camera::Camera() :
 {
 }
 
+
 // Calculatable matrizes from camera
-glm::mat4 Camera::getProjectionMatrix()
+void Camera::calcProjectionMatrix()
 {
-	return glm::perspective(
+	mProjectionMatrix = glm::perspective(
             this->mHFoV,
             this->mAspectRatio,
             this->mNearPlane,
@@ -26,13 +27,20 @@ glm::mat4 Camera::getProjectionMatrix()
         );
 }
 
-glm::mat4 Camera::getViewMatrix()
+void Camera::calcViewMatrix()
 {
-    return glm::lookAt(
+    mViewMatrix = glm::lookAt(
             this->mPos,
             this->mPos + getViewDirection(),
             getUp()
         );
+}
+
+void Camera::update()
+{
+    calcViewMatrix();
+    calcProjectionMatrix();
+    mViewProjectionMatrix = mProjectionMatrix * mViewMatrix;
 }
 
 // Functions

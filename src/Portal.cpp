@@ -1,35 +1,55 @@
 #include "Portal.h"
+unsigned int Portal::idGenerator = 0;
 
-Portal::Portal(const GLint &mShaderProgram)
+Portal::Portal(const GLint& mShaderProgram)
 {
+    this->mId = idGenerator++;
 
     model = new ModelLoader("../objects/flat_torus.obj", mShaderProgram);
     modelFill = new ModelLoader("../objects/inner_plane.obj", mShaderProgram);
 }
 
-void Portal::init(Camera* cam) {
+void Portal::init(Camera* cam, const Terrain& terrain) {
 
     modelFill->loadFile();
     modelFill->setBuffers();
     modelFill->setStandardUniformLocations();
 
     model->loadFile();
-	model->setBuffers();
-	model->setStandardUniformLocations();
-	
-    /* setRotation(glm::vec3(0.0, 0.0, 0.0)); */
-    /* setScale(glm::vec3(0.010, 0.010, 0.010)); */
+    model->setBuffers();
+    model->setStandardUniformLocations();
+
+    int xDim = terrain.getWidth();
+    std::default_random_engine gen(mId);
+    std::uniform_int_distribution<int> hDim(0, xDim);
+
+    int x = hDim(gen);
+    int z = hDim(gen);
+    mPosition = terrain.computePosition(x, z);
+    /* setTranslation(mPosition); */
+    /* setScale(glm::vec3(1.0, 1.0, 1.0)); */
     setScale(glm::vec3(1.0, 1.0, 1.0));
     setTranslation(glm::vec3(5.0, 1.0, 5.0));
 
+
+    /* setRotation(glm::vec3(0.0, 0.0, 0.0)); */
+    /* setScale(glm::vec3(0.010, 0.010, 0.010)); */
+
     camera = cam;
 }
+
+/* void setHeight(const float& height); */
 
 /* void Portal::setRotation(glm::vec3 angle) */
 /* { */
 /*     model->rotate(angle); */
 /*     modelFill->rotate(angle); */
 /* } */
+
+glm::vec3 Portal::getPosition()
+{
+    return mPosition;
+}
 
 void Portal::setScale(glm::vec3 ratio)
 {

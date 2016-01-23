@@ -206,24 +206,18 @@ int main(){
     /* shader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT); */
     GLint prog = shader.linkShaders();
 
-    // Portal
-    Portal portal(prog);
-    portal.init( &camera );
-
     // Terrain
     Shader terrainshader;
     terrainshader.loadShader("../src/shader/terrain.vs", Shader::VERTEX);
     terrainshader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT);
     GLint terrainprog = terrainshader.linkShaders();
 
+    // Skydom
     Shader skydomeShader;
     skydomeShader.loadShader("../src/shader/skydome.vs", Shader::VERTEX);
     skydomeShader.loadShader("../src/shader/skydome.fs", Shader::FRAGMENT);
     GLint skydomeProg = skydomeShader.linkShaders();
 
-    /* Terrain terrainTerrain(terrainprog, noiseDimX, noiseDimY, noiseDimX, noiseDimY, Noise::PERLIN, 9, 8, 2.0, 3.0); */
-    /* terrain.setNoiseValues(wNoise.getNoiseValues()); */
-    
 
     int noiseDimX = 256;
     int noiseDimY = 256;
@@ -231,28 +225,51 @@ int main(){
     int octaves = 16;
     double frequency = 4.0;
     double amplitude = 4.0;
-    PerlinNoise noise;
-    noise.setParams(noiseDimX, noiseDimY, seed);
-    noise.setOctavesFreqAmp(octaves, frequency, amplitude);
+    PerlinNoise pNoise;
+    pNoise.setParams(noiseDimX, noiseDimY, seed);
+    pNoise.setOctavesFreqAmp(octaves, frequency, amplitude);
     
     WorleyNoise wNoise;
-    /* wNoise.setParams(noiseDimX, noiseDimY, seed); */
-    /* wNoise.setOctavesFreqAmp(octaves, frequency, amplitude); */
+    wNoise.setParams(noiseDimX, noiseDimY, seed);
+    wNoise.setOctavesFreqAmp(octaves, frequency, amplitude);
     /* wNoise.init(); */
     /* wNoise.generateNoiseImage(); */
     /* wNoise.saveToFile("WorleyNoise_Terrain.tga"); */
 
-    Terrain terrain(terrainprog, noiseDimX, noiseDimY, &noise);
-    terrain.setVPMatrix(camera.getVPMatrix());
-    terrain.setInvViewMatrix(camera.getInvViewMatrix());
-    terrain.enableNormals();
-    terrain.computeTerrain();
-    terrain.genHeightMapTexture();
-	terrain.saveNoiseToFile("PerlinNoise_Terrain.tga");
-    terrain.draw();
+    Terrain terrain1(terrainprog, noiseDimX, noiseDimY, &pNoise);
+    terrain1.setVPMatrix(camera.getVPMatrix());
+    terrain1.setInvViewMatrix(camera.getInvViewMatrix());
+    terrain1.enableNormals();
+    terrain1.computeTerrain();
+    terrain1.genHeightMapTexture();
+	terrain1.saveNoiseToFile("PerlinNoise_Terrain.tga");
+    terrain1.draw();
 
-    terrain.linkHeightMapTexture(terrainprog);
-    /* terrain.debug(); */
+    terrain1.linkHeightMapTexture(terrainprog);
+    /* terrain1.debug(); */
+    // Portal
+    Portal portal1(prog);
+    portal1.init( &camera, terrain1 );
+    
+    
+    
+
+
+    
+    Camera portalCam;
+    // Next Terrain
+    Terrain terrain2(terrainprog, noiseDimX, noiseDimY, &wNoise);
+    terrain2.setVPMatrix(camera.getVPMatrix());
+    terrain2.setInvViewMatrix(camera.getInvViewMatrix());
+    terrain2.enableNormals();
+    terrain2.computeTerrain();
+    terrain2.genHeightMapTexture();
+	terrain2.saveNoiseToFile("WorleyNoise_Terrain.tga");
+    terrain2.draw();
+    /* terrain2.linkHeightMapTexture(terrainprog); */
+    // Portal
+    Portal portal2(prog);
+    portal2.init( &portalCam, terrain2 );
 
 
     //GRASS
@@ -276,26 +293,13 @@ int main(){
 
     //grass.generatePositionsFromTexture(noise.getTextureDataF(), noise.getWidth(), noise.getHeight(), 0.2f, 0.7f);
 
-    grass.setTerrainVao(terrain.getVAO(), terrain.getTotalIndices());
-    grass.setBuffers();
+    grass.setTerrainVao(terrain1.getVAO(), terrain1.getTotalIndices());
+    /* grass.setBuffers(); */
 
     grass.setUniforms();
     grass.loadTexture();
     //END GRASS
     //Outsource
-    
-    
-    
-    
-    // Next Terrain
-    Terrain nextTerrain(terrainprog, noiseDimX, noiseDimY, &wNoise);
-    nextTerrain.setVPMatrix(camera.getVPMatrix());
-    nextTerrain.setInvViewMatrix(camera.getInvViewMatrix());
-    nextTerrain.enableNormals();
-    nextTerrain.computeTerrain();
-    nextTerrain.genHeightMapTexture();
-	nextTerrain.saveNoiseToFile("WorleyNoise_Terrain.tga");
-    /* nextTerrain.linkHeightMapTexture(terrainprog); */
 
 
 
@@ -376,24 +380,43 @@ int main(){
         glClearColor(0.0, 0.0, 0.0, 1.0);
         /* std::cout << "view: " << camera.getPos().x << "< " << camera.getPos().y << "< " << camera.getPos().z << std::endl; */
         //neu
+        camera.update();
 
-        portal.enableStencil();
+        portal1.enableStencil();
 
-        portal.renderOutside();
+
+
+
+
+        /* portal1.substractStencil(); */
+        grass.setCameraPosRef(camera.getPos());
+        grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
+        grass.draw();
+
+
+
+
+
+        portal1.renderOutside();
+
+
+
+
+
         // Portal
-        /* portal.drawPortal(); */
-        /* portal.drawFill(); */
+        /* portal1.drawPortal(); */
+        /* portal1.drawFill(); */
 
         // sphere
         model.setProjection(camera.getProjectionMatrix());
         model.setView(camera.getViewMatrix());
         model.draw();
 
-        // terrain
-        terrain.setVPMatrix(camera.getVPMatrix());
-        terrain.setInvViewMatrix(camera.getInvViewMatrix());
-        terrain.setGrid(gDrawGrid);
-        terrain.draw();
+        // terrain1
+        terrain1.setVPMatrix(camera.getVPMatrix());
+        terrain1.setInvViewMatrix(camera.getInvViewMatrix());
+        terrain1.setGrid(gDrawGrid);
+        terrain1.draw();
         /* renderHeightmap(0.1, 10 , noise.getTextureData()); */
 
         //processInput
@@ -408,16 +431,36 @@ int main(){
 
  		//END GRASS
          skydome.setVPMatrix(camera.getVPMatrix());
-         /* skydome.draw(); */
+         skydome.draw();
+
+
+
+
+
+        portal1.renderInside();
+
+
+
+
+
+
         // next terrain
-        portal.renderInside();
+        terrain2.setVPMatrix(camera.getVPMatrix());
+        terrain2.setInvViewMatrix(camera.getInvViewMatrix());
+        terrain2.setGrid(gDrawGrid);
+        terrain2.draw();
 
-        nextTerrain.setVPMatrix(camera.getVPMatrix());
-        nextTerrain.setInvViewMatrix(camera.getInvViewMatrix());
-        nextTerrain.setGrid(gDrawGrid);
-        nextTerrain.draw();
 
-        portal.disableStencil();
+
+
+
+
+        portal1.disableStencil();
+
+
+
+
+
 
         glfwSwapBuffers( window );
         glFlush();
@@ -428,7 +471,7 @@ int main(){
 //	glDeleteVertexArrays(1, &VAO);
 
 	glDeleteProgram(prog);
-	glDeleteProgram(grassprog);
+	/* glDeleteProgram(grassprog); */
 	glDeleteProgram(terrainprog);
 
 
