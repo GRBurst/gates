@@ -124,7 +124,7 @@ void initOpenGL()
     glClearColor( 0.0, 0.0, 0.0, 1.0 );
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LESS );
-    /* glEnable(GL_CULL_FACE); */
+    glEnable(GL_CULL_FACE);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 }
@@ -234,6 +234,14 @@ int main(){
     PerlinNoise noise;
     noise.setParams(noiseDimX, noiseDimY, seed);
     noise.setOctavesFreqAmp(octaves, frequency, amplitude);
+    
+    WorleyNoise wNoise;
+    /* wNoise.setParams(noiseDimX, noiseDimY, seed); */
+    /* wNoise.setOctavesFreqAmp(octaves, frequency, amplitude); */
+    /* wNoise.init(); */
+    /* wNoise.generateNoiseImage(); */
+    /* wNoise.saveToFile("WorleyNoise_Terrain.tga"); */
+
     Terrain terrain(terrainprog, noiseDimX, noiseDimY, &noise);
     terrain.setVPMatrix(camera.getVPMatrix());
     terrain.setInvViewMatrix(camera.getInvViewMatrix());
@@ -241,26 +249,11 @@ int main(){
     terrain.computeTerrain();
     terrain.genHeightMapTexture();
 	terrain.saveNoiseToFile("PerlinNoise_Terrain.tga");
+    terrain.draw();
 
     terrain.linkHeightMapTexture(terrainprog);
+    terrain.linkHeightMapTexture(terrainprog);
     /* terrain.debug(); */
-   
-    // Next Terrain
-    WorleyNoise wNoise;
-    /* wNoise.setParams(noiseDimX, noiseDimY, seed); */
-    /* wNoise.setOctavesFreqAmp(octaves, frequency, amplitude); */
-    /* wNoise.init(); */
-    /* wNoise.generateNoiseImage(); */
-    /* wNoise.saveToFile("WorleyNoise_Terrain.tga"); */
-    Terrain nextTerrain(terrainprog, noiseDimX, noiseDimY, &wNoise);
-    nextTerrain.setVPMatrix(camera.getVPMatrix());
-    nextTerrain.setInvViewMatrix(camera.getInvViewMatrix());
-    nextTerrain.enableNormals();
-    nextTerrain.computeTerrain();
-    nextTerrain.genHeightMapTexture();
-	nextTerrain.saveNoiseToFile("WorleyNoise_Terrain.tga");
-    nextTerrain.linkHeightMapTexture(prog);
-
 
 
     //GRASS
@@ -291,6 +284,21 @@ int main(){
     grass.loadTexture();
     //END GRASS
     //Outsource
+    
+    
+    
+    
+    // Next Terrain
+    Terrain nextTerrain(prog, noiseDimX, noiseDimY, &wNoise);
+    nextTerrain.setVPMatrix(camera.getVPMatrix());
+    nextTerrain.setInvViewMatrix(camera.getInvViewMatrix());
+    nextTerrain.enableNormals();
+    nextTerrain.computeTerrain();
+    /* nextTerrain.genHeightMapTexture(); */
+	/* nextTerrain.saveNoiseToFile("WorleyNoise_Terrain.tga"); */
+    /* nextTerrain.linkHeightMapTexture(terrainprog); */
+
+
 
     Skydome skydome(skydomeProg);
     skydome.generateGeometry(10, 4, 4);
@@ -371,6 +379,7 @@ int main(){
         //neu
 
         portal.enableStencil();
+
         portal.renderOutside();
         // Portal
         /* portal.drawPortal(); */
@@ -404,10 +413,10 @@ int main(){
         // next terrain
         portal.renderInside();
 
-        nextTerrain.setVPMatrix(camera.getVPMatrix());
-        nextTerrain.setInvViewMatrix(camera.getInvViewMatrix());
-        nextTerrain.setGrid(gDrawGrid);
-        nextTerrain.draw();
+        /* nextTerrain.setVPMatrix(camera.getVPMatrix()); */
+        /* nextTerrain.setInvViewMatrix(camera.getInvViewMatrix()); */
+        /* nextTerrain.setGrid(gDrawGrid); */
+        /* nextTerrain.draw(); */
 
         portal.disableStencil();
 
