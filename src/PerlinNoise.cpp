@@ -82,6 +82,7 @@ void PerlinNoise::generateNoiseImage(){
             }
         }
     }
+    std::cout << "min = " << mMin << ", max = " << mMax << std::endl;
 
 
 }

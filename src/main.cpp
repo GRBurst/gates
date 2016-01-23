@@ -227,10 +227,10 @@ int main(){
 
     int noiseDimX = 256;
     int noiseDimY = 256;
-    int seed = 9;
-    int octaves = 8;
+    int seed = 42;
+    int octaves = 16;
     double frequency = 4.0;
-    double amplitude = 1.0;
+    double amplitude = 4.0;
     PerlinNoise noise;
     noise.setParams(noiseDimX, noiseDimY, seed);
     noise.setOctavesFreqAmp(octaves, frequency, amplitude);
@@ -251,7 +251,6 @@ int main(){
 	terrain.saveNoiseToFile("PerlinNoise_Terrain.tga");
     terrain.draw();
 
-    terrain.linkHeightMapTexture(terrainprog);
     terrain.linkHeightMapTexture(terrainprog);
     /* terrain.debug(); */
 
@@ -409,7 +408,7 @@ int main(){
 
  		//END GRASS
          skydome.setVPMatrix(camera.getVPMatrix());
-         skydome.draw();
+         /* skydome.draw(); */
         // next terrain
         portal.renderInside();
 

@@ -25,16 +25,15 @@ void main()
 
     float x         = (5.0 + vPosition.x) / 10.0;
     float z         = (5.0 + vPosition.z) / 10.0;
-    float hScale    = 1.0;
 
     //float height    = texture2D(heightMap, vec2(x, y)).r;
-    float height    = hScale * vPosition.y;
+    float height    = vPosition.y;
 
     //float height = 0.5;
     fColor = vec3(height, height, height);
 
     if (height < 0.2) height = 0.2;
-    vec4 pos = uVPMatrix * vec4(vPosition.x, hScale * height, vPosition.z, 1.0);
+    vec4 pos = uVPMatrix * vec4(vPosition.x, height, vPosition.z, 1.0);
 
     fUV = calculateUV();
     //fNormal = uInvViewMatrix * vNormal;
