@@ -46,11 +46,11 @@ class Terrain {
         void enableNormals() {mUseNormals = true; mFloatsPerVertex += 3;};
         void draw();
 
-        float getWidth()
+        float getWidth() const
         {
             return mWidth;
         };
-        float getHeight()
+        float getHeight() const
         {
             return mHeight;
         }
@@ -68,8 +68,10 @@ class Terrain {
         };
         float getTerrainHeight(glm::ivec2 coordinate)
         {
-            return mTerrainOffset + mTerrainScale * mNoiseValues[(coordinate.y * mWidth) + coordinate.x];
+            /* return mTerrainOffset + mTerrainScale * mNoiseValues[(coordinate.y * mWidth) + coordinate.x]; */
+            return mVertices[3 * ((coordinate.y * mWidth) + coordinate.x) + 1];
         };
+        glm::vec3 computePosition(int x, int y) const;
 
         float* getNoiseValues()
         {
@@ -109,7 +111,6 @@ class Terrain {
         int getIndexBottomPosition(int index);
         int getIndexTopRightPosition(int index);
         int getIndexBottomLeftPosition(int index);
-        glm::vec3 computePosition(int x, int y);
         int computeTerrainPositions();
         //glm::vec3 computeNormals();
         void computeTerrainNormals(int &offset, int &length);

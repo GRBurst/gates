@@ -38,6 +38,7 @@ public:
 	void setMVP();
 	void scale(vec3 &scale);
 	void translate(vec3 &trans);
+    glm::vec3 getPosition();
 private:
 	GLuint VBO, VAO, modelLocation, projectionLocation, viewLocation, MVPLocation, MVLocation, MV3Location, lightLoc, cameraLoc;
 	GLint shaderProgram;

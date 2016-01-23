@@ -1,5 +1,5 @@
 #include "Texture.h"
-unsigned int Texture::idGenerator = 0;
+int Texture::idGenerator = 0;
 
 Texture::Texture()
     : texture(0)
@@ -25,8 +25,8 @@ Texture::Texture(const char* imagePath)
 {
 	FreeImage_Initialise();
 	glGenTextures(1, &texture);
-
 	this->location = idGenerator++;
+
 	FREE_IMAGE_FORMAT fif = FreeImage_GetFileType(imagePath, 0);
 
 	if (fif == FIF_UNKNOWN)

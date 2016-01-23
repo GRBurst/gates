@@ -64,7 +64,7 @@ int Terrain::getDegensRequired()
     return (mWidth - 1) * 2;
 }
 
-glm::vec3 Terrain::computePosition(int x, int z)
+glm::vec3 Terrain::computePosition(int x, int z) const
 {
 
     float xRatio = static_cast<float>(x) / static_cast<float>(mWidth -1);

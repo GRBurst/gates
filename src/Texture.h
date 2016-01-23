@@ -35,7 +35,7 @@ class Texture
 
 
     private:
-        static unsigned int idGenerator;
+        static int idGenerator;
         GLuint texture;
         GLuint textureLocation;
         GLint location;
