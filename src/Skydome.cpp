@@ -25,7 +25,7 @@ void Skydome::loadTexture(float* textureData, int width, int height){
 	Texture* texture = new Texture();
 	texture->bind();
 	texture->setData(textureData, width, height);
-	texture->loadHeightmapOptions();
+	texture->loadCommonOptions();
 	texture->linkTexture(mShaderProgram, "textureSky");
 }
 
@@ -59,13 +59,17 @@ void Skydome::generateGeometry(float r, int azimuths, int meridians)
 	int i = 0;
 	for( int t = 0 ; t < meridians ; t++ )
 	{
-		float theta1 = ( (float)(t)/meridians )* glm::pi<float>();
-		float theta2 = ( (float)(t+1)/meridians )* glm::pi<float>();
+		float u1 = (float)(t)/meridians;
+		float u2 = (float)(t+1)/meridians;
+		float theta1 = u1 * glm::pi<float>();
+		float theta2 = u2 * glm::pi<float>();
 
 		for( int p = 0 ; p < azimuths ; p++ )
 		{
-			float phi1 = ( (float)(p)/azimuths ) * 2 * glm::pi<float>();
-			float phi2 = ( (float)(p+1)/azimuths ) * 2 * glm::pi<float>() ;
+			float v1 =  (float)(p)/azimuths;
+			float v2 = (float)(p+1)/azimuths;
+			float phi1 = v1 * 2 * glm::pi<float>();
+			float phi2 = v2 * 2 * glm::pi<float>();
 
 			glm::vec3 vertex1 = glm::vec3(r * sin(theta1) * cos(phi1), r * cos(theta1), r * sin(theta1) * sin(phi1)); //z and y switch to have caps of sphere top and bottom
 			glm::vec3 vertex2 = glm::vec3(r * sin(theta1) * cos(phi2), r * cos(theta1), r * sin(theta1) * sin(phi2));
@@ -78,18 +82,18 @@ void Skydome::generateGeometry(float r, int azimuths, int meridians)
 				meshAttributes.push_back(vertex1.x);
 				meshAttributes.push_back(vertex1.y);
 				meshAttributes.push_back(vertex1.z);
-				meshAttributes.push_back(theta1);
-				meshAttributes.push_back(phi1);
+				meshAttributes.push_back(u1);
+				meshAttributes.push_back(v1);
 				meshAttributes.push_back(vertex4.x);
 				meshAttributes.push_back(vertex4.y);
 				meshAttributes.push_back(vertex4.z);
-				meshAttributes.push_back(theta2);
-				meshAttributes.push_back(phi1);
+				meshAttributes.push_back(u2);
+				meshAttributes.push_back(v1);
 				meshAttributes.push_back(vertex3.x);
 				meshAttributes.push_back(vertex3.y);
 				meshAttributes.push_back(vertex3.z);
-				meshAttributes.push_back(theta2);
-				meshAttributes.push_back(phi2);
+				meshAttributes.push_back(u2);
+				meshAttributes.push_back(v2);
 			}
 			else
 			{
@@ -98,18 +102,18 @@ void Skydome::generateGeometry(float r, int azimuths, int meridians)
 					meshAttributes.push_back(vertex3.x);
 					meshAttributes.push_back(vertex3.y);
 					meshAttributes.push_back(vertex3.z);
-					meshAttributes.push_back(theta2);
-					meshAttributes.push_back(phi2);
+					meshAttributes.push_back(u2);
+					meshAttributes.push_back(v2);
 					meshAttributes.push_back(vertex2.x);
 					meshAttributes.push_back(vertex2.y);
 					meshAttributes.push_back(vertex2.z);
-					meshAttributes.push_back(theta1);
-					meshAttributes.push_back(phi2);
+					meshAttributes.push_back(u1);
+					meshAttributes.push_back(v2);
 					meshAttributes.push_back(vertex1.x);
 					meshAttributes.push_back(vertex1.y);
 					meshAttributes.push_back(vertex1.z);
-					meshAttributes.push_back(theta1);
-					meshAttributes.push_back(phi1);
+					meshAttributes.push_back(u1);
+					meshAttributes.push_back(v1);
 				}
 				else
 				{
@@ -117,33 +121,33 @@ void Skydome::generateGeometry(float r, int azimuths, int meridians)
 					meshAttributes.push_back(vertex1.x);
 					meshAttributes.push_back(vertex1.y);
 					meshAttributes.push_back(vertex1.z);
-					meshAttributes.push_back(theta1);
-					meshAttributes.push_back(phi1);
+					meshAttributes.push_back(u1);
+					meshAttributes.push_back(v1);
 					meshAttributes.push_back(vertex4.x);
 					meshAttributes.push_back(vertex4.y);
 					meshAttributes.push_back(vertex4.z);
-					meshAttributes.push_back(theta2);
-					meshAttributes.push_back(phi1);
+					meshAttributes.push_back(u2);
+					meshAttributes.push_back(v1);
 					meshAttributes.push_back(vertex2.x);
 					meshAttributes.push_back(vertex2.y);
 					meshAttributes.push_back(vertex2.z);
-					meshAttributes.push_back(theta1);
-					meshAttributes.push_back(phi2);
+					meshAttributes.push_back(u1);
+					meshAttributes.push_back(v2);
 					meshAttributes.push_back(vertex2.x);
 					meshAttributes.push_back(vertex2.y);
 					meshAttributes.push_back(vertex2.z);
-					meshAttributes.push_back(theta1);
-					meshAttributes.push_back(phi2);
+					meshAttributes.push_back(u1);
+					meshAttributes.push_back(v2);
 					meshAttributes.push_back(vertex4.x);
 					meshAttributes.push_back(vertex4.y);
 					meshAttributes.push_back(vertex4.z);
-					meshAttributes.push_back(theta2);
-					meshAttributes.push_back(phi1);
+					meshAttributes.push_back(u2);
+					meshAttributes.push_back(v1);
 					meshAttributes.push_back(vertex3.x);
 					meshAttributes.push_back(vertex3.y);
 					meshAttributes.push_back(vertex3.z);
-					meshAttributes.push_back(theta2);
-					meshAttributes.push_back(phi2);
+					meshAttributes.push_back(u2);
+					meshAttributes.push_back(v2);
 				}
 			}
 			i++;

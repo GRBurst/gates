@@ -301,7 +301,7 @@ int main(){
 
     Skydome skydome(skydomeProg, &camera);
     skydome.generateGeometry(noiseDimX / 2, 64, 64);
-    skydome.loadTexture(noise.getTextureData(), noiseDimX, noiseDimY);
+    skydome.loadTexture(noise.getTextureData(), noiseDimX / 2, noiseDimY / 2);
     skydome.setBuffers();
 
 
