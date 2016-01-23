@@ -10,7 +10,7 @@ Texture::Texture()
     , cdata(0)
     , ddata(0)
 {
-    this->location = 0;
+    this->location = idGenerator++;
     glGenTextures(1, &texture);
 }
 
@@ -26,7 +26,7 @@ Texture::Texture(const char* imagePath)
 	FreeImage_Initialise();
 	glGenTextures(1, &texture);
 
-	this->location = 1;
+	this->location = idGenerator++;
 	FREE_IMAGE_FORMAT fif = FreeImage_GetFileType(imagePath, 0);
 
 	if (fif == FIF_UNKNOWN)

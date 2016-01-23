@@ -6,7 +6,7 @@
  */
 
 #include "Skydome.h"
-#include <iostream>
+
 Skydome::Skydome(GLint shaderProgram, Camera* camera) : meshAttributes(0), mVao(0), mVbo(0), mShaderProgram(0),
 														muVPLocation(0), muInvViewLocation(0),
 														camera(0), verticesNumber(0)
@@ -19,6 +19,14 @@ Skydome::Skydome(GLint shaderProgram, Camera* camera) : meshAttributes(0), mVao(
 Skydome::~Skydome()
 {
 	// TODO Auto-generated destructor stub
+}
+
+void Skydome::loadTexture(float* textureData, int width, int height){
+	Texture* texture = new Texture();
+	texture->bind();
+	texture->setData(textureData, width, height);
+	texture->loadHeightmapOptions();
+	texture->linkTexture(mShaderProgram, "textureSky");
 }
 
 void Skydome::draw()

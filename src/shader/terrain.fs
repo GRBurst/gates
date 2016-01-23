@@ -53,13 +53,13 @@ void main()
     float initColor = colorRes.r;
 
     vec4 terrainColor;
-    if (initColor < 0.2){
+    if (initColor < 0.1){
         terrainColor = vec4(0.1, 0.15, 0.8, 1.0) - (vec4(0.0, 0.0, colorRes.r * 2, 0.0) );
     }
-    else if (initColor >= 0.199 && initColor < 0.7){
+    else if (initColor >= 0.1 && initColor < 0.8){
         terrainColor =vec4(0.1, 0.6, 0.1, 1.0) * vec4(colorRes.rrr, 1.0);
     }
-    else if (initColor >= 0.699 && initColor < 0.9){
+    else if (initColor >= 0.8 && initColor < 1.2){
         terrainColor = vec4(0.8, 0.8, 0.8, 1.0) * vec4(colorRes.rrr, 1.0);
     }
     else

@@ -252,7 +252,6 @@ int main(){
     terrain.draw();
 
     terrain.linkHeightMapTexture(terrainprog);
-    terrain.linkHeightMapTexture(terrainprog);
     /* terrain.debug(); */
 
 
@@ -278,7 +277,7 @@ int main(){
     //grass.generatePositionsFromTexture(noise.getTextureDataF(), noise.getWidth(), noise.getHeight(), 0.2f, 0.7f);
 
     grass.setTerrainVao(terrain.getVAO(), terrain.getTotalIndices());
-    grass.setBuffers();
+    //grass.setBuffers();
 
     grass.setUniforms();
     grass.loadTexture();
@@ -302,7 +301,9 @@ int main(){
 
     Skydome skydome(skydomeProg, &camera);
     skydome.generateGeometry(noiseDimX / 2, 64, 64);
+    skydome.loadTexture(noise.getTextureData(), noiseDimX, noiseDimY);
     skydome.setBuffers();
+
 
     ModelLoader model("../objects/sphere.obj", prog);
 	model.loadFile();
@@ -407,7 +408,10 @@ int main(){
 	 	grass.draw();
 
  		//END GRASS
+
         skydome.draw();
+          /* skydome.draw(); */
+
         // next terrain
         portal.renderInside();
 
