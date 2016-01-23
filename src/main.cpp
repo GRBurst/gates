@@ -227,10 +227,10 @@ int main(){
 
     int noiseDimX = 256;
     int noiseDimY = 256;
-    int seed = 9;
-    int octaves = 8;
-    double frequency = 4.0;
-    double amplitude = 1.0;
+    int seed = 42;
+    int octaves = 16;
+    double frequency = 8.0;
+    double amplitude = 4.0;
     PerlinNoise noise;
     noise.setParams(noiseDimX, noiseDimY, seed);
     noise.setOctavesFreqAmp(octaves, frequency, amplitude);
@@ -300,8 +300,8 @@ int main(){
 
 
 
-    Skydome skydome(skydomeProg);
-    skydome.generateGeometry(10, 4, 4);
+    Skydome skydome(skydomeProg, &camera);
+    skydome.generateGeometry(noiseDimX / 2, 64, 64);
     skydome.setBuffers();
 
     ModelLoader model("../objects/sphere.obj", prog);
@@ -403,13 +403,11 @@ int main(){
  //        err = glGetError();
  //		if (err != GL_NO_ERROR)
  //			std::cout << "Fehler: " << err << std::endl;
-         grass.setCameraPosRef(camera.getPos());
-         grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
-         grass.draw();
+        grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
+	 	grass.draw();
 
  		//END GRASS
-         skydome.setVPMatrix(camera.getVPMatrix());
-         skydome.draw();
+        skydome.draw();
         // next terrain
         portal.renderInside();
 

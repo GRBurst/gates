@@ -13,24 +13,24 @@
 #include <cmath>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "Camera.h"
 class Skydome
 {
 public:
-	Skydome(GLint shaderProgram);
+	Skydome(GLint shaderProgram, Camera* cam);
 	virtual ~Skydome();
-	void setVPMatrix(glm::mat4 vp) { this->mVPMatrix = vp; };
 	void draw();
 	void generateGeometry(float r, int azimuths, int meridians);
 	void setBuffers();
 private:
-	std::vector<glm::vec3> mesh;
+	std::vector<float> meshAttributes;
 	GLuint mVao;
 	GLuint mVbo;
 	GLint mShaderProgram;
 	GLuint muVPLocation;
-	glm::mat4 mVPMatrix;
 	GLuint muInvViewLocation;
-	glm::mat3 mInvViewMatrix;
+	Camera* camera;
+	int verticesNumber;
 };
 
 #endif /* SRC_SKYDOME_H_ */

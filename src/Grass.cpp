@@ -77,7 +77,6 @@ void Grass::draw(){
 	glDisable(GL_CULL_FACE);
 	GLenum err = GL_NO_ERROR;
 	glUniformMatrix4fv(uVPLocation, 1, GL_FALSE, glm::value_ptr(projection * view));
-	glUniform3fv(uCameraPosLocation, 1, value_ptr(cameraPos));
 	glUniform1f(uAlphaTest, 0.75f);
 	glUniform1f(uAlphaMultiplier, 1.2f);
 	glUniform1f(uTime, time);
@@ -85,7 +84,7 @@ void Grass::draw(){
     //glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(vao);
     //glDisable(GL_ALPHA_TEST);
-    glProvokingVertex(GL_LAST_VERTEX_CONVENTION);
+    //glProvokingVertex(GL_LAST_VERTEX_CONVENTION);
     glDrawElements(GL_TRIANGLES, mTotalIndices, GL_UNSIGNED_INT, 0);
 	//glDrawArrays(GL_POINTS, 0, vfdata.size()/3);
 
@@ -114,7 +113,6 @@ void Grass::setBuffers(){
 
 void Grass::setUniforms(){
     uVPLocation = glGetUniformLocation(shaderProgram, "gVP");
-    uCameraPosLocation = glGetUniformLocation(shaderProgram, "gCameraPos");
     uAlphaTest = glGetUniformLocation(shaderProgram, "fAlphaTest");
     uAlphaMultiplier = glGetUniformLocation(shaderProgram, "fAlphaMultiplier");
     uTime = glGetUniformLocation(shaderProgram, "uTime");
@@ -125,6 +123,3 @@ void Grass::setViewAndProjectionMatrix(glm::mat4 view, glm::mat4 projection){
 	this->projection = projection;
 }
 
-void Grass::setCameraPosRef(glm::vec3 cameraPos){
-	this->cameraPos = cameraPos;
-}
