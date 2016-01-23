@@ -289,13 +289,13 @@ int main(){
     
     
     // Next Terrain
-    Terrain nextTerrain(prog, noiseDimX, noiseDimY, &wNoise);
+    Terrain nextTerrain(terrainprog, noiseDimX, noiseDimY, &wNoise);
     nextTerrain.setVPMatrix(camera.getVPMatrix());
     nextTerrain.setInvViewMatrix(camera.getInvViewMatrix());
     nextTerrain.enableNormals();
     nextTerrain.computeTerrain();
-    /* nextTerrain.genHeightMapTexture(); */
-	/* nextTerrain.saveNoiseToFile("WorleyNoise_Terrain.tga"); */
+    nextTerrain.genHeightMapTexture();
+	nextTerrain.saveNoiseToFile("WorleyNoise_Terrain.tga");
     /* nextTerrain.linkHeightMapTexture(terrainprog); */
 
 
@@ -413,10 +413,10 @@ int main(){
         // next terrain
         portal.renderInside();
 
-        /* nextTerrain.setVPMatrix(camera.getVPMatrix()); */
-        /* nextTerrain.setInvViewMatrix(camera.getInvViewMatrix()); */
-        /* nextTerrain.setGrid(gDrawGrid); */
-        /* nextTerrain.draw(); */
+        nextTerrain.setVPMatrix(camera.getVPMatrix());
+        nextTerrain.setInvViewMatrix(camera.getInvViewMatrix());
+        nextTerrain.setGrid(gDrawGrid);
+        nextTerrain.draw();
 
         portal.disableStencil();
 
