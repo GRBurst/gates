@@ -53,10 +53,10 @@ void Skydome::draw()
 void Skydome::generateGeometry(float r, int azimuths, int meridians)
 {
 	//UV Generation is spherical
-	std::cout << "sfklnjsedfikl";
+
 	//meshAttributes.resize(azimuths * 30 + (meridians + 1) * azimuths * 30); //azimuths * 2 * 3 * ( 3+ 2) + (meridians - 2) * azimuths * 6 * (3 + 2)
 	//verticesNumber = azimuths * 18 + (meridians + 1) * azimuths * 18;
-	int i = 0;
+
 	for( int t = 0 ; t < meridians ; t++ )
 	{
 		float u1 = (float)(t)/meridians;
@@ -75,7 +75,6 @@ void Skydome::generateGeometry(float r, int azimuths, int meridians)
 			glm::vec3 vertex2 = glm::vec3(r * sin(theta1) * cos(phi2), r * cos(theta1), r * sin(theta1) * sin(phi2));
 			glm::vec3 vertex3 = glm::vec3(r * sin(theta2) * cos(phi2), r * cos(theta2), r * sin(theta2) * sin(phi2));
 			glm::vec3 vertex4 = glm::vec3(r * sin(theta2) * cos(phi1), r * cos(theta2), r * sin(theta2) * sin(phi1));
-			std::cout << i << std::endl;
 
 			if( t == 0 )
 			{// top cap
@@ -150,11 +149,9 @@ void Skydome::generateGeometry(float r, int azimuths, int meridians)
 					meshAttributes.push_back(v2);
 				}
 			}
-			i++;
-
 		}
 	}
-	std::cout << "DORT";
+
 }
 
 void Skydome::setBuffers()
