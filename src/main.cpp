@@ -14,6 +14,7 @@
 #include "Texture.h"
 #include "Grass.h"
 #include "WorleyNoise.h"
+#include "Skydome.h"
 
 
 using namespace glm;
@@ -215,6 +216,11 @@ int main(){
     terrainshader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT);
     GLint terrainprog = terrainshader.linkShaders();
 
+    Shader skydomeShader;
+    skydomeShader.loadShader("../src/shader/skydome.vs", Shader::VERTEX);
+    skydomeShader.loadShader("../src/shader/skydome.fs", Shader::FRAGMENT);
+    GLint skydomeProg = skydomeShader.linkShaders();
+
     /* Terrain terrainTerrain(terrainprog, noiseDimX, noiseDimY, noiseDimX, noiseDimY, Noise::PERLIN, 9, 8, 2.0, 3.0); */
     /* terrain.setNoiseValues(wNoise.getNoiseValues()); */
     
@@ -236,7 +242,7 @@ int main(){
     terrain.genHeightMapTexture();
 	terrain.saveNoiseToFile("PerlinNoise_Terrain.tga");
 
-    terrain.linkHeightMapTexture(prog);
+    terrain.linkHeightMapTexture(terrainprog);
     /* terrain.debug(); */
    
     // Next Terrain
@@ -286,6 +292,9 @@ int main(){
     //END GRASS
     //Outsource
 
+    Skydome skydome(skydomeProg);
+    skydome.generateGeometry(10, 4, 4);
+    skydome.setBuffers();
 
     ModelLoader model("../objects/sphere.obj", prog);
 	model.loadFile();
@@ -390,7 +399,8 @@ int main(){
          grass.draw();
 
  		//END GRASS
-
+         skydome.setVPMatrix(camera.getVPMatrix());
+         skydome.draw();
         // next terrain
         portal.renderInside();
 

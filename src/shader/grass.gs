@@ -50,7 +50,7 @@ void main()
 			  	float fWindPower = 0.5f+sin(posBL.x/30+posBL.z/30+uTime*(1.2f+fWindStrength/20.0f));
 				if(fWindPower < 0.0f)
 					fWindPower = fWindPower*0.2f;
-				else fWindPower = fWindPower*0.3f;
+				else fWindPower = fWindPower*0.4f;
 		  		fWindPower *= fWindStrength;
 		
 		  		//BL

@@ -184,7 +184,6 @@ vector<vec3> ModelLoader::getVertices(){
 	return fileVertices;
 }
 void ModelLoader::setStride(){
-	std::cout << vertexIndices.size() << std::endl;
 	if (!this->fileVertices.empty()){// &&
 		bufferSize += 3;
 		for(unsigned long i = 0; i < vertexIndices.size(); i++){
@@ -322,7 +321,6 @@ void ModelLoader::setBuffers(){
 	//location, attribute size vec3, data type, bool normalized?, stride size, offset to first dataobject in array
 //	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 //	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), elementBuffer, GL_STATIC_DRAW);
-	cout << " BUppersite" << bufferSize;
 	glEnableVertexAttribArray(posAttrib);
 	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, bufferSize * sizeof(GLfloat), (GLvoid*) 0);
 	if (!this->fileUvs.empty()){

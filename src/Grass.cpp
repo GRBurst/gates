@@ -74,8 +74,7 @@ void Grass::draw(){
 	float time = glfwGetTime();
 
 	glUseProgram(shaderProgram);
-//	glEnable(GL_BLEND);
-//	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_CULL_FACE);
 	GLenum err = GL_NO_ERROR;
 	glUniformMatrix4fv(uVPLocation, 1, GL_FALSE, glm::value_ptr(projection * view));
 	glUniform3fv(uCameraPosLocation, 1, value_ptr(cameraPos));
@@ -96,7 +95,7 @@ void Grass::draw(){
    	std::cout.flush();
 	glBindVertexArray(0);
 
-	//glEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 }
 
 

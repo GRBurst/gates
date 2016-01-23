@@ -1,6 +1,6 @@
 #ifndef TERRAIN_H_
 #define TERRAIN_H_
-#include "PerlinNoise.h"
+#include "Noise.h"
 #include <GL/glew.h>
 #include <iostream>
 #include <stdio.h>
