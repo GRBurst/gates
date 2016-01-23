@@ -23,10 +23,10 @@ Skydome::~Skydome()
 
 void Skydome::loadTexture(float* textureData, int width, int height){
 	Texture* texture = new Texture();
-	texture->bind();
 	texture->setData(textureData, width, height);
-	texture->loadCommonOptions();
 	texture->linkTexture(mShaderProgram, "textureSky");
+	texture->bind();
+	texture->loadCommonOptions();
 }
 
 void Skydome::draw()

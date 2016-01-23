@@ -87,9 +87,14 @@ void Texture::setData(unsigned char* data, int width, int height)
 
 void Texture::setData(float* data, int width, int height)
 {
-    this->ddata     = data;
-    this->width     = width;
-    this->height    = height;
+	this->ddata     = data;
+	this->cdata		= new unsigned char[width * height];
+	for(int i = 0; i < width * height; i++)
+	{
+		this->cdata[i] = (int)(data[i] * 255);
+	}
+	this->width     = width;
+	this->height    = height;
 }
 
 void Texture::loadCommonOptions()

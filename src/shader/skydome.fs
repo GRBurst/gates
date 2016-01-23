@@ -5,6 +5,6 @@ uniform sampler2D textureSky;
 
 void main()
 {
- 	color = vec4(texture(textureSky, fUV).r, texture(textureSky, fUV).r, texture(textureSky, fUV).r, 1.0);
+ 	color = mix(vec4(texture(textureSky, fUV).r, texture(textureSky, fUV).r, texture(textureSky, fUV).r, 1.0), vec4(0.1, 0.22, 0.6, 1.0), 0.4 );
  	//color = vec4(0.0, 1.0, 1.0, 1.0);
 }
