@@ -37,10 +37,11 @@ class Camera
         void setCamSpeed(float multiplicator = 2.0) {this->mCamSpeed *= multiplicator; }
 
         // Calculatable matrizes from camera
-        glm::mat3 getInvViewMatrix() { return glm::inverse(glm::transpose(glm::mat3(getViewMatrix()))); };
-        glm::mat4 getViewMatrix() {return mViewMatrix; };
-        glm::mat4 getProjectionMatrix() {return mProjectionMatrix; };
-        glm::mat4 getVPMatrix() {return mViewProjectionMatrix; };
+        glm::mat3 getInvViewMatrix() const { return glm::inverse(glm::transpose(glm::mat3(getViewMatrix()))); };
+        glm::mat4 getViewMatrix() const {return mViewMatrix; };
+        glm::mat4 getProjectionMatrix() const {return mProjectionMatrix; };
+        glm::mat4 getVPMatrix() const {return mViewProjectionMatrix; };
+        glm::vec3 getPosition() const {return mPos;};
 
         void calcViewMatrix();
         void calcProjectionMatrix();

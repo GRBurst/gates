@@ -389,9 +389,9 @@ int main(){
 
 
         /* portal1.substractStencil(); */
-        grass.setCameraPosRef(camera.getPos());
-        grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
-        grass.draw();
+        /* grass.setCameraPosRef(camera.getPos()); */
+        /* grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix()); */
+        /* grass.draw(); */
 
 
 
