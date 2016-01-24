@@ -17,7 +17,7 @@ float gauss(float x){
 void main()
 {	
 	vec4 resColor;
-	vec3 f3DUV= vec3(fUV, mod(uTime / 10, 1.0) );
+	vec3 f3DUV= vec3(fUV, 0.5);
 	if (texture(tClouds, f3DUV).r < 0.6)
 		resColor = vec4(0.0, 0.0, 0.0, 0.0);
 	else

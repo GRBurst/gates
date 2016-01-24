@@ -89,7 +89,6 @@ void Skydome::generateGeometry(float r, int azimuths, int meridians)
 			if (y > cloudHeightMin && y < cloudHeightMax){
 				if(bernoulli(generator)){
 					glm::vec3 vertex = vertex1 - (glm::normalize(vertex1) * distribution(generator));
-					std::cout << "ERZEUGT" << std::endl;
 					cloudAttributes.push_back(vertex);
 				}
 			}
