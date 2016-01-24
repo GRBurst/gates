@@ -16,6 +16,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Camera.h"
 #include "Texture.h"
+#include <GLFW/glfw3.h>
 
 class Skydome
 {
@@ -25,6 +26,7 @@ public:
 	void draw();
 	void generateGeometry(float r, int azimuths, int meridians);
 	void setBuffers();
+	void loadTexture(float* textureData, int width, int height, int depth);
 	void loadTexture(float* textureData, int width, int height);
 private:
 	std::vector<float> meshAttributes;
@@ -33,6 +35,7 @@ private:
 	GLint mShaderProgram;
 	GLuint muVPLocation;
 	GLuint muInvViewLocation;
+	GLuint muTime;
 	Camera* camera;
 	int verticesNumber;
 };

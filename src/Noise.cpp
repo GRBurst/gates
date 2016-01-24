@@ -6,8 +6,7 @@
  */
 
 #include "Noise.h"
-
-Noise::Noise() : mXDim(256), mYDim(256), mZDim(1), mSeed(1024), mOctaves(1), mFrequency(1.0), mAmplitude(1.0), mNoiseType(PERLIN)
+Noise::Noise() : mXDim(256), mYDim(256), mZDim(1), mWDim(1), mSeed(1024), mOctaves(1), mFrequency(1.0), mAmplitude(1.0), mNoiseType(PERLIN)
 {
 	// TODO Auto-generated constructor stub
 
@@ -25,6 +24,14 @@ void Noise::setParams(int x, int y, int seed){
 	mNoiseValues.resize(mXDim * mYDim);
 }
 
+void Noise::setParams(int x, int y, int z, int seed){
+	this->mXDim = x;
+	this->mYDim = y;
+	this->mZDim = z;
+	this->mSeed = seed;
+	mNoiseValues.resize(mXDim * mYDim * mZDim);
+}
+
 
 double Noise::clamp(double x, double min, double max){
 	if (x > max)
@@ -34,11 +41,27 @@ double Noise::clamp(double x, double min, double max){
 	return x;
 }
 
+//float* Noise::getSphericalTexture(){
+//	for (int y = 0; y < mYDim; y++)
+//	{
+//		for (int x = 0; x < mXDim; x++)
+//		{
+//			mNoiseValues[x+y * mXDim] = mNoiseValues[x+y * mXDim] + 1;
+//		}
+//	}
+//}
 
 float *Noise::getTextureData(){
 	return &mNoiseValues[0];
 }
 
+float *Noise::getInverseTextureData(){
+	for (int i = 0; i < mXDim * mYDim; i++)
+	{
+		mNoiseValues[i] = -mNoiseValues[i] + 1;
+	}
+	return &mNoiseValues[0];
+}
 
 bool Noise::saveToFile(const char* filename){
 	char* bmp = new char[mXDim*mYDim];

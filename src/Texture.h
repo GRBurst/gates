@@ -25,12 +25,16 @@ class Texture
 
         GLuint getTexture();
         GLuint getTextureLoc();
+
         void linkTexture(GLint shaderProgram, const char *texture_name);
         void setData(unsigned char* data, int width, int height);
-        void setData(float* data, int width, int height);
+        void setData(float* data, int width, int height, int depth = 1);
         void loadCommonOptions();
+        void loadSkydomeOptions();
+        void loadSkydome3DOptions();
         void loadHeightmapOptions();
         void bind();
+        void bind3D();
         void unbind();
 
 
@@ -40,7 +44,7 @@ class Texture
         GLuint textureLocation;
         GLint location;
 
-        int width, height;
+        int width, height, depth;
         unsigned char* cdata;
         float* ddata;
 

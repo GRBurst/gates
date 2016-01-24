@@ -27,26 +27,34 @@ class PerlinNoise : public Noise
 		void generateNoiseImage();
 
 		double calculateNoiseValue(double x, double y);
+		double calculateNoiseValue(double x, double y, double z);
 		glm::ivec2 getDimension(){ return glm::ivec2(mXDim, mYDim);}
 	private:
-		glm::dvec2 interpolationPolynomial2D(glm::dvec2 vec);
-		double interpolationPolynomial2D(double t);
+		glm::dvec4 interpolationPolynomial(glm::dvec4 vec);
+		glm::dvec3 interpolationPolynomial(glm::dvec3 vec);
+		glm::dvec2 interpolationPolynomial(glm::dvec2 vec);
+		double interpolationPolynomial(double t);
 		void initPermutationTable();
-		void initGradientTable();
+		void init2DGradientTable();
+		void init3DGradientTable();
+		void init4DGradientTable();
+		void setGridPoints(double i, int &b0, int &b1, double &r0, double &r1);
+
 	//		double clamp(double x, double min, double max); not needed here
 		double gradient();
 		double lerp(double alpha, double x0, double x1);
 
 		int mSampleSize = 256;
+		int N = 4096;
 		bool mStart = true;
 		double mMax = 0.0, mMin = 1.0;
 
 		std::vector<int> mPermutationTable;
 		std::vector<glm::dvec2> mGradientTable2d;
-		double** mGradientNoise;
+		std::vector<glm::dvec3> mGradientTable3d;
+		std::vector<glm::dvec4> mGradientTable4d;
 
 		double noise(double x, double y);
+		double noise(double x, double y, double z);
 };
-
-#endif /* SRC_PERLINNOISE_H_ */
-
+#endif
