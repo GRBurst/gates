@@ -9,7 +9,7 @@ uniform mat3 uInvViewMatrix;
 uniform int uHeightMapTerrainRatio;
 uniform int uDrawGrid;
 
-out vec3 fColor;
+out float fHeight;
 out vec2 fUV;
 out vec3 fNormal;
 out vec3 fPos;
@@ -27,17 +27,17 @@ void main()
     float z         = (5.0 + vPosition.z) / 10.0;
 
     //float height    = texture2D(heightMap, vec2(x, y)).r;
-    float height    = vPosition.y;
+    float vHeight = vPosition.y;
 
     //float height = 0.5;
-    fColor = vec3(height, height, height);
+    //fColor = vec3(height, height, height);
 
-    if (height < 0.2) height = 0.2;
-    vec4 pos = uVPMatrix * vec4(vPosition.x, height, vPosition.z, 1.0);
+    if (vHeight < 0.1) vHeight = 0.09;
+    vec4 pos = uVPMatrix * vec4(vPosition.x, vHeight, vPosition.z, 1.0);
 
     fUV = calculateUV();
-    //fNormal = uInvViewMatrix * vNormal;
     fNormal = vNormal;
+    fHeight = vPosition.y;
 
     fPos = vec3(pos);
     gl_Position = pos;

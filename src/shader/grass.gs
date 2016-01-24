@@ -39,7 +39,7 @@ void main()
 	vec3 posBL = gl_in[0].gl_Position.xyz;
 	vec3 posBR = gl_in[1].gl_Position.xyz;
 	float heightDiff = abs(posBR.y - posBL.y);
-	if(posBL.y > 0.1 && posBL.y < 0.7)
+	if(posBL.y > 0.1 && posBL.y < 0.4)
   	{
   		for(int i = 0; i < gl_in.length(); i++){
   			if(bool(gl_PrimitiveIDIn & 1)){

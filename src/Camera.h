@@ -26,15 +26,16 @@ class Camera
         void setHFoV(float fov) { this->mHFoV = fov; };
 
         float getAspectRatio() const { return this->mAspectRatio; };
-        void setAspectRatio(float aspectRatio) { this->mAspectRatio = aspectRatio; }
+        void setAspectRatio(float aspectRatio) { this->mAspectRatio = aspectRatio; };
 
         float getHorizontalAngle() const { return this->mHorizontalAngle; };
-        void setHorizontalAngle(float angle) { this->mHorizontalAngle = angle; }
+        void setHorizontalAngle(float angle) { this->mHorizontalAngle = angle; };
 
         float getVerticalAngle() const { return this->mVerticalAngle; };
-        void setVerticalAngle(float angle) { this->mVerticalAngle = angle; }
+        void setVerticalAngle(float angle) { this->mVerticalAngle = angle; };
 
-        void setCamSpeed(float multiplicator = 2.0) {this->mCamSpeed *= multiplicator; }
+        void setCamSpeed(float multiplicator = 2.0) {this->mCamSpeed *= multiplicator; };
+        void setPosition(glm::vec3 position) { this->mPos = position; };
 
         // Calculatable matrizes from camera
         glm::mat3 getInvViewMatrix() const { return glm::inverse(glm::transpose(glm::mat3(getViewMatrix()))); };
@@ -58,18 +59,18 @@ class Camera
 
         // Movements & rotations
         void move( const glm::vec3 &dist );
-        void moveRight( float dist = 1.0f ) { move( dist * getRight() ); }
-        void moveLeft( float dist = 1.0f ) { move( -dist * getRight() ); }
-        void moveUp( float dist = 1.0f ) { move( dist * getUp() ); }
-        void moveDown( float dist = 1.0f ) { move( -dist * getUp() ); }
-        void moveForward( float dist = 1.0f ) { move( dist * getViewDirection() ); }
-        void moveBack( float dist = 1.0f ) { move( -dist * getViewDirection() ); }
+        void moveRight( float dist = 1.0f ) { move( dist * getRight() ); };
+        void moveLeft( float dist = 1.0f ) { move( -dist * getRight() ); };
+        void moveUp( float dist = 1.0f ) { move( dist * getUp() ); };
+        void moveDown( float dist = 1.0f ) { move( -dist * getUp() ); };
+        void moveForward( float dist = 1.0f ) { move( dist * getViewDirection() ); };
+        void moveBack( float dist = 1.0f ) { move( -dist * getViewDirection() ); };
 
         void rotate( const glm::vec2 &degree );
-        void turnRight( float degree ) { rotate( glm::vec2(degree,0) ); }
-        void turnLeft( float degree ) { rotate( glm::vec2(-degree,0) ); }
-        void turnUp( float degree ) { rotate( glm::vec2(0,degree) ); }
-        void turnDown(  float degree ) { rotate( glm::vec2(0,-degree) ); }
+        void turnRight( float degree ) { rotate( glm::vec2(degree,0) ); };
+        void turnLeft( float degree ) { rotate( glm::vec2(-degree,0) ); };
+        void turnUp( float degree ) { rotate( glm::vec2(0,degree) ); };
+        void turnDown(  float degree ) { rotate( glm::vec2(0,-degree) ); };
 
         // Callback functions
         void processMouse(float rotH, float rotV);
