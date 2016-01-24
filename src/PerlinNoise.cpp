@@ -63,6 +63,16 @@ void PerlinNoise::generateNoiseImage(){
     }
 
     /* printParams(); */
+//    if((mMin < 0.0) || (mMax > 1.0))
+//    {
+//	    mMax = mMax - mMin;
+//        for(int x = 0; x < mXDim; x++){
+//            for(int y = 0; y < mYDim; y++){
+//                mNoiseValues[y * mXDim + x] = (mNoiseValues[y * mXDim + x] - mMin) / mMax;
+//            }
+//        }
+//    }
+
     for(int x = 0; x < mXDim; x++){
         for(int y = 0; y < mYDim; y++){
             float value = static_cast<float>(noise(static_cast<double>(x), static_cast<double>(y)));
@@ -73,6 +83,7 @@ void PerlinNoise::generateNoiseImage(){
                 mMax = value;
         }
     }
+
 
     mMax = mMax - mMin;
     for(int x = 0; x < mXDim; x++){
@@ -156,8 +167,8 @@ double PerlinNoise::calculateNoiseValue(double x, double y){
 	v = glm::dot(q, glm::dvec2(rx.y, ry.y));
 	b = lerp(s.x, u, v);
 
-//	return clamp(lerp(s.y, a, b), 0.0, 1.0);
-	return lerp(s.y, a, b);
+	return clamp(lerp(s.y, a, b), 0.0, 1.0);
+//	return lerp(s.y, a, b);
 }
 
 

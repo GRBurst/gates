@@ -27,7 +27,6 @@ public:
 //	void setPositionsFromArray(float* data, int noElements);
 	void setViewAndProjectionMatrix(glm::mat4 view, glm::mat4 projection);
 	void draw();
-	void setCameraPosRef( glm::vec3 cameraPos);
 	void loadTexture();
 	void setTerrainVao(GLuint vao, int totalIndices);
 private:

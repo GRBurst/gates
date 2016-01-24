@@ -42,7 +42,7 @@ class Noise
 		double calculateNoiseValue(double x, double y);
 		glm::ivec2 getDimension(){ return glm::ivec2(mXDim, mYDim);}
 	protected:
-
+		double clamp(double x, double min, double max);
 		int mXDim, mYDim, mZDim, mSeed;
 		NoiseType mNoiseType;
 		int mOctaves;

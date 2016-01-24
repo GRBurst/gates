@@ -26,13 +26,13 @@ void Noise::setParams(int x, int y, int seed){
 }
 
 
-//double Noise::clamp(double x, double min, double max){
-//	if (x > max)
-//		x = max;
-//	if (x < min)
-//		x = min;
-//	return x;
-//}
+double Noise::clamp(double x, double min, double max){
+	if (x > max)
+		x = max;
+	if (x < min)
+		x = min;
+	return x;
+}
 
 
 float *Noise::getTextureData(){

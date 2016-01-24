@@ -5,7 +5,6 @@ layout (triangle_strip, max_vertices = 12) out;
 
 
 uniform mat4 gVP;
-uniform vec3 gCameraPos;
 uniform float uTime;
 //uniform float uScale;
 

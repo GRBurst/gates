@@ -223,7 +223,7 @@ int main(){
     int noiseDimY = 256;
     int seed = 42;
     int octaves = 16;
-    double frequency = 4.0;
+    double frequency = 8.0;
     double amplitude = 4.0;
     PerlinNoise pNoise;
     pNoise.setParams(noiseDimX, noiseDimY, seed);
@@ -292,6 +292,8 @@ int main(){
     //grass.generatePositionsFromTexture(noise.getTextureDataF(), noise.getWidth(), noise.getHeight(), 0.2f, 0.7f);
 
     grass.setTerrainVao(terrain1.getVAO(), terrain1.getTotalIndices());
+    //grass.setBuffers();
+
     /* grass.setBuffers(); */
 
     grass.setUniforms();
@@ -301,9 +303,11 @@ int main(){
 
 
 
-    Skydome skydome(skydomeProg);
-    skydome.generateGeometry(10, 4, 4);
+    Skydome skydome(skydomeProg, &camera);
+    skydome.generateGeometry(noiseDimX / 2, 64, 64);
+    skydome.loadTexture(pNoise.getTextureData(), noiseDimX, noiseDimY);
     skydome.setBuffers();
+
 
     ModelLoader model("../objects/sphere.obj", prog);
 	model.loadFile();
@@ -385,16 +389,10 @@ int main(){
         portal1.enableStencil();
 
 
-
-
-
         /* portal1.substractStencil(); */
         /* grass.setCameraPosRef(camera.getPos()); */
         /* grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix()); */
         /* grass.draw(); */
-
-
-
 
 
         portal1.renderOutside();
@@ -425,23 +423,15 @@ int main(){
  //        err = glGetError();
  //		if (err != GL_NO_ERROR)
  //			std::cout << "Fehler: " << err << std::endl;
-         grass.setCameraPosRef(camera.getPos());
-         grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
-         grass.draw();
+        grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
+	 	grass.draw();
 
  		//END GRASS
-         skydome.setVPMatrix(camera.getVPMatrix());
-         /* skydome.draw(); */
-
-
+        skydome.draw();
 
 
 
         portal1.renderInside();
-
-
-
-
 
 
         // next terrain
