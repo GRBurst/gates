@@ -42,7 +42,7 @@ void Portal::init( Camera *const cam, Terrain *const terrain1, Terrain *const te
     /* mPosition2 = terrain2->computePosition(hDim2(gen), vDim2(gen)); */
     mPosition2 = glm::vec3(10.0, 1.0, 5.0);
     mScale2 = glm::vec3(1.0, 1.0, 1.0);
-    mTrans2 = glm::vec3(5.0, 0.0, 0.0);
+    mTrans2 = mPosition2 - mPosition1;
     mRot2 = glm::vec3(0.0, deg(gen), 0.0);
 
     Camera cam2;
@@ -124,7 +124,8 @@ void Portal::enableStencil()
     enableRenderStencilPattern();
     modelFill->setProjection(camera->getProjectionMatrix());
     modelFill->setView(camera->getViewMatrix());
-    if(mStatus)  modelFill->draw();
+    /* if(mStatus)  modelFill->draw(); */
+    modelFill->draw();
     disableRenderStencilPattern();
 }
 

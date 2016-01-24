@@ -27,6 +27,8 @@ public:
     void setTranslation(glm::vec3 dist);
     void setTransforms(glm::vec3 rot, glm::vec3 scale, glm::vec3 trans);
     glm::vec3 getPosition();
+    glm::vec3 getPosition2() { return mPosition2; };
+    glm::vec3 getRotation2() { return mRot2; };
     bool isActive() { return mStatus; };
 
     glm::mat4 getNextMVP() {return mMVP2;};

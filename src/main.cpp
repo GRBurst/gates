@@ -36,7 +36,7 @@ int gDrawGrid = 0;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-bool portalIntersection(Portal *const portal, Terrain *pTerrain1, Terrain *pTerrain2);
+bool portalIntersection(Portal *const portal, Terrain* &pTerrain1, Terrain* &pTerrain2, const GLint& prog);
 
 void debugCallback(GLenum source, GLenum type, GLuint id,
                    GLenum severity, GLsizei length,
@@ -257,7 +257,7 @@ int main(){
     pTerrain1->computeTerrain();
     pTerrain1->genHeightMapTexture();
 	pTerrain1->saveNoiseToFile("PerlinNoise_Terrain.tga");
-    pTerrain1->draw();
+    /* pTerrain1->draw(); */
 
     /* pTerrain1->linkHeightMapTexture(terrainprog); */
     /* pTerrain1->debug(); */
@@ -393,7 +393,7 @@ int main(){
     		loops++;
     		//std::cout << "Pos(x, y): " << camera.getCamPos().x <<", " << camera.getCamPos().y << std::endl;
 
-            intersection = portalIntersection(pPortal1, pTerrain1, pTerrain2);
+            intersection = portalIntersection(pPortal1, pTerrain1, pTerrain2, terrainprog);
     	}
      	//update Frame
 //    	glUseProgram(prog);
@@ -446,27 +446,32 @@ int main(){
  //		if (err != GL_NO_ERROR)
  //			std::cout << "Fehler: " << err << std::endl;
         grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
-	 	grass.draw();
+	 	/* grass.draw(); */
 
  		//END GRASS
         skydome.draw();
 
 
-
-        if(pPortal1->isActive())
-        {
             pPortal1->renderInside();
 
 
             // next terrain
             /* pTerrain2->setVPMatrix(pPortal1->getNextVP()); */
             /* pTerrain2->setInvViewMatrix(pPortal1->getNextInvV()); */
+
+            //modelMatrix = portal in world 2
+            //viewMatrix = camera in current world
+            glm::vec3 tmpPos = camera.getPosition();
+            camera.setPosition(pPortal1->getPosition2());
+            /* camera.rotate(glm::vec2(pPortal1->getRotation2(), 0.0)); */
+            camera.update();
             pTerrain2->setVPMatrix(camera.getVPMatrix());
             pTerrain2->setInvViewMatrix(camera.getInvViewMatrix());
             pTerrain2->setGrid(gDrawGrid);
             pTerrain2->draw();
+            camera.setPosition(tmpPos);
+            camera.update();
 
-        }
 
 
 
@@ -494,7 +499,7 @@ int main(){
 
 }
 
-bool portalIntersection(Portal *const portal, Terrain *pTerrain1, Terrain *pTerrain2)
+bool portalIntersection(Portal *const portal, Terrain*& pTerrain1, Terrain*& pTerrain2, const GLint& prog)
 {
 
     float diff = glm::length(glm::vec3(camera.getPosition() - portal->getPosition()));
@@ -509,19 +514,31 @@ bool portalIntersection(Portal *const portal, Terrain *pTerrain1, Terrain *pTerr
         /* portal->setTranslation(camera.getPosition()); */
         camera.update();
         /* camera.setOrientation(); */
-        std::cout << "pTerrain1 = " << pTerrain1 << std::endl;
-        std::cout << "pTerrain2 = " << pTerrain2 << std::endl;
-        Terrain *tmpTerrain = pTerrain1;
-        pTerrain1 = pTerrain2;
-        pTerrain2 = tmpTerrain;
-        std::cout << "pTerrain1 = " << pTerrain1 << std::endl;
-        std::cout << "pTerrain2 = " << pTerrain2 << std::endl;
 
+        /* Terrain *tmpTerrain = pTerrain1; */
+        /* pTerrain1 = pTerrain2; */
+        /* pTerrain2 = tmpTerrain; */
+        std::swap(pTerrain1, pTerrain2);
+        delete pTerrain2;
 
+        int noiseDimX = 256;
+        int noiseDimY = 256;
+        int seed = 464;
+        int octaves = 4;
+        double frequency = 54.0;
+        double amplitude = 2.0;
+        PerlinNoise pNoise;
+        pNoise.setParams(noiseDimX, noiseDimY, seed);
+        pNoise.setOctavesFreqAmp(octaves, frequency, amplitude);
 
-        std::cout << "Portal 1 coords: x = " << portal->getPosition().x << ", y = " << portal->getPosition().y << ", z = " << portal->getPosition().z << std::endl;
-        std::cout << "Camera coords: x = " << camera.getPosition().x << ", y = " << camera.getPosition().y << ", z = " << camera.getPosition().z << std::endl;
-
+    pTerrain2 = new Terrain(prog, noiseDimX, noiseDimY, &pNoise);
+    pTerrain2->setVPMatrix(camera.getVPMatrix());
+    pTerrain2->setInvViewMatrix(camera.getInvViewMatrix());
+    pTerrain2->enableNormals();
+    pTerrain2->computeTerrain();
+    pTerrain2->genHeightMapTexture();
+	pTerrain2->saveNoiseToFile("PerlinNoise_Terrain2.tga");
+    pTerrain2->draw();
 
         return true;
     }
