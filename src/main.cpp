@@ -15,6 +15,7 @@
 #include "Grass.h"
 #include "WorleyNoise.h"
 #include "Skydome.h"
+#include "Clouds.h"
 
 
 using namespace glm;
@@ -219,7 +220,11 @@ int main(){
     skydomeShader.loadShader("../src/shader/skydome.fs", Shader::FRAGMENT);
     GLint skydomeProg = skydomeShader.linkShaders();
 
-
+    Shader cloudsShader;
+    cloudsShader.loadShader("../src/shader/clouds.vs", Shader::VERTEX);
+    cloudsShader.loadShader("../src/shader/clouds.gs", Shader::GEOMETRY);
+	cloudsShader.loadShader("../src/shader/clouds.fs", Shader::FRAGMENT);
+	GLint cloudsProg = cloudsShader.linkShaders();
     /*
      * Terrain Pointer: pTerrain1, pTerrain2
      * Portal Pointer: pPortal1, pPortal2
@@ -249,11 +254,11 @@ int main(){
     wNoise.setOctavesFreqAmp(octaves, frequency, amplitude);
 
     int noiseSkyDimX = 256;
-	int noiseSkyDimY = 256;
+	int noiseSkyDimY = 128;
 	int noiseSkyDimZ = 64;
 	seed = 42;
-	octaves = 16;
-	frequency = 8.0;
+	octaves = 4;
+	frequency = 4.0;
     PerlinNoise pNoise3D;
 	pNoise3D.setParams(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
 	pNoise3D.setOctavesFreqAmp(octaves, frequency, amplitude);
@@ -331,9 +336,12 @@ int main(){
 
     Skydome skydome(skydomeProg, &camera);
     skydome.generateGeometry(noiseDimX / 3, 64, 64);
-//    skydome.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
     skydome.setBuffers();
 
+    Clouds clouds(cloudsProg, skydome.getCloudNumber(), skydome.getCloudAttributes(), &camera);
+    clouds.setBuffers();
+    clouds.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
+    skydome.setClouds(&clouds);
 
     ModelLoader model("../objects/sphere.obj", prog);
 	model.loadFile();
@@ -428,7 +436,6 @@ int main(){
         /* grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix()); */
         /* grass.draw(); */
 
-
         pPortal1->renderOutside();
 
 
@@ -462,6 +469,7 @@ int main(){
 
  		//END GRASS
         skydome.draw();
+
 
 
             pPortal1->renderInside();
