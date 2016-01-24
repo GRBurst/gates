@@ -38,12 +38,12 @@ void Clouds::setBuffers(){
 	glGenBuffers(1, &mVbo);
 	glBindBuffer(GL_ARRAY_BUFFER, mVbo);
 	glBufferData(GL_ARRAY_BUFFER, 3 * mCloudNumber * sizeof(GLfloat), mGeometry, GL_STATIC_DRAW);
-	std::cout <<"HIER";
-	std::cout << mCloudNumber;
-	for(int i = 0; i < mCloudNumber * 3; i++){
-		std::cout << mGeometry[i] << std::endl;
-		std::cout.flush();
-	}
+//	std::cout <<"HIER";
+//	std::cout << mCloudNumber;
+//	for(int i = 0; i < mCloudNumber * 3; i++){
+//		std::cout << mGeometry[i] << std::endl;
+//		std::cout.flush();
+//	}
 	// Get Attrib location
 	/* glEnableVertexAttribArray(terrainPosAttrib); */
 	/* glVertexAttribPointer(terrainPosAttrib, 3, GL_FLOAT, GL_FALSE, 24, 0); */
