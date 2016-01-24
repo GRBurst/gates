@@ -7,6 +7,7 @@ Texture::Texture()
     , location(0)
     , width(0)
     , height(0)
+	, depth(1)
     , cdata(0)
     , ddata(0)
 {
@@ -85,16 +86,17 @@ void Texture::setData(unsigned char* data, int width, int height)
     this->height    = height;
 }
 
-void Texture::setData(float* data, int width, int height)
+void Texture::setData(float* data, int width, int height, int depth)
 {
 	this->ddata     = data;
-	this->cdata		= new unsigned char[width * height];
-	for(int i = 0; i < width * height; i++)
-	{
-		this->cdata[i] = (int)(data[i] * 255);
-	}
+	this->cdata		= new unsigned char[width * height * depth];
+//	for(int i = 0; i < width * height * depth; i++)
+//	{
+//		this->cdata[i] = (int)(data[i] * 255);
+//	}
 	this->width     = width;
 	this->height    = height;
+	this->depth		= depth;
 }
 
 void Texture::loadCommonOptions()
@@ -122,6 +124,56 @@ void Texture::loadCommonOptions()
 
 }
 
+void Texture::loadSkydomeOptions()
+{
+//	glActiveTexture(GL_TEXTURE0 + this->location);
+//	glBindTexture(GL_TEXTURE_2D, this->texture);
+
+	// Give the image to OpenGL
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, this->width, this->height, 0, GL_RED, GL_FLOAT, ddata);
+
+    // build our texture mipmaps
+    //gluBuild2DMipmaps(GL_TEXTURE_2D, 4, width, height, GL_RGBA, GL_UNSIGNED_BYTE, cdata);
+
+    // select modulate to mix texture with color for shading
+    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+
+    // when texture area is small, bilinear filter the closest mipmap
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    // when texture area is large, bilinear filter the first mipmap
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // texture should tile
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,  GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,  GL_REPEAT);
+
+}
+
+void Texture::loadSkydome3DOptions()
+{
+//	glActiveTexture(GL_TEXTURE0 + this->location);
+//	glBindTexture(GL_TEXTURE_2D, this->texture);
+
+	// Give the image to OpenGL
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, this->width, this->height, this->depth, 0, GL_RED, GL_FLOAT, ddata);
+
+    // build our texture mipmaps
+    //gluBuild2DMipmaps(GL_TEXTURE_2D, 4, width, height, GL_RGBA, GL_UNSIGNED_BYTE, cdata);
+
+    // select modulate to mix texture with color for shading
+    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+
+    // when texture area is small, bilinear filter the closest mipmap
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    // when texture area is large, bilinear filter the first mipmap
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // texture should tile
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S,  GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T,  GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R,  GL_CLAMP_TO_EDGE);
+
+}
 void Texture::loadHeightmapOptions()
 {
 
@@ -150,6 +202,12 @@ void Texture::bind()
 {
     glActiveTexture(GL_TEXTURE0 + this->location);
     glBindTexture(GL_TEXTURE_2D, this->texture);
+}
+
+void Texture::bind3D()
+{
+    glActiveTexture(GL_TEXTURE0 + this->location);
+    glBindTexture(GL_TEXTURE_3D, this->texture);
 }
 
 void Texture::unbind()

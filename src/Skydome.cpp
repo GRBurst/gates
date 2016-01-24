@@ -8,7 +8,7 @@
 #include "Skydome.h"
 
 Skydome::Skydome(GLint shaderProgram, Camera* camera) : meshAttributes(0), mVao(0), mVbo(0), mShaderProgram(0),
-														muVPLocation(0), muInvViewLocation(0),
+														muVPLocation(0), muInvViewLocation(0), muTime(0),
 														camera(0), verticesNumber(0)
 {
 	// TODO Auto-generated constructor stub
@@ -21,12 +21,20 @@ Skydome::~Skydome()
 	// TODO Auto-generated destructor stub
 }
 
+void Skydome::loadTexture(float* textureData, int width, int height, int depth){
+	Texture* texture = new Texture();
+	texture->setData(textureData, width, height, depth);
+	texture->linkTexture(mShaderProgram, "textureSky");
+	texture->bind3D();
+	texture->loadSkydome3DOptions();
+}
+
 void Skydome::loadTexture(float* textureData, int width, int height){
 	Texture* texture = new Texture();
 	texture->setData(textureData, width, height);
 	texture->linkTexture(mShaderProgram, "textureSky");
 	texture->bind();
-	texture->loadCommonOptions();
+	texture->loadSkydomeOptions();
 }
 
 void Skydome::draw()
@@ -34,6 +42,7 @@ void Skydome::draw()
 	glUseProgram(mShaderProgram);
 
 	glUniformMatrix4fv(muVPLocation, 1, GL_FALSE, value_ptr(camera->getVPMatrix()));
+	glUniform1f(muTime, glfwGetTime());
 	glBindVertexArray(mVao);
 	glDrawArrays(GL_TRIANGLES, 0, verticesNumber );
 
@@ -63,6 +72,10 @@ void Skydome::generateGeometry(float r, int azimuths, int meridians)
 		float u2 = (float)(t+1)/meridians;
 		float theta1 = u1 * glm::pi<float>();
 		float theta2 = u2 * glm::pi<float>();
+//		float u1 = std::asin((2*t)/meridians - 1)/glm::pi<float>() + 0.5f;
+//		float u2 = std::asin((2*(t + 1))/meridians - 1)/glm::pi<float>() + 0.5f;
+//		float theta1 = (float)(t)/meridians * glm::pi<float>();
+//		float theta2 = (float)(t+1)/meridians * glm::pi<float>();
 
 		for( int p = 0 ; p < azimuths ; p++ )
 		{
@@ -70,6 +83,10 @@ void Skydome::generateGeometry(float r, int azimuths, int meridians)
 			float v2 = (float)(p+1)/azimuths;
 			float phi1 = v1 * 2 * glm::pi<float>();
 			float phi2 = v2 * 2 * glm::pi<float>();
+//			float v1 = std::asin((2*p)/azimuths - 1)/glm::pi<float>() + 0.5f;;
+//			float v2 = std::asin((2*(p + 1))/azimuths - 1)/glm::pi<float>() + 0.5f;
+//			float phi1 = (float)(p)/azimuths * 2 * glm::pi<float>();
+//			float phi2 = (float)(p+1)/azimuths * 2 * glm::pi<float>();
 
 			glm::vec3 vertex1 = glm::vec3(r * sin(theta1) * cos(phi1), r * cos(theta1), r * sin(theta1) * sin(phi1)); //z and y switch to have caps of sphere top and bottom
 			glm::vec3 vertex2 = glm::vec3(r * sin(theta1) * cos(phi2), r * cos(theta1), r * sin(theta1) * sin(phi2));
@@ -165,6 +182,7 @@ void Skydome::setBuffers()
 	//GLint normalAttrib = glGetAttribLocation(mShaderProgram, "vNormal");
 	muVPLocation = glGetUniformLocation(mShaderProgram, "uVPMatrix");
 	muInvViewLocation = glGetUniformLocation(mShaderProgram, "uInvViewMatrix");
+	muTime = glGetUniformLocation(mShaderProgram, "uTime");
 
 	verticesNumber = (meshAttributes.size() / 5) * 3;
 	//Generate & bind vao

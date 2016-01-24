@@ -28,22 +28,25 @@ class Noise
 		virtual ~Noise();
 
         void setParams(int x, int y, int seed);
-
+        void setParams(int x, int y, int z, int seed);
 		virtual float* getTextureData();
+		virtual float* getInverseTextureData();
 		virtual void generateNoiseImage() = 0;
 		virtual void setOctavesFreqAmp(int octaves, double frequency, double amplitude)
         {
             mOctaves = octaves; mFrequency = frequency; mAmplitude = amplitude;
         };
-
+//		virtual float* getSphericalTexture();
 		bool saveToFile(const char* filename);
 		int getXDim(){ return mXDim;}
 		int getYDim(){ return mYDim;}
+		int getZDim(){ return mZDim;}
+		int getWDim(){ return mWDim;}
 		double calculateNoiseValue(double x, double y);
 		glm::ivec2 getDimension(){ return glm::ivec2(mXDim, mYDim);}
 	protected:
 		double clamp(double x, double min, double max);
-		int mXDim, mYDim, mZDim, mSeed;
+		int mXDim, mYDim, mZDim, mWDim, mSeed;
 		NoiseType mNoiseType;
 		int mOctaves;
 		double mFrequency, mAmplitude;

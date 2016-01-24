@@ -235,6 +235,7 @@ int main(){
 
     int noiseDimX = 256;
     int noiseDimY = 256;
+    int noiseDimZ = 64;
     int seed = 42;
     int octaves = 16;
     double frequency = 8.0;
@@ -246,6 +247,17 @@ int main(){
     WorleyNoise wNoise;
     wNoise.setParams(noiseDimX, noiseDimY, seed);
     wNoise.setOctavesFreqAmp(octaves, frequency, amplitude);
+
+    int noiseSkyDimX = 256;
+	int noiseSkyDimY = 256;
+	int noiseSkyDimZ = 64;
+	seed = 42;
+	octaves = 16;
+	frequency = 8.0;
+    PerlinNoise pNoise3D;
+	pNoise3D.setParams(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
+	pNoise3D.setOctavesFreqAmp(octaves, frequency, amplitude);
+	pNoise3D.generateNoiseImage();
     /* wNoise.init(); */
     /* wNoise.generateNoiseImage(); */
     /* wNoise.saveToFile("WorleyNoise_Terrain.tga"); */
@@ -318,8 +330,8 @@ int main(){
 
 
     Skydome skydome(skydomeProg, &camera);
-    skydome.generateGeometry(noiseDimX / 2, 64, 64);
-    skydome.loadTexture(pNoise.getTextureData(), noiseDimX, noiseDimY);
+    skydome.generateGeometry(noiseDimX / 3, 64, 64);
+//    skydome.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
     skydome.setBuffers();
 
 
