@@ -11,7 +11,8 @@ Portal::Portal(const GLint& mShaderProgram)
 
 }
 
-void Portal::init(Camera *const cam, const Terrain& terrain1, const Terrain& terrain2) {
+void Portal::init( Camera *const cam, Terrain *const terrain1, Terrain *const terrain2)
+{
 
     modelFill->loadFile();
     modelFill->setBuffers();
@@ -24,22 +25,24 @@ void Portal::init(Camera *const cam, const Terrain& terrain1, const Terrain& ter
     camera = cam;
 
     std::default_random_engine gen(mId);
-    std::uniform_int_distribution<int> hDim1(0, terrain1.getWidth());
-    std::uniform_int_distribution<int> vDim1(0, terrain1.getHeight());
+    std::uniform_int_distribution<int> hDim1(0, terrain1->getWidth());
+    std::uniform_int_distribution<int> vDim1(0, terrain1->getHeight());
     std::uniform_real_distribution<double> deg(0.0, 360.0);
 
-    mPosition1 = terrain1.computePosition(hDim1(gen), vDim1(gen));
+    /* mPosition1 = terrain1->computePosition(hDim1(gen), vDim1(gen)); */
+    mPosition1 = glm::vec3(5.0, 1.0, 5.0);
     /* setRotation(glm::vec3(0.0, deg(gen), 0.0)); */
     setScale(glm::vec3(1.0, 1.0, 1.0));
     /* setTranslation(mPosition); */
     setTranslation(glm::vec3(5.0, 1.0, 5.0));
 
-    std::uniform_int_distribution<int> hDim2(0, terrain2.getWidth());
-    std::uniform_int_distribution<int> vDim2(0, terrain2.getHeight());
+    std::uniform_int_distribution<int> hDim2(0, terrain2->getWidth());
+    std::uniform_int_distribution<int> vDim2(0, terrain2->getHeight());
 
-    mPosition2 = terrain2.computePosition(hDim2(gen), vDim2(gen));
+    /* mPosition2 = terrain2->computePosition(hDim2(gen), vDim2(gen)); */
+    mPosition2 = glm::vec3(10.0, 1.0, 5.0);
     mScale2 = glm::vec3(1.0, 1.0, 1.0);
-    mTrans2 = glm::vec3(1.0, 1.0, 1.0);
+    mTrans2 = glm::vec3(5.0, 0.0, 0.0);
     mRot2 = glm::vec3(0.0, deg(gen), 0.0);
 
     Camera cam2;
@@ -47,6 +50,8 @@ void Portal::init(Camera *const cam, const Terrain& terrain1, const Terrain& ter
     cam2.rotate(glm::vec2(mRot2.y, 0.0));
     cam2.update();
     mMVP2 = cam2.getVPMatrix();
+    mVP2 = cam2.getVPMatrix();
+    mIV2 = cam2.getInvViewMatrix();
 
 }
 
@@ -119,14 +124,14 @@ void Portal::enableStencil()
     enableRenderStencilPattern();
     modelFill->setProjection(camera->getProjectionMatrix());
     modelFill->setView(camera->getViewMatrix());
-    modelFill->draw();
-    /* disableRenderStencilPattern(); */
+    if(mStatus)  modelFill->draw();
+    disableRenderStencilPattern();
 }
 
 // Secound call: Render current scene/terrain around stencil
 void Portal::renderOutside()
 {
-    disableRenderStencilPattern();
+    /* disableRenderStencilPattern(); */
     glStencilFunc(GL_EQUAL, 0, 0xFF);   // drawing the scene . skip where stencil's value is 0
     drawPortal();
 }
@@ -165,6 +170,7 @@ void Portal::worb()
     /* setRotation(mRot2); */
     setScale(mScale2);
     setTranslation(mTrans2);
+    std::cout << std::endl << "Portal worb" << std::endl;
 }
 /* void Portal::draw(const ConstSharedShaderProgram& shaderProg, */
 /*                       const GenericCamera& camera, */

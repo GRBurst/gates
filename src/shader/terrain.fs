@@ -1,5 +1,6 @@
 #version 410 core
-in vec3 fColor;
+in float fHeight;
+//in vec3 fColor;
 in vec2 fUV;
 in vec3 fNormal;
 in vec3 fPos;
@@ -48,26 +49,37 @@ void main()
 {
     //vec3 diff = dot(normalize(fNormal), normalize(fPos - lightPos)) * lightCol;
 
-    vec3 colorRes = fColor;
-    //vec3 colorRes = texture(heightMap, fUV).rrr;
-    float initColor = colorRes.r;
+    vec3 mapColor = texture(heightMap, fUV).rrr;
+    float mapHeight = mapColor.r;
 
-    vec4 terrainColor;
-    if (initColor < 0.1){
-        terrainColor = vec4(0.1, 0.15, 0.8, 1.0) - (vec4(0.0, 0.0, colorRes.r * 2, 0.0) );
+    //vec3 mixColor = (mapColor + heightColor)/2;
+    float mixHeight = (mapHeight + fHeight)/2;
+
+    /* float r = sin(fPos.x) * cos(fPos.y); */
+    /* float g = sin(fPos.y) * cos(fPos.z); */
+    /* float b = sin(fPos.z) * cos(fPos.x); */
+
+    vec3 terrainColor1, terrainColor2;
+
+    if (fHeight < 0.1){
+        terrainColor1 = vec3(0.1, 0.15, 0.8) - vec3(0.0, 0.0, fHeight * 2);
     }
-    else if (initColor >= 0.1 && initColor < 0.8){
-        terrainColor =vec4(0.1, 0.6, 0.1, 1.0) * vec4(colorRes.rrr, 1.0);
+    else if (fHeight < 0.8){
+        terrainColor1 = vec3(0.1, 0.6, 0.1) * vec3(0.1 + fHeight);
+        /* terrainColor2 = vec3(0.8 * fHeight); */
+        /* terrainColor1 = mix(terrainColor1, terrainColor2, fHeight/(2.0)); */
     }
-    else if (initColor >= 0.8 && initColor < 1.2){
-        terrainColor = vec4(0.8, 0.8, 0.8, 1.0) * vec4(colorRes.rrr, 1.0);
+    else if (fHeight < 1.2){
+        terrainColor1 = vec3(0.8 * fHeight);
+        /* terrainColor2 = vec3(1.0); */
+        /* terrainColor1 = mix(terrainColor1, terrainColor2, 0.2); */
     }
     else
     {
-        terrainColor = vec4(1.0, 1.0, 1.0, 1.0) * vec4(colorRes.rrr, 1.0);
+        terrainColor1 = vec3(1.0);
     }
 
-    color = phong(vec3(terrainColor));
+    color = phong(terrainColor1);
     //color = terrainColor * vec4(diff, 1.0);
     //color = vec4(diff, 1.0);
     //color = vec4(fNormal, 1.0);

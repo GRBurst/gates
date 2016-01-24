@@ -36,6 +36,7 @@ int gDrawGrid = 0;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+bool portalIntersection(Portal *const portal, Terrain *pTerrain1, Terrain *pTerrain2);
 
 void debugCallback(GLenum source, GLenum type, GLuint id,
                    GLenum severity, GLsizei length,
@@ -219,6 +220,19 @@ int main(){
     GLint skydomeProg = skydomeShader.linkShaders();
 
 
+    /*
+     * Terrain Pointer: pTerrain1, pTerrain2
+     * Portal Pointer: pPortal1, pPortal2
+     *
+     *
+     *
+     *
+     */
+
+    Terrain *pTerrain1, *pTerrain2;
+    Portal *pPortal1, *pPortal2;
+
+
     int noiseDimX = 256;
     int noiseDimY = 256;
     int seed = 42;
@@ -236,29 +250,29 @@ int main(){
     /* wNoise.generateNoiseImage(); */
     /* wNoise.saveToFile("WorleyNoise_Terrain.tga"); */
 
-    Terrain terrain1(terrainprog, noiseDimX, noiseDimY, &pNoise);
-    terrain1.setVPMatrix(camera.getVPMatrix());
-    terrain1.setInvViewMatrix(camera.getInvViewMatrix());
-    terrain1.enableNormals();
-    terrain1.computeTerrain();
-    terrain1.genHeightMapTexture();
-	terrain1.saveNoiseToFile("PerlinNoise_Terrain.tga");
-    terrain1.draw();
+    pTerrain1 = new Terrain(terrainprog, noiseDimX, noiseDimY, &pNoise);
+    pTerrain1->setVPMatrix(camera.getVPMatrix());
+    pTerrain1->setInvViewMatrix(camera.getInvViewMatrix());
+    pTerrain1->enableNormals();
+    pTerrain1->computeTerrain();
+    pTerrain1->genHeightMapTexture();
+	pTerrain1->saveNoiseToFile("PerlinNoise_Terrain.tga");
+    pTerrain1->draw();
 
-    terrain1.linkHeightMapTexture(terrainprog);
-    /* terrain1.debug(); */
+    /* pTerrain1->linkHeightMapTexture(terrainprog); */
+    /* pTerrain1->debug(); */
     
     
     // Next Terrain
-    Terrain terrain2(terrainprog, noiseDimX, noiseDimY, &wNoise);
-    terrain2.setVPMatrix(camera.getVPMatrix());
-    terrain2.setInvViewMatrix(camera.getInvViewMatrix());
-    terrain2.enableNormals();
-    terrain2.computeTerrain();
-    terrain2.genHeightMapTexture();
-	terrain2.saveNoiseToFile("WorleyNoise_Terrain.tga");
-    terrain2.draw();
-    /* terrain2.linkHeightMapTexture(terrainprog); */
+    pTerrain2 = new Terrain(terrainprog, noiseDimX, noiseDimY, &wNoise);
+    pTerrain2->setVPMatrix(camera.getVPMatrix());
+    pTerrain2->setInvViewMatrix(camera.getInvViewMatrix());
+    pTerrain2->enableNormals();
+    pTerrain2->computeTerrain();
+    pTerrain2->genHeightMapTexture();
+	pTerrain2->saveNoiseToFile("WorleyNoise_Terrain.tga");
+    pTerrain2->draw();
+    pTerrain2->linkHeightMapTexture(terrainprog);
     // Portal
     /* Portal portal2(prog); */
     /* portal2.init( &portalCam, terrain2 ); */
@@ -266,8 +280,8 @@ int main(){
     
     // Portal
     /* Camera portalCam; */
-    Portal portal1(prog);
-    portal1.init( &camera, terrain1, terrain2 );
+    pPortal1 = new Portal(prog);
+    pPortal1->init( &camera, pTerrain1, pTerrain2 );
 
 
     //GRASS
@@ -291,7 +305,7 @@ int main(){
 
     //grass.generatePositionsFromTexture(noise.getTextureDataF(), noise.getWidth(), noise.getHeight(), 0.2f, 0.7f);
 
-    grass.setTerrainVao(terrain1.getVAO(), terrain1.getTotalIndices());
+    grass.setTerrainVao(pTerrain1->getVAO(), pTerrain1->getTotalIndices());
     //grass.setBuffers();
 
     /* grass.setBuffers(); */
@@ -358,6 +372,9 @@ int main(){
 	double xpos, ypos;
     //model.setView(camera.getViewMatrix());
 
+    std::cout << std::endl << "Portal 1 coords: x = " << pPortal1->getPosition().x << ", y = " << pPortal1->getPosition().y << ", z = " << pPortal1->getPosition().z << std::endl;
+    std::cout << std::endl << "Camera coords: x = " << camera.getPosition().x << ", y = " << camera.getPosition().y << ", z = " << camera.getPosition().z << std::endl;
+    bool intersection = false;
     while(!(glfwWindowShouldClose(window)))
     {
 
@@ -375,35 +392,40 @@ int main(){
     		/* camera.setDeltaTime(frameTime); */
     		loops++;
     		//std::cout << "Pos(x, y): " << camera.getCamPos().x <<", " << camera.getCamPos().y << std::endl;
+
+            intersection = portalIntersection(pPortal1, pTerrain1, pTerrain2);
     	}
      	//update Frame
 //    	glUseProgram(prog);
     	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(0.0, 0.0, 0.0, 1.0);
         /* std::cout << "view: " << camera.getPos().x << "< " << camera.getPos().y << "< " << camera.getPos().z << std::endl; */
+
+
+
         //neu
         camera.update();
         /* portalCam.setPos(portal2.getPosition()); */
         /* portalCam.getViewMatrix(); */
 
-        portal1.enableStencil();
+        pPortal1->enableStencil();
 
 
-        /* portal1.substractStencil(); */
+        /* pPortal1->substractStencil(); */
         /* grass.setCameraPosRef(camera.getPos()); */
         /* grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix()); */
         /* grass.draw(); */
 
 
-        portal1.renderOutside();
+        pPortal1->renderOutside();
 
 
 
 
 
         // Portal
-        /* portal1.drawPortal(); */
-        /* portal1.drawFill(); */
+        /* pPortal1->drawPortal(); */
+        /* pPortal1->drawFill(); */
 
         // sphere
         model.setProjection(camera.getProjectionMatrix());
@@ -411,10 +433,10 @@ int main(){
         model.draw();
 
         // terrain1
-        terrain1.setVPMatrix(camera.getVPMatrix());
-        terrain1.setInvViewMatrix(camera.getInvViewMatrix());
-        terrain1.setGrid(gDrawGrid);
-        terrain1.draw();
+        pTerrain1->setVPMatrix(camera.getVPMatrix());
+        pTerrain1->setInvViewMatrix(camera.getInvViewMatrix());
+        pTerrain1->setGrid(gDrawGrid);
+        pTerrain1->draw();
         /* renderHeightmap(0.1, 10 , noise.getTextureData()); */
 
         //processInput
@@ -431,21 +453,26 @@ int main(){
 
 
 
-        portal1.renderInside();
+        if(pPortal1->isActive())
+        {
+            pPortal1->renderInside();
 
 
-        // next terrain
-        terrain2.setVPMatrix(camera.getVPMatrix());
-        terrain2.setInvViewMatrix(camera.getInvViewMatrix());
-        terrain2.setGrid(gDrawGrid);
-        terrain2.draw();
+            // next terrain
+            /* pTerrain2->setVPMatrix(pPortal1->getNextVP()); */
+            /* pTerrain2->setInvViewMatrix(pPortal1->getNextInvV()); */
+            pTerrain2->setVPMatrix(camera.getVPMatrix());
+            pTerrain2->setInvViewMatrix(camera.getInvViewMatrix());
+            pTerrain2->setGrid(gDrawGrid);
+            pTerrain2->draw();
+
+        }
 
 
 
 
 
-
-        portal1.disableStencil();
+        pPortal1->disableStencil();
 
 
 
@@ -464,6 +491,42 @@ int main(){
 	/* glDeleteProgram(grassprog); */
 	glDeleteProgram(terrainprog);
 
+
+}
+
+bool portalIntersection(Portal *const portal, Terrain *pTerrain1, Terrain *pTerrain2)
+{
+
+    float diff = glm::length(glm::vec3(camera.getPosition() - portal->getPosition()));
+
+    if((diff < 1.0) && portal->isActive())
+    {
+        std::cout << std::endl << "Intersection in physics" << std::endl;
+        std::cout << "Portal 1 coords: x = " << portal->getPosition().x << ", y = " << portal->getPosition().y << ", z = " << portal->getPosition().z << std::endl;
+        std::cout << "Camera coords: x = " << camera.getPosition().x << ", y = " << camera.getPosition().y << ", z = " << camera.getPosition().z << std::endl;
+        portal->worb();
+        camera.setPosition(portal->getPosition());
+        /* portal->setTranslation(camera.getPosition()); */
+        camera.update();
+        /* camera.setOrientation(); */
+        std::cout << "pTerrain1 = " << pTerrain1 << std::endl;
+        std::cout << "pTerrain2 = " << pTerrain2 << std::endl;
+        Terrain *tmpTerrain = pTerrain1;
+        pTerrain1 = pTerrain2;
+        pTerrain2 = tmpTerrain;
+        std::cout << "pTerrain1 = " << pTerrain1 << std::endl;
+        std::cout << "pTerrain2 = " << pTerrain2 << std::endl;
+
+
+
+        std::cout << "Portal 1 coords: x = " << portal->getPosition().x << ", y = " << portal->getPosition().y << ", z = " << portal->getPosition().z << std::endl;
+        std::cout << "Camera coords: x = " << camera.getPosition().x << ", y = " << camera.getPosition().y << ", z = " << camera.getPosition().z << std::endl;
+
+
+        return true;
+    }
+
+    return false;
 
 }
 
@@ -501,6 +564,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         case GLFW_KEY_G :
             if(action == GLFW_PRESS) gDrawGrid = (gDrawGrid + 1) % 3;
             break;
+        case GLFW_KEY_C :
+            if(action == GLFW_PRESS)
+            {
+                std::cout << std::endl << "Camera coords: x = " << camera.getPosition().x << ", y = " << camera.getPosition().y << ", z = " << camera.getPosition().z << std::endl;
+            }
+            break;
+
         default: std::cout << "Key has no function!" << std::endl;
             break;
     }
