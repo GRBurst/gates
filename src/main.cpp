@@ -247,16 +247,8 @@ int main(){
 
     terrain1.linkHeightMapTexture(terrainprog);
     /* terrain1.debug(); */
-    // Portal
-    Portal portal1(prog);
-    portal1.init( &camera, terrain1 );
     
     
-    
-
-
-    
-    Camera portalCam;
     // Next Terrain
     Terrain terrain2(terrainprog, noiseDimX, noiseDimY, &wNoise);
     terrain2.setVPMatrix(camera.getVPMatrix());
@@ -268,8 +260,14 @@ int main(){
     terrain2.draw();
     /* terrain2.linkHeightMapTexture(terrainprog); */
     // Portal
-    Portal portal2(prog);
-    portal2.init( &portalCam, terrain2 );
+    /* Portal portal2(prog); */
+    /* portal2.init( &portalCam, terrain2 ); */
+    
+    
+    // Portal
+    /* Camera portalCam; */
+    Portal portal1(prog);
+    portal1.init( &camera, terrain1, terrain2 );
 
 
     //GRASS
@@ -381,6 +379,8 @@ int main(){
         /* std::cout << "view: " << camera.getPos().x << "< " << camera.getPos().y << "< " << camera.getPos().z << std::endl; */
         //neu
         camera.update();
+        /* portalCam.setPos(portal2.getPosition()); */
+        /* portalCam.getViewMatrix(); */
 
         portal1.enableStencil();
 
@@ -431,7 +431,7 @@ int main(){
 
  		//END GRASS
          skydome.setVPMatrix(camera.getVPMatrix());
-         skydome.draw();
+         /* skydome.draw(); */
 
 
 

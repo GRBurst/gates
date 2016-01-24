@@ -4,12 +4,14 @@ unsigned int Portal::idGenerator = 0;
 Portal::Portal(const GLint& mShaderProgram)
 {
     this->mId = idGenerator++;
+    this->mStatus = true;
 
     model = new ModelLoader("../objects/flat_torus.obj", mShaderProgram);
     modelFill = new ModelLoader("../objects/inner_plane.obj", mShaderProgram);
+
 }
 
-void Portal::init(Camera* cam, const Terrain& terrain) {
+void Portal::init(Camera *const cam, const Terrain& terrain1, const Terrain& terrain2) {
 
     modelFill->loadFile();
     modelFill->setBuffers();
@@ -19,23 +21,33 @@ void Portal::init(Camera* cam, const Terrain& terrain) {
     model->setBuffers();
     model->setStandardUniformLocations();
 
-    int xDim = terrain.getWidth();
-    std::default_random_engine gen(mId);
-    std::uniform_int_distribution<int> hDim(0, xDim);
+    camera = cam;
 
-    int x = hDim(gen);
-    int z = hDim(gen);
-    mPosition = terrain.computePosition(x, z);
-    /* setTranslation(mPosition); */
-    /* setScale(glm::vec3(1.0, 1.0, 1.0)); */
+    std::default_random_engine gen(mId);
+    std::uniform_int_distribution<int> hDim1(0, terrain1.getWidth());
+    std::uniform_int_distribution<int> vDim1(0, terrain1.getHeight());
+    std::uniform_real_distribution<double> deg(0.0, 360.0);
+
+    mPosition1 = terrain1.computePosition(hDim1(gen), vDim1(gen));
+    /* setRotation(glm::vec3(0.0, deg(gen), 0.0)); */
     setScale(glm::vec3(1.0, 1.0, 1.0));
+    /* setTranslation(mPosition); */
     setTranslation(glm::vec3(5.0, 1.0, 5.0));
 
+    std::uniform_int_distribution<int> hDim2(0, terrain2.getWidth());
+    std::uniform_int_distribution<int> vDim2(0, terrain2.getHeight());
 
-    /* setRotation(glm::vec3(0.0, 0.0, 0.0)); */
-    /* setScale(glm::vec3(0.010, 0.010, 0.010)); */
+    mPosition2 = terrain2.computePosition(hDim2(gen), vDim2(gen));
+    mScale2 = glm::vec3(1.0, 1.0, 1.0);
+    mTrans2 = glm::vec3(1.0, 1.0, 1.0);
+    mRot2 = glm::vec3(0.0, deg(gen), 0.0);
 
-    camera = cam;
+    Camera cam2;
+    cam2.setPosition(mPosition2);
+    cam2.rotate(glm::vec2(mRot2.y, 0.0));
+    cam2.update();
+    mMVP2 = cam2.getVPMatrix();
+
 }
 
 /* void setHeight(const float& height); */
@@ -48,7 +60,8 @@ void Portal::init(Camera* cam, const Terrain& terrain) {
 
 glm::vec3 Portal::getPosition()
 {
-    return mPosition;
+    if(mStatus) return mPosition1;
+    return mPosition2;
 }
 
 void Portal::setScale(glm::vec3 ratio)
@@ -74,8 +87,8 @@ void Portal::enableRenderStencilPattern()
 {
     //Settings for init rendering coords for stencil buffer
     glEnable(GL_STENCIL_TEST);
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    glDepthMask(GL_FALSE);
+    /* glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); */
+    /* glDepthMask(GL_FALSE); */
     glStencilFunc(GL_NEVER, 1, 0xFF);
     glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);  // draw 1s on test fail (always)
 
@@ -87,10 +100,17 @@ void Portal::enableRenderStencilPattern()
 
 void Portal::disableRenderStencilPattern()
 {
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    glDepthMask(GL_TRUE);
+    /* glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); */
+    /* glDepthMask(GL_TRUE); */
     glStencilMask(0x00);
 }
+
+/* void Portal::substractStencil() */
+/* { */
+/*     glStencilFunc(GL_EQUAL, 1, 0xFF);   // drawing the scene . skip where stencil's value is 0 */
+/*     glStencilOp(GL_KEEP, GL_ZERO, GL_KEEP);  // draw 1s on test fail (always) */
+/*     glStencilMask(0xFF); */
+/* } */
 
 // Fist call: Renders stencil pattern
 void Portal::enableStencil()
@@ -100,12 +120,13 @@ void Portal::enableStencil()
     modelFill->setProjection(camera->getProjectionMatrix());
     modelFill->setView(camera->getViewMatrix());
     modelFill->draw();
-    disableRenderStencilPattern();
+    /* disableRenderStencilPattern(); */
 }
 
 // Secound call: Render current scene/terrain around stencil
 void Portal::renderOutside()
 {
+    disableRenderStencilPattern();
     glStencilFunc(GL_EQUAL, 0, 0xFF);   // drawing the scene . skip where stencil's value is 0
     drawPortal();
 }
@@ -138,6 +159,13 @@ void Portal::drawFill()
     modelFill->draw();
 }
 
+void Portal::worb()
+{
+    this->mStatus = false;
+    /* setRotation(mRot2); */
+    setScale(mScale2);
+    setTranslation(mTrans2);
+}
 /* void Portal::draw(const ConstSharedShaderProgram& shaderProg, */
 /*                       const GenericCamera& camera, */
 /*                       const dvec3& translation, */

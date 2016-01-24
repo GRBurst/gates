@@ -11,7 +11,7 @@ class Portal
 {
 public:
     Portal(const GLint& mShaderProgram);
-    void init( Camera* cam, const Terrain& terrain );
+    void init( Camera *const cam, const Terrain& terrain1, const Terrain& terrain2);
     /* void loadPortal(); */
 
     void enableStencil();
@@ -27,6 +27,8 @@ public:
     void setTranslation(glm::vec3 dist);
     void setTransforms(glm::vec3 rot, glm::vec3 scale, glm::vec3 trans);
     glm::vec3 getPosition();
+
+    void worb();
     /* void setHeight(const float& height); */
 
     /* void drawPortal( const Shader& shaderProg, const Camera& camera ); */
@@ -44,7 +46,13 @@ public:
 private:
     static unsigned int idGenerator;
     unsigned mId;
-    glm::vec3 mPosition;
+    bool mStatus;
+    glm::vec3 mPosition1;
+    glm::vec3 mPosition2;
+    glm::vec3 mRot2;
+    glm::vec3 mScale2;
+    glm::vec3 mTrans2;
+    glm::mat4 mMVP2;
     ModelLoader *model;
     ModelLoader *modelFill;
     Camera* camera;
