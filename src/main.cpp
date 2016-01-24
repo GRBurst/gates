@@ -257,8 +257,8 @@ int main(){
 	int noiseSkyDimY = 128;
 	int noiseSkyDimZ = 64;
 	seed = 42;
-	octaves = 4;
-	frequency = 4.0;
+	octaves = 2;
+	frequency = 2.0;
     PerlinNoise pNoise3D;
 	pNoise3D.setParams(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
 	pNoise3D.setOctavesFreqAmp(octaves, frequency, amplitude);

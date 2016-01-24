@@ -89,12 +89,12 @@ void PerlinNoise::generateNoiseImage(){
 				for(int x = 0; x < mXDim; x++){
 					float value = static_cast<float>(noise(static_cast<double>(x), static_cast<double>(y), static_cast<double>(z)));
 					mNoiseValues[z * mYDim * mXDim + y * mXDim + x] = value;
-					if (value < mMin)
-						mMin = value;
-					if (value > mMax)
-						mMax = value;
-    				}
-    			}
+//					if (value < mMin)
+//						mMin = value;
+//					if (value > mMax)
+//						mMax = value;
+				}
+			}
     	}
     }
 
@@ -195,9 +195,9 @@ double PerlinNoise::calculateNoiseValue(double x, double y){
 }
 
 double PerlinNoise::calculateNoiseValue(double x, double y, double z){
-	int N = 4096;
+
 	glm::dvec3 inputVector(x, y, z);
-	int b00, b10, b01, b11;
+	int b00, b10, b01, b11,  b000, b100, b010, b110, b001, b101, b011, b111;
 	double a, b, c, d, e, f;
 	int i, j;
 
@@ -217,28 +217,37 @@ double PerlinNoise::calculateNoiseValue(double x, double y, double z){
 	b01 = mPermutationTable[i + b1.y];
 	b11 = mPermutationTable[j + b1.y];
 
+	b000 = mPermutationTable[b00 + b0.z];
+	b100 = mPermutationTable[b10 + b0.z];
+	b010 = mPermutationTable[b01 + b0.z];
+	b110 = mPermutationTable[b11 + b0.z];
+	b001 = mPermutationTable[b00 + b1.z];
+	b101 = mPermutationTable[b10 + b1.z];
+	b011 = mPermutationTable[b01 + b1.z];
+	b111 = mPermutationTable[b11 + b1.z];
+
 	s = interpolationPolynomial(r0);
 
-	q = glm::dvec3(mGradientTable3d.at(b00));
+	q = glm::dvec3(mGradientTable3d.at(b000));
 	u[0] = glm::dot(q, glm::dvec3(r0.x, r0.y, r0.z));
-	q = glm::dvec3(mGradientTable3d.at(b10));
+	q = glm::dvec3(mGradientTable3d.at(b100));
 	v[0] = glm::dot(q, glm::dvec3(r1.x, r0.y, r0.z));
 
 
 
-	q = glm::dvec3(mGradientTable3d.at(b01 + b0.z));
+	q = glm::dvec3(mGradientTable3d.at(b010));
 	u[1] = glm::dot(q, glm::dvec3(r0.x, r1.y, r0.z));
-	q = glm::dvec3(mGradientTable3d.at(b11 + b0.z));
+	q = glm::dvec3(mGradientTable3d.at(b110));
 	v[1] = glm::dot(q, glm::dvec3(r1.x, r1.y, r0.z));
 
-	q = glm::dvec3(mGradientTable3d.at(b00 + b1.z));
+	q = glm::dvec3(mGradientTable3d.at(b001));
 	u[2] = glm::dot(q, glm::dvec3(r0.x, r0.y, r1.z));
-	q = glm::dvec3(mGradientTable3d.at(b10 + b1.z));
+	q = glm::dvec3(mGradientTable3d.at(b101));
 	v[2] = glm::dot(q, glm::dvec3(r1.y, r0.y, r1.z));
 
-	q = glm::dvec3(mGradientTable3d.at(b01 + b1.z));
+	q = glm::dvec3(mGradientTable3d.at(b011));
 	u[3] = glm::dot(q, glm::dvec3(r0.x, r1.y, r1.z));
-	q = glm::dvec3(mGradientTable3d.at(b11 + b1.z));
+	q = glm::dvec3(mGradientTable3d.at(b111));
 	v[3] = glm::dot(q, glm::dvec3(r1.y, r1.y, r1.z));
 
 	a = lerp(s.x, u[0], v[0]);
@@ -248,7 +257,7 @@ double PerlinNoise::calculateNoiseValue(double x, double y, double z){
 	e = lerp(s.y, a, b);
 	f = lerp(s.y, c, d);
 
-	return clamp(lerp(s.y, e, f), 0.0, 1.0);
+	return lerp(s.z, f, e);
 //	return lerp(s.y, a, b);
 }
 glm::dvec4 PerlinNoise::interpolationPolynomial(glm::dvec4 vec){
@@ -274,7 +283,7 @@ glm::dvec2 PerlinNoise::interpolationPolynomial(glm::dvec2 vec){
 
 double PerlinNoise::interpolationPolynomial(double t){
 	return t * t *(3 - 2 * t);
-				//t * t * t * (t * (t * 6 - 15) + 10); simplex
+	//return t * t * t * (t * (t * 6 - 15) + 10); //simplex
 }
 
 void PerlinNoise::initPermutationTable(){
