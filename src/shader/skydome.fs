@@ -13,5 +13,6 @@ void main()
 	//vec3 f3DUV= vec3(fUV, uTime / 64.0);
  	//color = mix(vec4(texture(textureSky, f3DUV).r, texture(textureSky, f3DUV).r, texture(textureSky, f3DUV).r, 1.0), vec4(0.1, 0.22, 0.6, 1.0), 0.4 );
  	
- 	color = vec4(fUV.x * 0.81, 0.15 + fUV.x * 0.23, 0.66, 1.0);
+ 	color = mix(vec4(fUV.x * 0.71, 0.15 + fUV.x * 0.1 + fUV.x * 0.23, fUV.x * 0.23 + 0.66, 1.0), vec4(texture(textureSky, vec3(fUV, uTime / 512)).rrr, 1.0), 0.7);
+ 	//color = vec4(fUV.x * 0.71, 0.15 + fUV.x * 0.3 + fUV.x * 0.23, fUV.x * 0.13 + 0.66, 1.0);
 }

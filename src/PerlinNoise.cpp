@@ -53,20 +53,19 @@ void PerlinNoise::printParams()
 }
 
 void PerlinNoise::generateNoiseImage(){
-    if(mStart){
-        mStart = false;
-        initPermutationTable();
-        if (mZDim == 1)
-        	init2DGradientTable();
-        else
-        	init3DGradientTable();
-    }
 
+	initPermutationTable();
+	if (mZDim == 1)
+		init2DGradientTable();
+	else
+		init3DGradientTable();
+
+    mStart = false;
 //    printParams();
     if (mZDim == 1){
     	for(int y = 0; y < mYDim; y++){
 			for(int x = 0; x < mXDim; x++){
-				float value = static_cast<float>(noise(static_cast<double>(x), static_cast<double>(y)));
+				float value = static_cast<float>(fbm(static_cast<double>(x), static_cast<double>(y)));
 				//value = value -floor(value);
 				mNoiseValues[y * mXDim + x] = value;
 //				std::cout << value << std::endl;
@@ -89,15 +88,24 @@ void PerlinNoise::generateNoiseImage(){
     	for(int z = 0; z < mZDim; z++){
     		for(int y = 0; y < mYDim; y++){
 				for(int x = 0; x < mXDim; x++){
-					float value = static_cast<float>(noise(static_cast<double>(x), static_cast<double>(y), static_cast<double>(z)));
+					float value = static_cast<float>(fbm(static_cast<double>(x), static_cast<double>(y), static_cast<double>(z)));
 					mNoiseValues[z * mYDim * mXDim + y * mXDim + x] = value;
-//					if (value < mMin)
-//						mMin = value;
-//					if (value > mMax)
-//						mMax = value;
+					if (value < mMin)
+						mMin = value;
+					if (value > mMax)
+						mMax = value;
 				}
 			}
     	}
+    	if (mMax != 0)
+			for(int z = 0; z < mZDim; z++){
+				for(int y = 0; y < mYDim; y++){
+					for(int x = 0; x < mXDim; x++){
+						mNoiseValues[z * mYDim * mXDim + y * mXDim + x] = (mNoiseValues[z * mYDim * mXDim + y * mXDim + x] - mMin) / mMax;
+
+					}
+				}
+			}
     }
 
 
@@ -105,7 +113,7 @@ void PerlinNoise::generateNoiseImage(){
     std::cout << "perlinNoise: min = " << mMin << ", max = " << mMax << std::endl;
 }
 
-double PerlinNoise::noise(double x, double y){
+double PerlinNoise::fbm(double x, double y){
 	double result = 0.0;
 	double amp = mAmplitude;
 	x = x / (double)mXDim;
@@ -121,7 +129,7 @@ double PerlinNoise::noise(double x, double y){
 	return result;
 }
 
-double PerlinNoise::noise(double x, double y, double z){
+double PerlinNoise::fbm(double x, double y, double z){
 	double result = 0.0;
 	double amp = mAmplitude;
 	x = x / (double)mXDim;
@@ -135,7 +143,7 @@ double PerlinNoise::noise(double x, double y, double z){
 		x *= 2.0;
 		y *= 2.0;
 		z *= 2.0;
-		amp *= 0.2;
+		amp *= 0.5;
 	}
 	return result;
 }
@@ -150,8 +158,8 @@ double PerlinNoise::noise(double x, double y, double z){
 
 void PerlinNoise::setGridPoints(double inputVector, int &b0, int &b1, double &r0, double &r1){
 	double t = inputVector + N;
-	b0 = ((int)t) % (mSampleSize - 1); //faster modulo operation
-	b1 = (b0 + 1) % (mSampleSize - 1);
+	b0 = ((int)t) & (mSampleSize - 1); //faster modulo operation
+	b1 = (b0 + 1) & (mSampleSize - 1);
 	r0 = t - ((int)t);
 	r1 = r0 - 1;
 

@@ -12,7 +12,7 @@ uniform float uTime;
 out float height;
 out vec2 fUV;
 
-out vec3 vPosition;
+out vec3 fPosition;
 
 #define PI 3.141592653589793238462643383279
 
@@ -33,7 +33,8 @@ void main()
 	vec3 norm = normalize(vec3(gl_in[0].gl_Position));
 	vec3 right = normalize(cross(norm, vec3(0, 1, 0)));
 	vec3 up = normalize(cross(norm, right));
-	mat4 M = rotationMatrix(vec3(0, 1, 0), (uTime / 120) * PI);
+	fPosition = vec3(gl_in[0].gl_Position);
+	mat4 M = rotationMatrix(vec3(0, 1, 0), (uTime / 512) * PI);
 	gl_Position = uVPMatrix * M * (gl_in[0].gl_Position -vec4(20*norm + 10 * right - 5*up, 0));
 	fUV = vec2(1, 0);	
 	EmitVertex();

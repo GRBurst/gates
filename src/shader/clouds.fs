@@ -1,6 +1,7 @@
 #version 410 core
 out vec4 color;
 in vec2 fUV;
+in vec3 fPosition;
 uniform float uTime;
 
 uniform sampler3D tClouds;
@@ -17,8 +18,9 @@ float gauss(float x){
 void main()
 {	
 	vec4 resColor;
-	vec3 f3DUV= vec3(fUV, 0.5);
-	if (texture(tClouds, f3DUV).r < 0.6)
+	vec3 f3DUV= vec3(fUV, uTime / 1024 + ceil(fPosition.z));
+
+	if (texture(tClouds, f3DUV).r < 0.05)
 		resColor = vec4(0.0, 0.0, 0.0, 0.0);
 	else
 		resColor = vec4(texture(tClouds, f3DUV).r, texture(tClouds, f3DUV).r, texture(tClouds, f3DUV).r, gauss(fUV.x) + gauss(fUV.y));
