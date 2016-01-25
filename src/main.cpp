@@ -25,19 +25,15 @@ GLFWwindow* window;
 
 const int UPDATES_PER_SECOND = 60;
 const int MAX_FRAMESKIP = 10;
-double frameTime = 1.0 / UPDATES_PER_SECOND;
-//std::chrono::time_point<std::chrono::steady_clock, std::chrono::milliseconds> oldTime;
-//std::chrono::time_point<std::chrono::steady_clock, std::chrono::milliseconds> newTime = std::chrono::steady_clock::now();;
-float oldTime, newTime;
-int loops;
+const double frameTime = 1.0 / UPDATES_PER_SECOND;
 
 Camera camera;
 int gDrawGrid = 0;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-bool portalIntersection(Portal *const portal, Terrain* &pTerrain1, Terrain* &pTerrain2, const GLint& prog);
+void mouse_callback(GLFWwindow* window, double mouseXPosition, double mouseYPosition);
+    bool portalIntersection(Camera *const camera, Terrain*& pActiveTerrain, Terrain*& pInactiveTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, const GLint& terrainShaderProgram, const GLint& portalprog);
 
 void debugCallback(GLenum source, GLenum type, GLuint id,
                    GLenum severity, GLsizei length,
@@ -149,25 +145,8 @@ void displayFrame(){
 
 }
 
-/* void renderHeightmap(float size, float h, double* heights) */
-/* { */
-
-/*     int dim = 50; */
-/*     for(int i = 0; i < dim-1; i++) */
-/*         for(int j = 0; j < dim-1; j++) */
-/*         { */
-/*             glBegin(GL_TRIANGLE_STRIP); */
-/*             glColor3f(heights[dim * i + j], heights[dim * i + j], heights[dim * i + j]); */
-/*             glVertex3f(i*dim, heights[dim * i + j]*h, j*size); */
-/*             glVertex3f((i+1)*dim, heights[dim * (i+1) + j]*h, j*size); */
-/*             glVertex3f(i*dim, heights[dim * i + (j+1)]*h, (j+1)*size); */
-/*             glVertex3f((i+1)*dim, heights[dim * (i+1) + (j+1)]*h, (j+1)*size); */
-/*             glEnd(); */
-/*         } */
-
-/* } */
-
-int main(){
+int main()
+{
 
     if( !glfwInit() )
     {
@@ -183,200 +162,19 @@ int main(){
     }
 
     glewExperimental = true; // Needed in core profile
-    if (glewInit() != GLEW_OK) {
+    if (glewInit() != GLEW_OK)
+    {
         fprintf(stderr, "Failed to initialize GLEW\n");
         return -1;
     }
     GLenum err = GL_NO_ERROR;
     err = glGetError();
-	if (err != GL_NO_ERROR)
-		std::cout << "Fehler GLEWInit(): " << err << std::endl;
-	std::cout.flush();
-	initOpenGL();
-	//Noise noise(noiseDimX, noiseDimY, Noise::PERLIN, 9, 8, 2.0, 3.0);
-	//noise.generateNoiseImage();
-	//noise.saveToFile("texture.tga");
+    if (err != GL_NO_ERROR)
+        std::cout << "Fehler GLEWInit(): " << err << std::endl;
+    std::cout.flush();
+    initOpenGL();
 
-    Shader shader;
-
-    /* shader.loadShader("../src/shader/triangle.vs", Shader::VERTEX); */
-    /* shader.loadShader("../src/shader/triangle.fs", Shader::FRAGMENT); */
-    shader.loadShader("../src/shader/main.vs", Shader::VERTEX);
-    shader.loadShader("../src/shader/main.fs", Shader::FRAGMENT);
-
-    /* shader.loadShader("../src/shader/terrain.vs", Shader::VERTEX); */
-    /* shader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT); */
-    GLint prog = shader.linkShaders();
-
-    // Terrain
-    Shader terrainshader;
-    terrainshader.loadShader("../src/shader/terrain.vs", Shader::VERTEX);
-    terrainshader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT);
-    GLint terrainprog = terrainshader.linkShaders();
-
-    // Skydom
-    Shader skydomeShader;
-    skydomeShader.loadShader("../src/shader/skydome.vs", Shader::VERTEX);
-    skydomeShader.loadShader("../src/shader/skydome.fs", Shader::FRAGMENT);
-    GLint skydomeProg = skydomeShader.linkShaders();
-
-    Shader cloudsShader;
-    cloudsShader.loadShader("../src/shader/clouds.vs", Shader::VERTEX);
-    cloudsShader.loadShader("../src/shader/clouds.gs", Shader::GEOMETRY);
-	cloudsShader.loadShader("../src/shader/clouds.fs", Shader::FRAGMENT);
-	GLint cloudsProg = cloudsShader.linkShaders();
-    /*
-     * Terrain Pointer: pTerrain1, pTerrain2
-     * Portal Pointer: pPortal1, pPortal2
-     *
-     *
-     *
-     *
-     */
-
-    Terrain *pTerrain1, *pTerrain2;
-    Portal *pPortal1, *pPortal2;
-
-
-    int noiseDimX = 256;
-    int noiseDimY = 256;
-    int noiseDimZ = 64;
-    int seed = 42;
-    int octaves = 16;
-    double frequency = 8.0;
-    double amplitude = 4.0;
-    PerlinNoise pNoise;
-    pNoise.setParams(noiseDimX, noiseDimY, seed);
-    pNoise.setOctavesFreqAmp(octaves, frequency, amplitude);
-    
-    WorleyNoise wNoise;
-    wNoise.setParams(noiseDimX, noiseDimY, seed);
-    wNoise.setOctavesFreqAmp(octaves, frequency, amplitude);
-
-    int noiseSkyDimX = 256;
-	int noiseSkyDimY = 128;
-	int noiseSkyDimZ = 64;
-	seed = 42;
-	octaves = 2;
-	frequency = 2.0;
-    PerlinNoise pNoise3D;
-	pNoise3D.setParams(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
-	pNoise3D.setOctavesFreqAmp(octaves, frequency, amplitude);
-	pNoise3D.generateNoiseImage();
-	pNoise3D.saveToFile("PerlinNoise3D_clouds.tga");
-    /* wNoise.init(); */
-    /* wNoise.generateNoiseImage(); */
-    /* wNoise.saveToFile("WorleyNoise_Terrain.tga"); */
-
-    pTerrain1 = new Terrain(terrainprog, noiseDimX, noiseDimY, &pNoise);
-    pTerrain1->setVPMatrix(camera.getVPMatrix());
-    pTerrain1->setInvViewMatrix(camera.getInvViewMatrix());
-    pTerrain1->enableNormals();
-    pTerrain1->computeTerrain();
-    pTerrain1->genHeightMapTexture();
-	pTerrain1->saveNoiseToFile("PerlinNoise_Terrain.tga");
-    /* pTerrain1->draw(); */
-
-    /* pTerrain1->linkHeightMapTexture(terrainprog); */
-    /* pTerrain1->debug(); */
-    
-    
-    // Next Terrain
-    pTerrain2 = new Terrain(terrainprog, noiseDimX, noiseDimY, &wNoise);
-    pTerrain2->setVPMatrix(camera.getVPMatrix());
-    pTerrain2->setInvViewMatrix(camera.getInvViewMatrix());
-    pTerrain2->enableNormals();
-    pTerrain2->computeTerrain();
-    pTerrain2->genHeightMapTexture();
-	pTerrain2->saveNoiseToFile("WorleyNoise_Terrain.tga");
-    pTerrain2->draw();
-    pTerrain2->linkHeightMapTexture(terrainprog);
-    // Portal
-    /* Portal portal2(prog); */
-    /* portal2.init( &portalCam, terrain2 ); */
-    
-    
-    // Portal
-    /* Camera portalCam; */
-    pPortal1 = new Portal(prog);
-    pPortal1->init( &camera, pTerrain1, pTerrain2 );
-
-
-    //GRASS
-    Shader grassshader;
-    grassshader.loadShader("../src/shader/grass.vs", Shader::VERTEX);
-    grassshader.loadShader("../src/shader/grass.gs", Shader::GEOMETRY);
-    grassshader.loadShader("../src/shader/grass.fs", Shader::FRAGMENT);
-    GLint grassprog = grassshader.linkShaders();
-
-    Grass grass;
-//
-    grass.setShaderProgram(grassprog);
-//    GLfloat billboard[] = {
-//        		1.0f, 2.0f, 0.0f,
-//				0.1f, 2.0f, -2.0f,
-//				0.3f, 2.0f, -1.5f,
-//				-0.3f, 2.76f, -1.0f,
-//				2.0f,1.0f,2.0f,0.6f,-1.0f,-1.0f
-//
-//        };
-
-    //grass.generatePositionsFromTexture(noise.getTextureDataF(), noise.getWidth(), noise.getHeight(), 0.2f, 0.7f);
-
-    grass.setTerrainVao(pTerrain1->getVAO(), pTerrain1->getTotalIndices());
-    //grass.setBuffers();
-
-    /* grass.setBuffers(); */
-
-    grass.setUniforms();
-    grass.loadTexture();
-    //END GRASS
-    //Outsource
-
-
-
-    Skydome skydome(skydomeProg, &camera);
-    skydome.generateGeometry(noiseDimX / 3, 64, 64);
-    skydome.setBuffers();
-
-    Clouds clouds(cloudsProg, skydome.getCloudNumber(), skydome.getCloudAttributes(), &camera);
-    clouds.setBuffers();
-    clouds.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
-    skydome.setClouds(&clouds);
-
-    ModelLoader model("../objects/sphere.obj", prog);
-	model.loadFile();
-
-	model.setBuffers();
-	model.setStandardUniformLocations();
-	glm::vec3 trans(1.0, 0.0, -1.0);
-	model.translate(trans);
-
-//    GLuint posAttrib = glGetAttribLocation(prog, "vPosition");
-//    GLuint VAO;
-//
-//    glGenVertexArrays(1, &VAO);
-//    glBindVertexArray(VAO);
-//
-//    GLfloat vertexBuffer[] = {
-//    		-1.0f, -1.0f, -0.5f,
-//			1.0f, -1.0f, -0.6f,
-//   		    0.0f,  1.0f, -1.0f,
-//    };
-//
-//    GLuint VBO;
-//    glGenBuffers(1, &VBO);
-//
-//    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-//    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexBuffer), vertexBuffer, GL_STATIC_DRAW);
-//
-//    glEnableVertexAttribArray(posAttrib);
-//    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*) 0);
-//    glBindVertexArray(0);
-    //set Uniforms
-    //GLint mvpMat = glGetUniformLocation(prog, "ModelViewProjectionMatrix");
-    // Ensure we can capture the escape key being pressed below
-
+    // Input initialization
     glfwSetKeyCallback( window, key_callback );
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
@@ -384,124 +182,323 @@ int main(){
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPos(window, 0, 0);
+    double mouseXPosition, mouseYPosition;
 
+    /*
+     * Begin main initialization phase
+     *
+     */
+
+    // Default shader
+    Shader defaultShader;
+    defaultShader.loadShader("../src/shader/main.vs", Shader::VERTEX);
+    defaultShader.loadShader("../src/shader/main.fs", Shader::FRAGMENT);
+    GLint defaultShaderProgram = defaultShader.linkShaders();
+
+    // Grass shader
+    Shader grassShader;
+    grassShader.loadShader("../src/shader/grass.vs", Shader::VERTEX);
+    grassShader.loadShader("../src/shader/grass.gs", Shader::GEOMETRY);
+    grassShader.loadShader("../src/shader/grass.fs", Shader::FRAGMENT);
+    GLint grassShaderProgram = grassShader.linkShaders();
+
+    // Terrain
+    Shader terrainShader;
+    terrainShader.loadShader("../src/shader/terrain.vs", Shader::VERTEX);
+    terrainShader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT);
+    GLint terrainShaderProgram = terrainShader.linkShaders();
+
+    // Skydom
+    Shader skydomeShader;
+    skydomeShader.loadShader("../src/shader/skydome.vs", Shader::VERTEX);
+    skydomeShader.loadShader("../src/shader/skydome.fs", Shader::FRAGMENT);
+    GLint skydomeShaderProgram = skydomeShader.linkShaders();
+
+    // Cloids
+    Shader cloudsShader;
+    cloudsShader.loadShader("../src/shader/clouds.vs", Shader::VERTEX);
+    cloudsShader.loadShader("../src/shader/clouds.gs", Shader::GEOMETRY);
+    cloudsShader.loadShader("../src/shader/clouds.fs", Shader::FRAGMENT);
+    GLint cloudsShaderProgram = cloudsShader.linkShaders();
+    /*
+     * Setup main Pointer
+     * Terrain Pointer: pActiveTerrain, pInactiveTerrain
+     * Portal Pointer: pActivePortal, pInactivePortal
+     *
+     */
+
+    Terrain *pActiveTerrain, *pInactiveTerrain;
+    Portal *pActivePortal, *pInactivePortal;
+    Noise *pActiveNoise, *pInactiveNoise;
+
+    /*
+     * Setup initial terrains and noise
+     * First terrain uses perlin noise
+     * Second uses worley noise
+     * Use common parameters at current state of development
+     *
+     */
+
+    // Common parameters
+    int noiseDimX = 256, noiseDimY = 256, noiseDimZ = 64;
+    int seed = 42, octaves = 16;
+    double frequency = 8.0, amplitude = 4.0;
+
+    // Setup perlin noise
+    pActiveNoise = new PerlinNoise();
+    pActiveNoise->setParams(noiseDimX, noiseDimY, seed);
+    pActiveNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
+
+    // Setup initial terrain
+    pActiveTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, pActiveNoise);
+    pActiveTerrain->setVPMatrix(camera.getVPMatrix());
+    pActiveTerrain->setInvViewMatrix(camera.getInvViewMatrix());
+    pActiveTerrain->enableNormals();
+    pActiveTerrain->computeTerrain();
+    pActiveTerrain->genHeightMapTexture();
+    pActiveTerrain->saveNoiseToFile("PerlinNoise_Terrain.tga");
+    pActiveTerrain->linkHeightMapTexture(terrainShaderProgram);
+    pActiveTerrain->linkHeightMapTexture(defaultShaderProgram);
+
+    // Setup worled (cell) noise for second terrain
+    pInactiveNoise = new WorleyNoise();
+    pInactiveNoise->setParams(noiseDimX, noiseDimY, seed);
+    pInactiveNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
+
+    // Setup initial inactive terrain (in portal)
+    pInactiveTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, pInactiveNoise);
+    pInactiveTerrain->setVPMatrix(camera.getVPMatrix());
+    pInactiveTerrain->setInvViewMatrix(camera.getInvViewMatrix());
+    pInactiveTerrain->enableNormals();
+    pInactiveTerrain->computeTerrain();
+    pInactiveTerrain->genHeightMapTexture();
+    pInactiveTerrain->saveNoiseToFile("WorleyNoise_Terrain.tga");
+
+    /*
+     * Setup Portals
+     * Each terrain will have one inactive portal (the portal where user came from)
+     * and an active portal to teleport to the next terrain
+     *
+     */
+
+    // Portal
+    pActivePortal = new Portal(defaultShaderProgram);
+    pActivePortal->init( &camera, pActiveTerrain, pInactiveTerrain );
+
+    pInactivePortal = new Portal(defaultShaderProgram);
+    pInactivePortal->init( &camera, pActiveTerrain, pInactiveTerrain );
+    pInactivePortal->deaktivate();
+
+    /*
+     * Setup further terrain properties like skydome, grass, ...
+     *
+     */
+
+    // Skydome noise parameters
+    int noiseSkyDimX = 256, noiseSkyDimY = 128, noiseSkyDimZ = 64;
+    seed = 42, octaves = 2, frequency = 2.0;
+
+    // Setup noise for clouds
+    PerlinNoise pNoise3D;
+    pNoise3D.setParams(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
+    pNoise3D.setOctavesFreqAmp(octaves, frequency, amplitude);
+    pNoise3D.generateNoiseImage();
+
+    // Skydome initialization
+    Skydome skydome(skydomeShaderProgram, &camera);
+    skydome.generateGeometry(noiseDimX / 3, 64, 64);
+    skydome.setBuffers();
+
+    // Clouds initialization
+    Clouds clouds(cloudsShaderProgram, skydome.getCloudNumber(), skydome.getCloudAttributes(), &camera);
+    clouds.setBuffers();
+    clouds.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
+    skydome.setClouds(&clouds);
+
+    // Grass
+    Grass grass;
+    grass.setShaderProgram(grassShaderProgram);
+    grass.setTerrainVao(pActiveTerrain->getVAO(), pActiveTerrain->getTotalIndices());
+    grass.setUniforms();
+    grass.loadTexture();
+
+    // Our beloved sphere in the center of the terrain :-)
+    ModelLoader model("../objects/sphere.obj", defaultShaderProgram);
+    model.loadFile();
+    model.setBuffers();
+    model.setStandardUniformLocations();
+    vec3 sphereTranslation = vec3(0.0, 3.0, 0.0);
+    model.translate(sphereTranslation);
+
+    // Main (frame) loop
+    float oldTime, newTime;
+    int loops;
     oldTime = glfwGetTime();
-    //Noise Test
-
-
-
-	double xpos, ypos;
-    //model.setView(camera.getViewMatrix());
-
-    std::cout << std::endl << "Portal 1 coords: x = " << pPortal1->getPosition().x << ", y = " << pPortal1->getPosition().y << ", z = " << pPortal1->getPosition().z << std::endl;
-    std::cout << std::endl << "Camera coords: x = " << camera.getPosition().x << ", y = " << camera.getPosition().y << ", z = " << camera.getPosition().z << std::endl;
-    bool intersection = false;
+    /* int noises = 0; */
     while(!(glfwWindowShouldClose(window)))
     {
+        loops = 0;
 
-    	loops = 0;
-    	//Update game logic
-    	//newTime = std::chrono::steady_clock::now();
-    	newTime = glfwGetTime();
-    	while (oldTime < newTime && loops < MAX_FRAMESKIP){
-    		//here update game   glfwPollEvents();
+        //Update game logic and physics
+        newTime = glfwGetTime();
+        while (oldTime < newTime && loops < MAX_FRAMESKIP)
+        {
+            //here update game   glfwPollEvents();
 
-    	   	glfwGetCursorPos(window, &xpos, &ypos);
-    	    glfwPollEvents();
-    		/* camera.moveCamera(xpos, ypos, window); */
-    		newTime += frameTime;
-    		/* camera.setDeltaTime(frameTime); */
-    		loops++;
-    		//std::cout << "Pos(x, y): " << camera.getCamPos().x <<", " << camera.getCamPos().y << std::endl;
+            glfwGetCursorPos(window, &mouseXPosition, &mouseYPosition);
+            glfwPollEvents();
+            newTime += frameTime;
 
-            intersection = portalIntersection(pPortal1, pTerrain1, pTerrain2, terrainprog);
-    	}
-     	//update Frame
-//    	glUseProgram(prog);
-    	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            loops++;
+
+            /*
+             * portalIntersection(&camera, pActiveTerrain, pInactiveTerrain, pActivePortal, pInactivePortal, terrainShaderProgram, defaultShaderProgram); 
+             *
+             * Check for portal intersection
+             *
+             */
+
+            float diff = glm::length(glm::vec3(camera.getPosition() - pActivePortal->getPosition()));
+
+            if((diff < 2.5) && pActivePortal->isActive())
+            {
+                // Do teleportation
+                pActivePortal->teleport();
+                camera.setPosition(pActivePortal->getPosition2());
+                /* camera->setOrientation(); */
+                camera.update();
+
+                std::cout << "Generate new noise" << std::endl;
+                // Generate new inactive terrain
+                int noiseDimX = 256;
+                int noiseDimY = 256;
+                int seed = 42 * pActivePortal->getPosition().x;
+                int octaves = 4;
+                double frequency = 54.0;
+                double amplitude = 2.0;
+                Noise* pNewNoise = new PerlinNoise();
+                pNewNoise->setParams(noiseDimX, noiseDimY, seed);
+                pNewNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
+
+                std::cout << "Swap noises" << std::endl;
+                delete pActiveNoise;
+                pActiveNoise    = pInactiveNoise;
+                pInactiveNoise  = pNewNoise;
+
+                std::cout << "Generate new terrain" << std::endl;
+                Terrain* pNewTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, pInactiveNoise);
+                pNewTerrain->setVPMatrix(camera.getVPMatrix());
+                pNewTerrain->setInvViewMatrix(camera.getInvViewMatrix());
+                pNewTerrain->enableNormals();
+                pNewTerrain->computeTerrain();
+                pNewTerrain->genHeightMapTexture();
+                pNewTerrain->saveNoiseToFile("PerlinNoise_Terrain2.tga");
+                pNewTerrain->linkHeightMapTexture(terrainShaderProgram);
+                pNewTerrain->linkHeightMapTexture(defaultShaderProgram);
+                pNewTerrain->draw();
+
+                std::cout << "Swap terrains" << std::endl;
+                // swap terrains
+                delete pActiveTerrain;
+                pActiveTerrain      = pInactiveTerrain;
+                pInactiveTerrain    = pNewTerrain;
+
+
+                std::cout << "Generate new portal" << std::endl;
+                // Setup new portal
+                Portal* pNewPortal = new Portal(defaultShaderProgram);
+                pNewPortal->init( &camera, pActiveTerrain, pInactiveTerrain );
+
+                std::cout << "Swap portals" << std::endl;
+                // swap portals
+                delete pInactivePortal;
+                pInactivePortal = pActivePortal;
+                pActivePortal   = pNewPortal;
+            }
+        }
+
+        //update Frame
+
+        // Clear buffers
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(0.0, 0.0, 0.0, 1.0);
-        /* std::cout << "view: " << camera.getPos().x << "< " << camera.getPos().y << "< " << camera.getPos().z << std::endl; */
 
-
-
-        //neu
+        // Recalculate camera matrices
         camera.update();
-        /* portalCam.setPos(portal2.getPosition()); */
-        /* portalCam.getViewMatrix(); */
-
-        pPortal1->enableStencil();
-
-
-        /* pPortal1->substractStencil(); */
-        /* grass.setCameraPosRef(camera.getPos()); */
-        /* grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix()); */
-        /* grass.draw(); */
-
-        pPortal1->renderOutside();
 
 
 
+
+
+
+        // Enable stencil and automatically draw pattern
+        pActivePortal->enableStencil();
+
+
+
+
+
+        // Draw around pattern (main scene, around portal)
+        pActivePortal->renderOutside();
 
 
         // Portal
-        /* pPortal1->drawPortal(); */
-        /* pPortal1->drawFill(); */
+        pInactivePortal->drawPortal();
 
-        // sphere
+        // Sphere
         model.setProjection(camera.getProjectionMatrix());
         model.setView(camera.getViewMatrix());
         model.draw();
 
-        // terrain1
-        pTerrain1->setVPMatrix(camera.getVPMatrix());
-        pTerrain1->setInvViewMatrix(camera.getInvViewMatrix());
-        pTerrain1->setGrid(gDrawGrid);
-        pTerrain1->draw();
-        /* renderHeightmap(0.1, 10 , noise.getTextureData()); */
+        // Active terrain
+        pActiveTerrain->setVPMatrix(camera.getVPMatrix());
+        pActiveTerrain->setInvViewMatrix(camera.getInvViewMatrix());
+        pActiveTerrain->setGrid(gDrawGrid);
+        pActiveTerrain->draw();
 
-        //processInput
-        //GRASS
-
- //        err = glGetError();
- //		if (err != GL_NO_ERROR)
- //			std::cout << "Fehler: " << err << std::endl;
+        // Grass
         grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
-	 	/* grass.draw(); */
+        grass.draw();
 
- 		//END GRASS
+        // Skydome
         skydome.draw();
 
 
 
-            pPortal1->renderInside();
 
-
-            // next terrain
-            /* pTerrain2->setVPMatrix(pPortal1->getNextVP()); */
-            /* pTerrain2->setInvViewMatrix(pPortal1->getNextInvV()); */
-
-            //modelMatrix = portal in world 2
-            //viewMatrix = camera in current world
-            glm::vec3 tmpPos = camera.getPosition();
-            camera.setPosition(pPortal1->getPosition2());
-            /* camera.rotate(glm::vec2(pPortal1->getRotation2(), 0.0)); */
-            camera.update();
-            pTerrain2->setVPMatrix(camera.getVPMatrix());
-            pTerrain2->setInvViewMatrix(camera.getInvViewMatrix());
-            pTerrain2->setGrid(gDrawGrid);
-            pTerrain2->draw();
-            camera.setPosition(tmpPos);
-            camera.update();
+        // Draw in stencil pattern (in portal)
+        pActivePortal->renderInside();
 
 
 
 
 
+        // Sphere
+        model.setProjection(camera.getProjectionMatrix());
+        model.setView(camera.getViewMatrix());
+        model.draw();
 
-        pPortal1->disableStencil();
+        // Inactive or next terrain
+        pInactiveTerrain->setVPMatrix(camera.getVPMatrix());
+        pInactiveTerrain->setInvViewMatrix(camera.getInvViewMatrix());
+        pInactiveTerrain->setGrid(gDrawGrid);
+        pInactiveTerrain->draw();
+
+        // Grass
+        grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
+        grass.draw();
+
+        // Skydome
+        skydome.draw();
 
 
 
+
+
+        // Disable stencil test
+        pActivePortal->disableStencil();
+
+        // Do post rendering stuff (maybe shadowmaps etc. if enough spare time)
 
 
 
@@ -509,42 +506,46 @@ int main(){
         glFlush();
 
     }
-    // Cleanup VBO
-//	glDeleteBuffers(1, &VBO);
-//	glDeleteVertexArrays(1, &VAO);
 
-	glDeleteProgram(prog);
-	/* glDeleteProgram(grassprog); */
-	glDeleteProgram(terrainprog);
+    /*
+     * Cleaup phase
+     */
 
+
+    // Pointers
+    delete pActiveTerrain;
+    delete pInactiveTerrain;
+    delete pActivePortal;
+    delete pInactivePortal;
+    delete pActiveNoise;
+    delete pInactiveNoise;
+
+    // Programs
+    glDeleteProgram(defaultShaderProgram);
+    glDeleteProgram(grassShaderProgram);
+    glDeleteProgram(terrainShaderProgram);
+    glDeleteProgram(skydomeShaderProgram);
+    glDeleteProgram(cloudsShaderProgram);
 
 }
 
-bool portalIntersection(Portal *const portal, Terrain*& pTerrain1, Terrain*& pTerrain2, const GLint& prog)
+    bool portalIntersection(Camera *const camera, Terrain*& pActiveTerrain, Terrain*& pInactiveTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, const GLint& terrainShaderProgram, const GLint& portalProg)
 {
 
-    float diff = glm::length(glm::vec3(camera.getPosition() - portal->getPosition()));
+    float diff = glm::length(glm::vec3(camera->getPosition() - pActivePortal->getPosition()));
 
-    if((diff < 1.0) && portal->isActive())
+    if((diff < 2.5) && pActivePortal->isActive())
     {
-        std::cout << std::endl << "Intersection in physics" << std::endl;
-        std::cout << "Portal 1 coords: x = " << portal->getPosition().x << ", y = " << portal->getPosition().y << ", z = " << portal->getPosition().z << std::endl;
-        std::cout << "Camera coords: x = " << camera.getPosition().x << ", y = " << camera.getPosition().y << ", z = " << camera.getPosition().z << std::endl;
-        portal->worb();
-        camera.setPosition(portal->getPosition());
-        /* portal->setTranslation(camera.getPosition()); */
-        camera.update();
-        /* camera.setOrientation(); */
+        // Do teleportation
+        pActivePortal->teleport();
+        camera->setPosition(pActivePortal->getPosition2());
+        /* camera->setOrientation(); */
+        camera->update();
 
-        /* Terrain *tmpTerrain = pTerrain1; */
-        /* pTerrain1 = pTerrain2; */
-        /* pTerrain2 = tmpTerrain; */
-        std::swap(pTerrain1, pTerrain2);
-        delete pTerrain2;
-
+        // Generate new inactive terrain
         int noiseDimX = 256;
         int noiseDimY = 256;
-        int seed = 464;
+        int seed = 42 * pActivePortal->getPosition().x;
         int octaves = 4;
         double frequency = 54.0;
         double amplitude = 2.0;
@@ -552,14 +553,31 @@ bool portalIntersection(Portal *const portal, Terrain*& pTerrain1, Terrain*& pTe
         pNoise.setParams(noiseDimX, noiseDimY, seed);
         pNoise.setOctavesFreqAmp(octaves, frequency, amplitude);
 
-    pTerrain2 = new Terrain(prog, noiseDimX, noiseDimY, &pNoise);
-    pTerrain2->setVPMatrix(camera.getVPMatrix());
-    pTerrain2->setInvViewMatrix(camera.getInvViewMatrix());
-    pTerrain2->enableNormals();
-    pTerrain2->computeTerrain();
-    pTerrain2->genHeightMapTexture();
-	pTerrain2->saveNoiseToFile("PerlinNoise_Terrain2.tga");
-    pTerrain2->draw();
+        Terrain* pNewTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &pNoise);
+        pNewTerrain->setVPMatrix(camera->getVPMatrix());
+        pNewTerrain->setInvViewMatrix(camera->getInvViewMatrix());
+        pNewTerrain->enableNormals();
+        pNewTerrain->computeTerrain();
+        pNewTerrain->genHeightMapTexture();
+        pNewTerrain->saveNoiseToFile("PerlinNoise_Terrain2.tga");
+        pNewTerrain->linkHeightMapTexture(terrainShaderProgram);
+        pNewTerrain->linkHeightMapTexture(portalProg);
+        pNewTerrain->draw();
+
+        // swap terrains
+        delete pActiveTerrain;
+        pActiveTerrain      = pInactiveTerrain;
+        pInactiveTerrain    = pNewTerrain;
+
+
+        // Setup new portal
+        Portal* pNewPortal = new Portal(portalProg);
+        pNewPortal->init( camera, pActiveTerrain, pInactiveTerrain );
+
+        // swap portals
+        delete pInactivePortal;
+        pInactivePortal = pActivePortal;
+        pActivePortal   = pNewPortal;
 
         return true;
     }
@@ -615,15 +633,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         //mRight * (float)mDeltaTime * mCamSpeed
 }
 
-/* void mouse_callback(GLFWwindow* window, double xpos, double ypos, const Camera &camera) */
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+/* void mouse_callback(GLFWwindow* window, double mouseXPosition, double mouseYPosition, const Camera &camera) */
+void mouse_callback(GLFWwindow* window, double mouseXPosition, double mouseYPosition)
 {
     int width, height;
 
     glfwGetWindowSize(window, &width, &height);
     glfwSetCursorPos(window, width/2.0, height/2.0);
 
-    camera.processMouse(float( width/2.0 - xpos ), float( height/2.0 - ypos ));
+    camera.processMouse(float( width/2.0 - mouseXPosition ), float( height/2.0 - mouseYPosition ));
 
 }
 

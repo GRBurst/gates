@@ -30,12 +30,14 @@ public:
     glm::vec3 getPosition2() { return mPosition2; };
     glm::vec3 getRotation2() { return mRot2; };
     bool isActive() { return mStatus; };
+    void aktivate() { this->mStatus = true; };
+    void deaktivate() { teleport(); };
 
     glm::mat4 getNextMVP() {return mMVP2;};
     glm::mat4 getNextVP() {return mVP2;};
     glm::mat3 getNextInvV() {return mIV2;};
 
-    void worb();
+    void teleport();
     /* void setHeight(const float& height); */
 
     /* void drawPortal( const Shader& shaderProg, const Camera& camera ); */
@@ -65,6 +67,7 @@ private:
     ModelLoader *model;
     ModelLoader *modelFill;
     Camera* camera;
+    glm::vec3 mTmpCamPos;
 
     /* void drawFill(); */
     /* void drawPortal(); */

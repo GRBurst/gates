@@ -9,59 +9,57 @@ Portal::Portal(const GLint& mShaderProgram)
     model = new ModelLoader("../objects/flat_torus.obj", mShaderProgram);
     modelFill = new ModelLoader("../objects/inner_plane.obj", mShaderProgram);
 
+    /* std::cout << "new Portal id = " << mId << std::endl; */
+
 }
 
-void Portal::init( Camera *const cam, Terrain *const terrain1, Terrain *const terrain2)
+void Portal::init( Camera *const cam, Terrain *const activeTerrain, Terrain *const inactiveTerrain )
 {
 
+    /* std::cout << "load model fill files" << std::endl; */
+    // Setup model data
     modelFill->loadFile();
     modelFill->setBuffers();
     modelFill->setStandardUniformLocations();
 
+    /* std::cout << "load model files" << std::endl; */
     model->loadFile();
     model->setBuffers();
     model->setStandardUniformLocations();
 
+    /* std::cout << "set camera" << std::endl; */
+    // Set camera
     camera = cam;
 
-    std::default_random_engine gen(mId);
-    std::uniform_int_distribution<int> hDim1(0, terrain1->getWidth());
-    std::uniform_int_distribution<int> vDim1(0, terrain1->getHeight());
+    /* std::cout << "generate new positions" << std::endl; */
+    // Generate positions
+    std::default_random_engine gen(mId + 42);
+    std::uniform_int_distribution<int> hDim1(32, activeTerrain->getWidth() - 32);
+    std::uniform_int_distribution<int> vDim1(32, activeTerrain->getHeight() - 32);
     std::uniform_real_distribution<double> deg(0.0, 360.0);
 
-    /* mPosition1 = terrain1->computePosition(hDim1(gen), vDim1(gen)); */
-    mPosition1 = glm::vec3(5.0, 1.0, 5.0);
+    /* std::cout << "generate new x and y locations" << std::endl; */
+    int x = hDim1(gen);
+    int y = vDim1(gen);
+    /* std::cout << "calc active terrain locations: x = " << x << ", y = " << y << std::endl; */
+    mPosition1 = glm::vec3(0.0, 1.0, 0.0) + activeTerrain->computePosition(x, y);
     /* setRotation(glm::vec3(0.0, deg(gen), 0.0)); */
-    setScale(glm::vec3(1.0, 1.0, 1.0));
-    /* setTranslation(mPosition); */
-    setTranslation(glm::vec3(5.0, 1.0, 5.0));
+    setScale(glm::vec3(1.0, 2.0, 1.0));
+    setTranslation(mPosition1);
 
-    std::uniform_int_distribution<int> hDim2(0, terrain2->getWidth());
-    std::uniform_int_distribution<int> vDim2(0, terrain2->getHeight());
+    std::uniform_int_distribution<int> hDim2(32, inactiveTerrain->getWidth() - 32);
+    std::uniform_int_distribution<int> vDim2(32, inactiveTerrain->getHeight()- 32);
 
-    /* mPosition2 = terrain2->computePosition(hDim2(gen), vDim2(gen)); */
-    mPosition2 = glm::vec3(10.0, 1.0, 5.0);
+    /* std::cout << "calc inactive terrain locations" << std::endl; */
+    mPosition2 = glm::vec3(0.0, 1.0, 0.0) + inactiveTerrain->computePosition(hDim2(gen), vDim2(gen));
     mScale2 = glm::vec3(1.0, 1.0, 1.0);
     mTrans2 = mPosition2 - mPosition1;
     mRot2 = glm::vec3(0.0, deg(gen), 0.0);
 
-    Camera cam2;
-    cam2.setPosition(mPosition2);
-    cam2.rotate(glm::vec2(mRot2.y, 0.0));
-    cam2.update();
-    mMVP2 = cam2.getVPMatrix();
-    mVP2 = cam2.getVPMatrix();
-    mIV2 = cam2.getInvViewMatrix();
+    std::cout << "Portal " << mId << " coords 1: x = " << mPosition1.x << ", y = " << mPosition1.y << ", z = " << mPosition1.z << std::endl;
+    std::cout << "Portal " << mId << " coords 2: x = " << mPosition2.x << ", y = " << mPosition2.y << ", z = " << mPosition2.z << std::endl;
 
 }
-
-/* void setHeight(const float& height); */
-
-/* void Portal::setRotation(glm::vec3 angle) */
-/* { */
-/*     model->rotate(angle); */
-/*     modelFill->rotate(angle); */
-/* } */
 
 glm::vec3 Portal::getPosition()
 {
@@ -124,8 +122,8 @@ void Portal::enableStencil()
     enableRenderStencilPattern();
     modelFill->setProjection(camera->getProjectionMatrix());
     modelFill->setView(camera->getViewMatrix());
-    /* if(mStatus)  modelFill->draw(); */
-    modelFill->draw();
+    if(mStatus)  modelFill->draw();
+    /* modelFill->draw(); */
     disableRenderStencilPattern();
 }
 
@@ -138,14 +136,23 @@ void Portal::renderOutside()
 }
 
 // Third call: Render next scene/terrain in the stencil
-void Portal::renderInside(){
+void Portal::renderInside()
+{
     // drawing the scene in coords where we filled the buffer . skip where stencil's value is != 0
     glStencilFunc(GL_EQUAL, 1, 0xFF);
+
+    //viewMatrix = camera in current world
+    mTmpCamPos = camera->getPosition();
+    camera->setPosition(mPosition2-(mPosition1-mTmpCamPos));
+    /* camera->rotate(glm::vec2(pActivePortal->getRotation2(), 0.0)); */
+    camera->update();
 }
 
 // Fourth call: Disable stencil rendering. Continue with post rendering (shadow maps or something like this
 void Portal::disableStencil()
 {
+    camera->setPosition(mTmpCamPos);
+    camera->update();
     glDisable(GL_STENCIL_TEST);
 }
 
@@ -153,6 +160,7 @@ void Portal::disableStencil()
 /* void Portal::drawPortal( const ConstSharedShaderProgram& shaderProg, const GenericCamera& camera ){ */
 void Portal::drawPortal()
 {
+    /* if(!mStatus) std::cout << "render inactve portal at: x = " << std::endl; */
     model->setProjection(camera->getProjectionMatrix());
     model->setView(camera->getViewMatrix());
     model->draw();
@@ -165,13 +173,13 @@ void Portal::drawFill()
     modelFill->draw();
 }
 
-void Portal::worb()
+void Portal::teleport()
 {
     this->mStatus = false;
     /* setRotation(mRot2); */
     setScale(mScale2);
     setTranslation(mTrans2);
-    std::cout << std::endl << "Portal worb" << std::endl;
+    std::cout << std::endl << "Portal " << mId << " teleportation" << std::endl;
 }
 /* void Portal::draw(const ConstSharedShaderProgram& shaderProg, */
 /*                       const GenericCamera& camera, */

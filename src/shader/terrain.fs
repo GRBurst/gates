@@ -60,16 +60,20 @@ void main()
     /* float b = sin(fPos.z) * cos(fPos.x); */
 
     vec3 terrainColor1, terrainColor2;
+    float tHeight = fHeight * fHeight;
 
-    if (fHeight < 0.1){
+    if (fHeight < 0.1)
+    {
         terrainColor1 = vec3(0.1, 0.15, 0.8) - vec3(0.0, 0.0, fHeight * 2);
     }
-    else if (fHeight < 0.8){
-        terrainColor1 = vec3(0.1, 0.6, 0.1) * vec3(0.1 + fHeight);
+    else if (fHeight < (0.2 + fNormal.y/1.0))
+    {
+        terrainColor1 = vec3(0.1, 0.6, 0.1) * (0.1 + fHeight);
         /* terrainColor2 = vec3(0.8 * fHeight); */
         /* terrainColor1 = mix(terrainColor1, terrainColor2, fHeight/(2.0)); */
     }
-    else if (fHeight < 1.2){
+    else if (fHeight < (1.2 + fNormal.y))
+    {
         terrainColor1 = vec3(0.8 * fHeight);
         /* terrainColor2 = vec3(1.0); */
         /* terrainColor1 = mix(terrainColor1, terrainColor2, 0.2); */
