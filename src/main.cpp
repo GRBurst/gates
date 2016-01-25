@@ -28,12 +28,13 @@ const int MAX_FRAMESKIP = 10;
 const double frameTime = 1.0 / UPDATES_PER_SECOND;
 
 Camera camera;
+double lastMouseXPosition, lastMouseYPosition;
 int gDrawGrid = 0;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_callback(GLFWwindow* window, double mouseXPosition, double mouseYPosition);
-    bool portalIntersection(Camera *const camera, Terrain*& pActiveTerrain, Terrain*& pInactiveTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, const GLint& terrainShaderProgram, const GLint& portalprog);
+bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pInactiveNoise, Terrain*& pActiveTerrain, Terrain*& pInactiveTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, const GLint& terrainShaderProgram, const GLint& defaultShaderProgram);
 
 void debugCallback(GLenum source, GLenum type, GLuint id,
                    GLenum severity, GLsizei length,
@@ -145,6 +146,41 @@ void displayFrame(){
 
 }
 
+void processInput(Camera& camera)
+{
+    glfwPollEvents();
+
+    double mouseXPosition, mouseYPosition;
+    glfwGetCursorPos(window, &mouseXPosition, &mouseYPosition);
+    if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+    {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        camera.processMouse(float( lastMouseXPosition - mouseXPosition ), float( lastMouseYPosition - mouseYPosition ));
+        glfwSetCursorPos(window, lastMouseXPosition, lastMouseYPosition);
+    }
+    else
+    {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        lastMouseXPosition = mouseXPosition;
+        lastMouseYPosition = mouseYPosition;
+    }
+
+    if(glfwGetKey(window, GLFW_KEY_ESCAPE)  == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
+    if(glfwGetKey(window, GLFW_KEY_Q )      == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
+    if(glfwGetKey(window, GLFW_KEY_W )      == GLFW_PRESS) camera.moveForward( float(frameTime) );
+    if(glfwGetKey(window, GLFW_KEY_S )      == GLFW_PRESS) camera.moveBack( float(frameTime) );
+    if(glfwGetKey(window, GLFW_KEY_A )      == GLFW_PRESS) camera.moveLeft( float(frameTime) );
+    if(glfwGetKey(window, GLFW_KEY_D )      == GLFW_PRESS) camera.moveRight( float(frameTime) );
+    if(glfwGetKey(window, GLFW_KEY_I )      == GLFW_PRESS) camera.setCamSpeed( 10.0 );
+    if(glfwGetKey(window, GLFW_KEY_K )      == GLFW_PRESS) camera.setCamSpeed( 0.1 );
+    if(glfwGetKey(window, GLFW_KEY_G )      == GLFW_PRESS) gDrawGrid = (gDrawGrid + 1) % 3;
+    if(glfwGetKey(window, GLFW_KEY_C )      == GLFW_PRESS)
+    {
+        std::cout << std::endl << "Camera coords: x = " << camera.getPosition().x << ", y = " << camera.getPosition().y << ", z = " << camera.getPosition().z << std::endl;
+    }
+
+}
+
 int main()
 {
 
@@ -175,14 +211,13 @@ int main()
     initOpenGL();
 
     // Input initialization
-    glfwSetKeyCallback( window, key_callback );
-    glfwSetCursorPosCallback(window, mouse_callback);
+    /* glfwSetKeyCallback( window, key_callback ); */
+    /* glfwSetCursorPosCallback(window, mouse_callback); */
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetWindowSizeCallback( window, resize_callback );
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPos(window, 0, 0);
-    double mouseXPosition, mouseYPosition;
+    /* glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); */
+    glfwSetCursorPos(window, wWidth / 2, wHeight / 2);
 
     /*
      * Begin main initialization phase
@@ -343,10 +378,11 @@ int main()
         newTime = glfwGetTime();
         while (oldTime < newTime && loops < MAX_FRAMESKIP)
         {
-            //here update game   glfwPollEvents();
+            //here update game
+            /* glfwPollEvents(); */
 
-            glfwGetCursorPos(window, &mouseXPosition, &mouseYPosition);
-            glfwPollEvents();
+            processInput(camera);
+
             newTime += frameTime;
 
             loops++;
@@ -357,7 +393,6 @@ int main()
              * Check for portal intersection
              *
              */
-
             float diff = glm::length(glm::vec3(camera.getPosition() - pActivePortal->getPosition()));
 
             if((diff < 2.5) && pActivePortal->isActive())
@@ -373,9 +408,10 @@ int main()
                 int noiseDimX = 256;
                 int noiseDimY = 256;
                 double seed = 1.0 + 42.0 * pActivePortal->getPosition().x;
-                int octaves = static_cast<int>(4.0 * seed) % 17;
-                double frequency = mod(seed, 67.0);
-                double amplitude = mod(seed, 11.0);
+                int octaves = seed < 0 ? static_cast<int>(-seed) % 17 : static_cast<int>(seed) % 17;
+                std::cout << "Octaves: "<< octaves << std::endl;
+                double frequency = mod(seed, 16.0);
+                double amplitude = mod(seed, 8.0);
                 Noise* pNewNoise = new PerlinNoise();
                 pNewNoise->setParams(noiseDimX, noiseDimY, seed);
                 pNewNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
@@ -412,9 +448,12 @@ int main()
                 pInactivePortal = pActivePortal;
                 pActivePortal   = pNewPortal;
             }
+
+            portalIntersection(camera, pActiveNoise, pInactiveNoise, pActiveTerrain, pInactiveTerrain, pActivePortal, pInactivePortal, terrainShaderProgram, defaultShaderProgram);
+
         }
 
-        //update Frame
+                    //update Frame
 
         // Clear buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -526,39 +565,44 @@ int main()
 
 }
 
-    bool portalIntersection(Camera *const camera, Terrain*& pActiveTerrain, Terrain*& pInactiveTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, const GLint& terrainShaderProgram, const GLint& portalProg)
+bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pInactiveNoise, Terrain*& pActiveTerrain, Terrain*& pInactiveTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, const GLint& terrainShaderProgram, const GLint& defaultShaderProgram)
 {
-
-    float diff = glm::length(glm::vec3(camera->getPosition() - pActivePortal->getPosition()));
+    float diff = glm::length(glm::vec3(camera.getPosition() - pActivePortal->getPosition()));
 
     if((diff < 2.5) && pActivePortal->isActive())
     {
         // Do teleportation
         pActivePortal->teleport();
-        camera->setPosition(pActivePortal->getPosition2());
-        /* camera->setOrientation(); */
-        camera->update();
+        camera.setPosition(pActivePortal->getPosition2());
+        /* camera.setOrientation(); */
+        camera.update();
 
+        std::cout << "Generate new noise" << std::endl;
         // Generate new inactive terrain
         int noiseDimX = 256;
         int noiseDimY = 256;
-        int seed = 42 * pActivePortal->getPosition().x;
-        int octaves = 4;
-        double frequency = 54.0;
-        double amplitude = 2.0;
-        PerlinNoise pNoise;
-        pNoise.setParams(noiseDimX, noiseDimY, seed);
-        pNoise.setOctavesFreqAmp(octaves, frequency, amplitude);
+        double seed = 1.0 + 42.0 * pActivePortal->getPosition().x;
+        int octaves = static_cast<int>(4.0 * seed) % 17;
+        double frequency = fmod(seed, 67.0);
+        double amplitude = fmod(seed, 11.0);
+        Noise* pNewNoise = new WorleyNoise();
+        pNewNoise->setParams(noiseDimX, noiseDimY, static_cast<int>(seed));
+        pNewNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
 
-        Terrain* pNewTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &pNoise);
-        pNewTerrain->setVPMatrix(camera->getVPMatrix());
-        pNewTerrain->setInvViewMatrix(camera->getInvViewMatrix());
+        delete pActiveNoise;
+        pActiveNoise    = pInactiveNoise;
+        pInactiveNoise  = pNewNoise;
+
+        std::cout << "Generate new terrain" << std::endl;
+        Terrain* pNewTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, pInactiveNoise);
+        pNewTerrain->setVPMatrix(camera.getVPMatrix());
+        pNewTerrain->setInvViewMatrix(camera.getInvViewMatrix());
         pNewTerrain->enableNormals();
         pNewTerrain->computeTerrain();
         pNewTerrain->genHeightMapTexture();
-        pNewTerrain->saveNoiseToFile("PerlinNoise_Terrain2.tga");
+        pNewTerrain->saveNoiseToFile("newTerrain_noise.tga");
         pNewTerrain->linkHeightMapTexture(terrainShaderProgram);
-        pNewTerrain->linkHeightMapTexture(portalProg);
+        pNewTerrain->linkHeightMapTexture(defaultShaderProgram);
         pNewTerrain->draw();
 
         // swap terrains
@@ -567,9 +611,10 @@ int main()
         pInactiveTerrain    = pNewTerrain;
 
 
+        std::cout << "Generate new portal" << std::endl;
         // Setup new portal
-        Portal* pNewPortal = new Portal(portalProg);
-        pNewPortal->init( camera, pActiveTerrain, pInactiveTerrain );
+        Portal* pNewPortal = new Portal(defaultShaderProgram);
+        pNewPortal->init( &camera, pActiveTerrain, pInactiveTerrain );
 
         // swap portals
         delete pInactivePortal;
@@ -597,16 +642,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             if(action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
             break;
         case GLFW_KEY_W :
-            if(action == GLFW_REPEAT) camera.moveForward( float(frameTime) );
+            if(action == GLFW_PRESS) camera.moveForward( float(frameTime) );
             break;
         case GLFW_KEY_S :
-            if(action == GLFW_REPEAT) camera.moveBack( float(frameTime) );
+            if(action == GLFW_PRESS) camera.moveBack( float(frameTime) );
             break;
         case GLFW_KEY_A :
-            if(action == GLFW_REPEAT) camera.moveLeft( float(frameTime) );
+            if(action == GLFW_PRESS) camera.moveLeft( float(frameTime) );
             break;
         case GLFW_KEY_D :
-            if(action == GLFW_REPEAT) camera.moveRight( float(frameTime) );
+            if(action == GLFW_PRESS) camera.moveRight( float(frameTime) );
             break;
         case GLFW_KEY_I :
             if(action == GLFW_PRESS) camera.setCamSpeed( 10.0 );

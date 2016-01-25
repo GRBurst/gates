@@ -76,13 +76,13 @@ void PerlinNoise::generateNoiseImage(){
 					mMax = value;
 			}
 		}
-//    	mMax = mMax - mMin;
-//		for(int y = 0; y < mYDim; y++){
-//			for(int x = 0; x < mXDim; x++){
-//				mNoiseValues[y * mXDim + x] = (mNoiseValues[y * mXDim + x] - mMin) / mMax;
-//				std::cout << mNoiseValues[y * mXDim + x] << std::endl;
-//			}
-//		}
+    	mMax = mMax - mMin;
+    	if (mMax != 0)
+			for(int y = 0; y < mYDim; y++){
+				for(int x = 0; x < mXDim; x++){
+					mNoiseValues[y * mXDim + x] = (mNoiseValues[y * mXDim + x] - mMin) / mMax;
+				}
+			}
     }
     else
     {
@@ -191,7 +191,6 @@ double PerlinNoise::calculateNoiseValue(double x, double y){
 	q = glm::dvec2(mGradientTable2d.at(b11));
 	v[1] = glm::dot(q, glm::dvec2(r1.x, r1.y));
 	//b = lerp(s.x, u, v);
-	std::cout << lerp(s.y, lerp(s.x, u[0], v[0]), lerp(s.x, u[1], v[1])) << std::endl;
 	return lerp(s.y, lerp(s.x, u[0], v[0]), lerp(s.x, u[1], v[1]));
 //	return lerp(s.y, a, b);
 }
@@ -259,7 +258,7 @@ double PerlinNoise::calculateNoiseValue(double x, double y, double z){
 	e = lerp(s.y, a, b);
 	f = lerp(s.y, c, d);
 
-	return (lerp(s.z, e, f) + 1) / 2;
+	return lerp(s.z, e, f);
 //	return lerp(s.y, a, b);
 }
 glm::dvec4 PerlinNoise::interpolationPolynomial(glm::dvec4 vec){
