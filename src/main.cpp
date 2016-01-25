@@ -263,6 +263,7 @@ int main(){
 	pNoise3D.setParams(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
 	pNoise3D.setOctavesFreqAmp(octaves, frequency, amplitude);
 	pNoise3D.generateNoiseImage();
+	pNoise3D.saveToFile("PerlinNoise3D_clouds.tga");
     /* wNoise.init(); */
     /* wNoise.generateNoiseImage(); */
     /* wNoise.saveToFile("WorleyNoise_Terrain.tga"); */

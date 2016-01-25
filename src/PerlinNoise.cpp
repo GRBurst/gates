@@ -133,7 +133,7 @@ double PerlinNoise::noise(double x, double y, double z){
 		x *= 2.0;
 		y *= 2.0;
 		z *= 2.0;
-		amp *= 0.5;
+		amp *= 0.2;
 	}
 	return result;
 }
@@ -257,7 +257,7 @@ double PerlinNoise::calculateNoiseValue(double x, double y, double z){
 	e = lerp(s.y, a, b);
 	f = lerp(s.y, c, d);
 
-	return lerp(s.z, f, e);
+	return lerp(s.z, e, f);
 //	return lerp(s.y, a, b);
 }
 glm::dvec4 PerlinNoise::interpolationPolynomial(glm::dvec4 vec){
