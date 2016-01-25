@@ -162,7 +162,8 @@ int main()
     }
 
     glewExperimental = true; // Needed in core profile
-    if (glewInit() != GLEW_OK) {
+    if (glewInit() != GLEW_OK)
+    {
         fprintf(stderr, "Failed to initialize GLEW\n");
         return -1;
     }
@@ -213,11 +214,12 @@ int main()
     skydomeShader.loadShader("../src/shader/skydome.fs", Shader::FRAGMENT);
     GLint skydomeShaderProgram = skydomeShader.linkShaders();
 
+    // Cloids
     Shader cloudsShader;
     cloudsShader.loadShader("../src/shader/clouds.vs", Shader::VERTEX);
     cloudsShader.loadShader("../src/shader/clouds.gs", Shader::GEOMETRY);
-	cloudsShader.loadShader("../src/shader/clouds.fs", Shader::FRAGMENT);
-	GLint cloudsProg = cloudsShader.linkShaders();
+    cloudsShader.loadShader("../src/shader/clouds.fs", Shader::FRAGMENT);
+    GLint cloudsShaderProgram = cloudsShader.linkShaders();
     /*
      * Setup main Pointer
      * Terrain Pointer: pActiveTerrain, pInactiveTerrain
@@ -298,9 +300,9 @@ int main()
 
     // Setup noise for clouds
     PerlinNoise pNoise3D;
-	pNoise3D.setParams(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
-	pNoise3D.setOctavesFreqAmp(octaves, frequency, amplitude);
-	pNoise3D.generateNoiseImage();
+    pNoise3D.setParams(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
+    pNoise3D.setOctavesFreqAmp(octaves, frequency, amplitude);
+    pNoise3D.generateNoiseImage();
 
     // Skydome initialization
     Skydome skydome(skydomeShaderProgram, &camera);
@@ -308,7 +310,7 @@ int main()
     skydome.setBuffers();
 
     // Clouds initialization
-    Clouds clouds(cloudsProg, skydome.getCloudNumber(), skydome.getCloudAttributes(), &camera);
+    Clouds clouds(cloudsShaderProgram, skydome.getCloudNumber(), skydome.getCloudAttributes(), &camera);
     clouds.setBuffers();
     clouds.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
     skydome.setClouds(&clouds);
@@ -413,74 +415,97 @@ int main()
                 pInactivePortal = pActivePortal;
                 pActivePortal   = pNewPortal;
             }
-
-            //update Frame
-
-            // Clear buffers
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glClearColor(0.0, 0.0, 0.0, 1.0);
-
-            // Recalculate camera matrices
-            camera.update();
-
-            // Enable stencil and automatically draw pattern
-            pActivePortal->enableStencil();
-
-            // Draw around pattern (main scene, around portal)
-            pActivePortal->renderOutside();
-
-
-            // Portal
-            pInactivePortal->drawPortal();
-
-            // Sphere
-            model.setProjection(camera.getProjectionMatrix());
-            model.setView(camera.getViewMatrix());
-            model.draw();
-
-            // Active terrain
-            pActiveTerrain->setVPMatrix(camera.getVPMatrix());
-            pActiveTerrain->setInvViewMatrix(camera.getInvViewMatrix());
-            pActiveTerrain->setGrid(gDrawGrid);
-            pActiveTerrain->draw();
-
-            // Grass
-            grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
-            grass.draw();
-
-            // Skydome
-            skydome.draw();
-
-
-            // Draw in stencil pattern (in portal)
-            pActivePortal->renderInside();
-
-
-            // Inactive or next terrain
-            //viewMatrix = camera in current world
-            glm::vec3 tmpPos = camera.getPosition();
-            camera.setPosition(pActivePortal->getPosition2());
-            /* camera.rotate(glm::vec2(pActivePortal->getRotation2(), 0.0)); */
-            camera.update();
-            pInactiveTerrain->setVPMatrix(camera.getVPMatrix());
-            pInactiveTerrain->setInvViewMatrix(camera.getInvViewMatrix());
-            pInactiveTerrain->setGrid(gDrawGrid);
-            pInactiveTerrain->draw();
-            camera.setPosition(tmpPos);
-            camera.update();
-
-
-            // Disable stencil test
-            pActivePortal->disableStencil();
-
-            // Do post rendering stuff (maybe shadowmaps etc. if enough spare time)
-
-
-
-            glfwSwapBuffers( window );
-            glFlush();
-
         }
+
+        //update Frame
+
+        // Clear buffers
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(0.0, 0.0, 0.0, 1.0);
+
+        // Recalculate camera matrices
+        camera.update();
+
+
+
+
+
+
+        // Enable stencil and automatically draw pattern
+        pActivePortal->enableStencil();
+
+
+
+
+
+        // Draw around pattern (main scene, around portal)
+        pActivePortal->renderOutside();
+
+
+        // Portal
+        pInactivePortal->drawPortal();
+
+        // Sphere
+        model.setProjection(camera.getProjectionMatrix());
+        model.setView(camera.getViewMatrix());
+        model.draw();
+
+        // Active terrain
+        pActiveTerrain->setVPMatrix(camera.getVPMatrix());
+        pActiveTerrain->setInvViewMatrix(camera.getInvViewMatrix());
+        pActiveTerrain->setGrid(gDrawGrid);
+        pActiveTerrain->draw();
+
+        // Grass
+        grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
+        grass.draw();
+
+        // Skydome
+        skydome.draw();
+
+
+
+
+        // Draw in stencil pattern (in portal)
+        pActivePortal->renderInside();
+
+
+
+
+
+        // Sphere
+        model.setProjection(camera.getProjectionMatrix());
+        model.setView(camera.getViewMatrix());
+        model.draw();
+
+        // Inactive or next terrain
+        pInactiveTerrain->setVPMatrix(camera.getVPMatrix());
+        pInactiveTerrain->setInvViewMatrix(camera.getInvViewMatrix());
+        pInactiveTerrain->setGrid(gDrawGrid);
+        pInactiveTerrain->draw();
+
+        // Grass
+        grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
+        grass.draw();
+
+        // Skydome
+        skydome.draw();
+
+
+
+
+
+        // Disable stencil test
+        pActivePortal->disableStencil();
+
+        // Do post rendering stuff (maybe shadowmaps etc. if enough spare time)
+
+
+
+        glfwSwapBuffers( window );
+        glFlush();
+
+    }
 
     /*
      * Cleaup phase
@@ -500,6 +525,7 @@ int main()
     glDeleteProgram(grassShaderProgram);
     glDeleteProgram(terrainShaderProgram);
     glDeleteProgram(skydomeShaderProgram);
+    glDeleteProgram(cloudsShaderProgram);
 
 }
 

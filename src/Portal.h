@@ -67,6 +67,7 @@ private:
     ModelLoader *model;
     ModelLoader *modelFill;
     Camera* camera;
+    glm::vec3 mTmpCamPos;
 
     /* void drawFill(); */
     /* void drawPortal(); */

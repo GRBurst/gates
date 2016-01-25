@@ -136,14 +136,23 @@ void Portal::renderOutside()
 }
 
 // Third call: Render next scene/terrain in the stencil
-void Portal::renderInside(){
+void Portal::renderInside()
+{
     // drawing the scene in coords where we filled the buffer . skip where stencil's value is != 0
     glStencilFunc(GL_EQUAL, 1, 0xFF);
+
+    //viewMatrix = camera in current world
+    mTmpCamPos = camera->getPosition();
+    camera->setPosition(mPosition2);
+    /* camera->rotate(glm::vec2(pActivePortal->getRotation2(), 0.0)); */
+    camera->update();
 }
 
 // Fourth call: Disable stencil rendering. Continue with post rendering (shadow maps or something like this
 void Portal::disableStencil()
 {
+    camera->setPosition(mTmpCamPos);
+    camera->update();
     glDisable(GL_STENCIL_TEST);
 }
 
