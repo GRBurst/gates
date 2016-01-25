@@ -69,18 +69,20 @@ void PerlinNoise::generateNoiseImage(){
 				float value = static_cast<float>(noise(static_cast<double>(x), static_cast<double>(y)));
 				//value = value -floor(value);
 				mNoiseValues[y * mXDim + x] = value;
+//				std::cout << value << std::endl;
 				if (value < mMin)
 					mMin = value;
 				if (value > mMax)
 					mMax = value;
 			}
 		}
-    	mMax = mMax - mMin;
-		for(int y = 0; y < mYDim; y++){
-			for(int x = 0; x < mXDim; x++){
-				mNoiseValues[y * mXDim + x] = (mNoiseValues[y * mXDim + x] - mMin) / mMax;
-			}
-		}
+//    	mMax = mMax - mMin;
+//		for(int y = 0; y < mYDim; y++){
+//			for(int x = 0; x < mXDim; x++){
+//				mNoiseValues[y * mXDim + x] = (mNoiseValues[y * mXDim + x] - mMin) / mMax;
+//				std::cout << mNoiseValues[y * mXDim + x] << std::endl;
+//			}
+//		}
     }
     else
     {
@@ -148,8 +150,8 @@ double PerlinNoise::noise(double x, double y, double z){
 
 void PerlinNoise::setGridPoints(double inputVector, int &b0, int &b1, double &r0, double &r1){
 	double t = inputVector + N;
-	b0 = ((int)t) & (mSampleSize - 1); //faster modulo operation
-	b1 = (b0 + 1) & (mSampleSize - 1);
+	b0 = ((int)t) % (mSampleSize - 1); //faster modulo operation
+	b1 = (b0 + 1) % (mSampleSize - 1);
 	r0 = t - ((int)t);
 	r1 = r0 - 1;
 
@@ -189,8 +191,8 @@ double PerlinNoise::calculateNoiseValue(double x, double y){
 	q = glm::dvec2(mGradientTable2d.at(b11));
 	v[1] = glm::dot(q, glm::dvec2(r1.x, r1.y));
 	//b = lerp(s.x, u, v);
-
-	return clamp(lerp(s.y, lerp(s.x, u[0], v[0]), lerp(s.x, u[1], v[1])), 0.0, 1.0);
+	std::cout << lerp(s.y, lerp(s.x, u[0], v[0]), lerp(s.x, u[1], v[1])) << std::endl;
+	return lerp(s.y, lerp(s.x, u[0], v[0]), lerp(s.x, u[1], v[1]));
 //	return lerp(s.y, a, b);
 }
 
@@ -257,7 +259,7 @@ double PerlinNoise::calculateNoiseValue(double x, double y, double z){
 	e = lerp(s.y, a, b);
 	f = lerp(s.y, c, d);
 
-	return lerp(s.z, e, f);
+	return (lerp(s.z, e, f) + 1) / 2;
 //	return lerp(s.y, a, b);
 }
 glm::dvec4 PerlinNoise::interpolationPolynomial(glm::dvec4 vec){
@@ -304,7 +306,8 @@ void PerlinNoise::init2DGradientTable(){
 		for (int j = 0; j < 2; j++)
 			mGradientTable2d.at(i)[j] = distribution(generator);
 		mGradientTable2d.at(i) = glm::normalize(mGradientTable2d.at(i));
-		//std::cout << mGradientTable2d.at(i).x << ", b0  " <<  mGradientTable2d.at(i).y << std::endl;
+		//std::cout << glm::length(mGradientTable2d.at(i))<< std::endl;
+
 	}
 	//std::cin.get();
 

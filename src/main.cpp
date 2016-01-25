@@ -374,10 +374,10 @@ int main()
                 int noiseDimY = 256;
                 double seed = 1.0 + 42.0 * pActivePortal->getPosition().x;
                 int octaves = static_cast<int>(4.0 * seed) % 17;
-                double frequency = fmodf(seed, 67.0);
-                double amplitude = fmodf(seed, 11.0);
+                double frequency = mod(seed, 67.0);
+                double amplitude = mod(seed, 11.0);
                 Noise* pNewNoise = new PerlinNoise();
-                pNewNoise->setParams(noiseDimX, noiseDimY, static_cast<int>(seed));
+                pNewNoise->setParams(noiseDimX, noiseDimY, seed);
                 pNewNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
 
                 delete pActiveNoise;

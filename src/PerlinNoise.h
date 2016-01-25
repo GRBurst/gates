@@ -15,7 +15,7 @@
 #include <algorithm>
 #include <glm/glm.hpp>
 #include <math.h>
-
+#include <glm/gtx/string_cast.hpp>
 
 class PerlinNoise : public Noise
 {
