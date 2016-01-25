@@ -143,7 +143,7 @@ void Portal::renderInside()
 
     //viewMatrix = camera in current world
     mTmpCamPos = camera->getPosition();
-    camera->setPosition(mPosition2);
+    camera->setPosition(mPosition2-(mPosition1-mTmpCamPos));
     /* camera->rotate(glm::vec2(pActivePortal->getRotation2(), 0.0)); */
     camera->update();
 }
