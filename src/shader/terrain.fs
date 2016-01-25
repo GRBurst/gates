@@ -72,7 +72,7 @@ void main()
         /* terrainColor2 = vec3(0.8 * fHeight); */
         /* terrainColor1 = mix(terrainColor1, terrainColor2, fHeight/(2.0)); */
     }
-    else if (fHeight < (1.2 + fNormal.y))
+    else if (fHeight < (2.2 - fNormal.y))
     {
         terrainColor1 = vec3(0.8 * fHeight);
         /* terrainColor2 = vec3(1.0); */
@@ -80,7 +80,7 @@ void main()
     }
     else
     {
-        terrainColor1 = vec3(1.0);
+        terrainColor1 = vec3(fHeight);
     }
 
     color = phong(terrainColor1);
