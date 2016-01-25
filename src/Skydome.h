@@ -11,11 +11,13 @@
 #include <GL/glew.h>
 #include <vector>
 #include <iostream>
+#include <random>
 #include <cmath>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Camera.h"
 #include "Texture.h"
+#include "Clouds.h"
 #include <GLFW/glfw3.h>
 
 class Skydome
@@ -26,10 +28,16 @@ public:
 	void draw();
 	void generateGeometry(float r, int azimuths, int meridians);
 	void setBuffers();
+	void setCloud(GLint cloudShader, double probabilty);
 	void loadTexture(float* textureData, int width, int height, int depth);
 	void loadTexture(float* textureData, int width, int height);
+	void setClouds(Clouds* clouds){mClouds = clouds;}
+	float* getCloudAttributes(){return &cloudAttributes.front()[0];}
+	int getCloudNumber(){return cloudNumber; }
 private:
+	Clouds *mClouds;
 	std::vector<float> meshAttributes;
+	std::vector<glm::vec3> cloudAttributes;
 	GLuint mVao;
 	GLuint mVbo;
 	GLint mShaderProgram;
@@ -37,7 +45,9 @@ private:
 	GLuint muInvViewLocation;
 	GLuint muTime;
 	Camera* camera;
-	int verticesNumber;
+	int verticesNumber, cloudNumber;
+	int mCloudSeed;
+	double mCloudProbability;
 };
 
 #endif /* SRC_SKYDOME_H_ */

@@ -15,6 +15,7 @@
 #include "Grass.h"
 #include "WorleyNoise.h"
 #include "Skydome.h"
+#include "Clouds.h"
 
 
 using namespace glm;
@@ -212,7 +213,11 @@ int main()
     skydomeShader.loadShader("../src/shader/skydome.fs", Shader::FRAGMENT);
     GLint skydomeShaderProgram = skydomeShader.linkShaders();
 
-
+    Shader cloudsShader;
+    cloudsShader.loadShader("../src/shader/clouds.vs", Shader::VERTEX);
+    cloudsShader.loadShader("../src/shader/clouds.gs", Shader::GEOMETRY);
+	cloudsShader.loadShader("../src/shader/clouds.fs", Shader::FRAGMENT);
+	GLint cloudsProg = cloudsShader.linkShaders();
     /*
      * Setup main Pointer
      * Terrain Pointer: pActiveTerrain, pInactiveTerrain
@@ -288,19 +293,25 @@ int main()
      */
 
     // Skydome noise parameters
-    int noiseSkyDimX = 256, noiseSkyDimY = 256, noiseSkyDimZ = 64;
-    seed = 42, octaves = 16, frequency = 8.0;
+    int noiseSkyDimX = 256, noiseSkyDimY = 128, noiseSkyDimZ = 64;
+    seed = 42, octaves = 2, frequency = 2.0;
 
-    // Skydome noise generation
-    /* PerlinNoise pNoise3D; */
-    /* pNoise3D.setParams(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed); */
-    /* pNoise3D.setOctavesFreqAmp(octaves, frequency, amplitude); */
-    /* pNoise3D.generateNoiseImage(); */
+    // Setup noise for clouds
+    PerlinNoise pNoise3D;
+	pNoise3D.setParams(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
+	pNoise3D.setOctavesFreqAmp(octaves, frequency, amplitude);
+	pNoise3D.generateNoiseImage();
 
     // Skydome initialization
-    /* Skydome skydome(skydomeShaderProgram, &camera); */
-    /* skydome.generateGeometry(noiseDimX / 3, 64, 64); */
-    /* skydome.setBuffers(); */
+    Skydome skydome(skydomeShaderProgram, &camera);
+    skydome.generateGeometry(noiseDimX / 3, 64, 64);
+    skydome.setBuffers();
+
+    // Clouds initialization
+    Clouds clouds(cloudsProg, skydome.getCloudNumber(), skydome.getCloudAttributes(), &camera);
+    clouds.setBuffers();
+    clouds.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
+    skydome.setClouds(&clouds);
 
     // Grass
     Grass grass;
@@ -403,9 +414,6 @@ int main()
                 pActivePortal   = pNewPortal;
             }
 
-
-
-        }
             //update Frame
 
             // Clear buffers
@@ -441,7 +449,7 @@ int main()
             grass.draw();
 
             // Skydome
-            /* skydome.draw(); */
+            skydome.draw();
 
 
             // Draw in stencil pattern (in portal)
@@ -508,7 +516,6 @@ int main()
         /* camera->setOrientation(); */
         camera->update();
 
-        std::cout << "Generate new noise" << std::endl;
         // Generate new inactive terrain
         int noiseDimX = 256;
         int noiseDimY = 256;
@@ -520,7 +527,6 @@ int main()
         pNoise.setParams(noiseDimX, noiseDimY, seed);
         pNoise.setOctavesFreqAmp(octaves, frequency, amplitude);
 
-        std::cout << "Generate new terrain" << std::endl;
         Terrain* pNewTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &pNoise);
         pNewTerrain->setVPMatrix(camera->getVPMatrix());
         pNewTerrain->setInvViewMatrix(camera->getInvViewMatrix());
@@ -532,19 +538,16 @@ int main()
         pNewTerrain->linkHeightMapTexture(portalProg);
         pNewTerrain->draw();
 
-        std::cout << "Swap terrains" << std::endl;
         // swap terrains
         delete pActiveTerrain;
         pActiveTerrain      = pInactiveTerrain;
         pInactiveTerrain    = pNewTerrain;
 
 
-        std::cout << "Generate new portal" << std::endl;
         // Setup new portal
         Portal* pNewPortal = new Portal(portalProg);
         pNewPortal->init( camera, pActiveTerrain, pInactiveTerrain );
 
-        std::cout << "Swap portals" << std::endl;
         // swap portals
         delete pInactivePortal;
         pInactivePortal = pActivePortal;
