@@ -38,10 +38,10 @@ class Noise
         };
 //		virtual float* getSphericalTexture();
 		bool saveToFile(const char* filename);
-		int getXDim(){ return mXDim;}
-		int getYDim(){ return mYDim;}
-		int getZDim(){ return mZDim;}
-		int getWDim(){ return mWDim;}
+		int getXDim(){ return mXDim;};
+		int getYDim(){ return mYDim;};
+		int getZDim(){ return mZDim;};
+		int getWDim(){ return mWDim;};
 		double calculateNoiseValue(double x, double y);
 		glm::ivec2 getDimension(){ return glm::ivec2(mXDim, mYDim);}
 	protected:

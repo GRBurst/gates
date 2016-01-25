@@ -124,8 +124,8 @@ class Terrain {
         int mWidth, mHeight;
         int mTotalIndices, mTotalVertices;
 
-        Noise *mNoise;
-        float* mNoiseValues;
+        Noise *mNoise = NULL;
+        float* mNoiseValues = NULL;
         NoiseType noiseType;
 
         Texture mHeightMapTexture;
@@ -137,8 +137,8 @@ class Terrain {
         float mTerrainPosRange;
         bool mUseNormals;
 
-        GLfloat* mVertices;
-        GLint* mIndices;
+        GLfloat* mVertices = NULL;
+        GLint* mIndices = NULL;
         int mFloatsPerVertex;
         GLuint mVao;
         GLuint mVbo;

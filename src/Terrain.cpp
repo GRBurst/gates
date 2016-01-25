@@ -73,11 +73,12 @@ glm::vec3 Terrain::computePosition(int x, int z) const
     float xPosition = mTerrainMinPos + (xRatio * mTerrainPosRange);
     float yPosition = mNoiseValues[z * mHeightMapTerrainRatio * mNoise->getXDim() + x];
     float zPosition = mTerrainMinPos + (zRatio * mTerrainPosRange);
-    /* double zPosition = mNoise->calculateNoiseValue((double)x * (double)muHeightMapTerrainRatio, (double)y * (double)muHeightMapTerrainRatio); */
-    /* std::cout << "zPosition = " << zPosition << std::endl; */
     /* yPosition = 4.04*yPosition - 1.72; */
     yPosition = 0.5*pow(yPosition+0.5,5);
 
+    /* std::cout << "xPosition = " << xPosition << std::endl; */
+    /* std::cout << "yPosition = " << yPosition << std::endl; */
+    /* std::cout << "zPosition = " << zPosition << std::endl; */
     return glm::vec3(xPosition, yPosition, -zPosition);
     /* return glm::vec3(x, y, -1.0); */
 }
