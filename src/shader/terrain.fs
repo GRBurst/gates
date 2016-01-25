@@ -80,7 +80,7 @@ void main()
     }
     else
     {
-        terrainColor1 = vec3(1.0);
+        terrainColor1 = vec3(fHeight);
     }
 
     color = phong(terrainColor1);
