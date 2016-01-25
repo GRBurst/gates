@@ -372,15 +372,14 @@ int main()
                 // Generate new inactive terrain
                 int noiseDimX = 256;
                 int noiseDimY = 256;
-                int seed = 42 * pActivePortal->getPosition().x;
-                int octaves = 4;
-                double frequency = 54.0;
-                double amplitude = 2.0;
+                double seed = 1.0 + 42.0 * pActivePortal->getPosition().x;
+                int octaves = static_cast<int>(4.0 * seed) % 17;
+                double frequency = fmodf(seed, 67.0);
+                double amplitude = fmodf(seed, 11.0);
                 Noise* pNewNoise = new PerlinNoise();
-                pNewNoise->setParams(noiseDimX, noiseDimY, seed);
+                pNewNoise->setParams(noiseDimX, noiseDimY, static_cast<int>(seed));
                 pNewNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
 
-                std::cout << "Swap noises" << std::endl;
                 delete pActiveNoise;
                 pActiveNoise    = pInactiveNoise;
                 pInactiveNoise  = pNewNoise;
@@ -392,12 +391,11 @@ int main()
                 pNewTerrain->enableNormals();
                 pNewTerrain->computeTerrain();
                 pNewTerrain->genHeightMapTexture();
-                pNewTerrain->saveNoiseToFile("PerlinNoise_Terrain2.tga");
+                pNewTerrain->saveNoiseToFile("newTerrain_noise.tga");
                 pNewTerrain->linkHeightMapTexture(terrainShaderProgram);
                 pNewTerrain->linkHeightMapTexture(defaultShaderProgram);
                 pNewTerrain->draw();
 
-                std::cout << "Swap terrains" << std::endl;
                 // swap terrains
                 delete pActiveTerrain;
                 pActiveTerrain      = pInactiveTerrain;
@@ -409,7 +407,6 @@ int main()
                 Portal* pNewPortal = new Portal(defaultShaderProgram);
                 pNewPortal->init( &camera, pActiveTerrain, pInactiveTerrain );
 
-                std::cout << "Swap portals" << std::endl;
                 // swap portals
                 delete pInactivePortal;
                 pInactivePortal = pActivePortal;
