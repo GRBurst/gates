@@ -37,7 +37,7 @@ bool doHighLight()
 {
     vec2 ray = vec2(uRayTerrainIntersection.x - wPos.x, uRayTerrainIntersection.z - wPos.z);
     float diff = length(ray);
-    if(diff < 5.0) return true;
+    if(diff < 0.5) return true;
 
     return false;
 }

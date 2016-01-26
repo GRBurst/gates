@@ -49,7 +49,7 @@ void main()
 
     fUV = calculateUV();
     fNormal = vNormal;
-    # fHeight = getHightScale() * vPosition.y;
+    //fHeight = getHightScale() * vPosition.y;
     fHeight = vPosition.y;
 
     fPos = vec3(pos);
