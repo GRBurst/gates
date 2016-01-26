@@ -22,6 +22,7 @@ Terrain::Terrain(GLint shaderProgram, int width, int height)
     int verticesPerStrip = 2 * mWidth;
     mTotalIndices = (verticesPerStrip * numStripsRequired) + numDegensRequired;
     Texture mHeightMapTexture();
+    mRayTerrainIntersection = glm::vec3(0.0, 0.0, 0.0);
 }
 
 Terrain::Terrain(GLint shaderProgram, int width, int height, Noise *noise)
@@ -81,6 +82,81 @@ glm::vec3 Terrain::computePosition(int x, int z) const
     /* std::cout << "zPosition = " << zPosition << std::endl; */
     return glm::vec3(xPosition, yPosition, -zPosition);
     /* return glm::vec3(x, y, -1.0); */
+}
+
+glm::vec2 Terrain::getIndexCordFromTerrain(glm::vec3 position)
+{
+    float x = (mWidth - 1) * ((position.x - mTerrainMinPos) / mTerrainPosRange);
+    float z = (mHeight - 1) * (1 - ((position.z - mTerrainMinPos) / mTerrainPosRange));
+    return glm::vec2(x, z);
+}
+
+void Terrain::getRayTerrainIntersection(glm::vec3& ray, glm::vec3 camPosition)
+{
+
+    float interpolHeight;
+    float dist0, dist1, dist2, dist3;
+    glm::vec3 cord0, cord1, cord2, cord3;
+    glm::ivec2 floorVals, ceilVals;
+    glm::ivec2 indexCord0, indexCord1, indexCord2, indexCord3;
+
+    glm::vec3 curPos = camPosition;
+    /* float dX = mTerrainPosRange * (1.0f / (mWidth - 1)); */
+    /* float dY = mTerrainPosRange * (1.0 - (1.0f / (mWidth - 1))); */
+
+    /* yPosition = 4.04*yPosition - 1.72; */
+    /* yPosition = 0.5*pow(yPosition+0.5,5); */
+
+    /* /1* while( rayHeight > minTerrainDist) *1/ */
+    std::cout << "camPosition: x = " << camPosition.x << ", y = " << camPosition.y << ", z = " << camPosition.z << std::endl;
+    std::cout << "ray trace: " << std::endl;
+    while( (curPos.y > -0.5f) && (curPos.y < 25.0f))
+    {
+        curPos += ray;
+
+        floorVals = floor(getIndexCordFromTerrain(curPos));
+        ceilVals = ceil(getIndexCordFromTerrain(curPos));
+
+        indexCord0 = glm::ivec2(floorVals.x, floorVals.y);   // Bottom left
+        indexCord1 = glm::ivec2(floorVals.x, ceilVals.y);    // Top left
+        indexCord2 = glm::ivec2(ceilVals.x, floorVals.y);    // Bottom right
+        indexCord3 = glm::ivec2(ceilVals.x, ceilVals.y);     // Top right
+
+        cord0 = getTerrainPosition(indexCord0);   // Bottom left
+        cord1 = getTerrainPosition(indexCord1);    // Top left
+        cord2 = getTerrainPosition(indexCord2);    // Bottom right
+        cord3 = getTerrainPosition(indexCord3);     // Top right
+
+        dist0 = sqrt((curPos.x - cord0.x)*(curPos.x - cord0.x) + (curPos.z - cord0.z)*(curPos.z - cord0.z));
+        dist1 = sqrt((curPos.x - cord1.x)*(curPos.x - cord1.x) + (curPos.z - cord1.z)*(curPos.z - cord1.z));
+        dist2 = sqrt((curPos.x - cord2.x)*(curPos.x - cord2.x) + (curPos.z - cord2.z)*(curPos.z - cord2.z));
+        dist3 = sqrt((curPos.x - cord3.x)*(curPos.x - cord3.x) + (curPos.z - cord3.z)*(curPos.z - cord3.z));
+
+        /* heights[0] = computePosition(cord0); */
+        /* heights[1] = computePosition(cord1); */
+        /* heights[2] = computePosition(cord2); */
+        /* heights[3] = computePosition(cord3); */
+        /* interpolHeight = dist0 * heights[0] + dist1 * heights[1] + dist2 * heights[2] + dist3 * heights[3]; */
+        interpolHeight = dist0 * cord0.y + dist1 * cord1.y + dist2 * cord2.y + dist3 * cord3.y;
+
+        /* distance = glm::length(camPosition - curPos); */
+
+        /* rayHeight = camPosition.y + (ray.y * distance); */
+        /* std::cout << "current pos: x = " << curPos.x << ", y = " << rayHeight << ", z = " << curPos.z << "\t <=>" ; */
+        /* std::cout << "current pos: x = " << curPos.x << ", y = " << rayHeight << ", z = " << curPos.z << "\t <=>" ; */
+        std::cout << "index pos: x = " << indexCord0.x << ", y = " << indexCord0.y << std::endl;
+        std::cout << "current pos: x = " << curPos.x << ", y = " << curPos.y << ", z = " << curPos.z << "\t <=>" ;
+        std::cout << "terrain pos: x = " << cord0.x << ", y = " << cord0.y << ", z = " << cord0.z << std::endl;
+
+        if(curPos.y < interpolHeight)
+        {
+            /* curPos.y = rayHeight; */
+            std::cout << "INTERSECTION" << std::endl;
+            break;
+        }
+
+    }
+    mRayTerrainIntersection = cord0;
 }
 
 int Terrain::computeTerrainPositions()
@@ -329,6 +405,8 @@ void Terrain::setBuffers()
     muInvViewLocation = glGetUniformLocation(mShaderProgram, "uInvViewMatrix");
     muHeightMapTerrainRatioLocation = glGetUniformLocation(mShaderProgram, "uHeightMapTerrainRatio");
     muDrawGridLocation = glGetUniformLocation(mShaderProgram, "uDrawGrid");
+    muRayTerrainIntersectionLocation = glGetUniformLocation(mShaderProgram, "uRayTerrainIntersection");
+    muCamPos = glGetUniformLocation(mShaderProgram, "uCamPos");
 
     //Generate & bind vao
     glGenVertexArrays(1, &mVao);
@@ -376,6 +454,8 @@ void Terrain::draw()
     glUniformMatrix3fv(muInvViewLocation, 1, GL_FALSE, value_ptr(mInvViewMatrix));
     glUniform1i(muHeightMapTerrainRatioLocation, mHeightMapTerrainRatio);
     glUniform1i(muDrawGridLocation, mDrawGrid);
+    glUniform3f(muRayTerrainIntersectionLocation, mRayTerrainIntersection.x, mRayTerrainIntersection.y, mRayTerrainIntersection.z);
+    glUniform3f(muCamPos, mCamPos.x, mCamPos.y, mCamPos.z);
 
     // Bind Attributes
     glBindVertexArray(mVao);

@@ -50,7 +50,7 @@ class WorleyNoise : public Noise
         const uint OFFSET_BASIS = 2166136261;
         const uint FNV_PRIME = 16777619;
         /* std::vector<float> mNoiseValues; */
-        std::function< void(float) > mDistFunc;
+        std::function< float(glm::vec3, glm::vec3) > mDistFunc;
         unsigned int mDistSeed;
         double mAvgNumFeaturePoints;
         int mNumDistF;
@@ -69,13 +69,13 @@ class WorleyNoise : public Noise
         unsigned int fnvHash(unsigned int i, unsigned int j, unsigned int k);
         unsigned int lcgRandom(unsigned int lastValue);
 
-        float euclidian_distance( glm::vec3 p1, glm::vec3 p2 );
-        float euclidean(float x1, float y1, float z1, float x2, float y2, float z2);
-        float euclideanSquared(float x1, float y1, float z1, float x2, float y2, float z2);
-        float manhattan(float x1, float y1, float z1, float x2, float y2, float z2);
-        float chebychev(float x1, float y1, float z1, float x2, float y2, float z2);
-        float quadratic(float x1, float y1, float z1, float x2, float y2, float z2);
-        float minkowski(float x1, float y1, float z1, float x2, float y2, float z2);
+        float euclidean_distance( glm::vec3 p1, glm::vec3 p2 );
+        float euclidean(glm::vec3 p1, glm::vec3 p2);
+        float euclideanSquared(glm::vec3 p1, glm::vec3 p2);
+        float manhattan(glm::vec3 p1, glm::vec3 p2);
+        float chebychev(glm::vec3 p1, glm::vec3 p2);
+        float quadratic(glm::vec3 p1, glm::vec3 p2);
+        float minkowski(glm::vec3 p1, glm::vec3 p2);
 
 
         /* bool wrapping; */

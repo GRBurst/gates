@@ -8,7 +8,8 @@ uniform mat4 uVPMatrix;
 uniform mat3 uInvViewMatrix;
 uniform int uHeightMapTerrainRatio;
 uniform int uDrawGrid;
-
+uniform vec3 uRayTerrainIntersection;
+uniform vec3 uCamPos;
 out float fHeight;
 out vec2 fUV;
 out vec3 fNormal;

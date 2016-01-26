@@ -86,6 +86,14 @@ class Terrain {
         /* { */
         /*     return mNoiseValues; */
         /* }; */
+        void getRayTerrainIntersection(glm::vec3& ray, glm::vec3 camPosition);
+        glm::vec2 getIndexCordFromTerrain(glm::vec3 position);
+        glm::vec3 getTerrainPosition(glm::ivec2 coordinate)
+        {
+            /* return mTerrainOffset + mTerrainScale * mNoiseValues[(coordinate.y * mWidth) + coordinate.x]; */
+            int index = 3 * ((coordinate.y * mWidth) + coordinate.x);
+            return glm::vec3(mVertices[index], mVertices[index+1], -mVertices[index+2]);
+        };
 
         void setGrid(int mode) {mDrawGrid = mode;};
 
@@ -153,6 +161,10 @@ class Terrain {
         int mHeightMapTerrainRatio;
         GLint muDrawGridLocation;
         int mDrawGrid;
+        glm::vec3 mRayTerrainIntersection;
+        GLint muRayTerrainIntersectionLocation;
+        glm::vec3 mCamPos;
+        GLint muCamPos;
 
         /* float minPos, posRange; */
         typedef struct

@@ -31,6 +31,8 @@ Camera camera;
 double lastMouseXPosition, lastMouseYPosition;
 int gDrawGrid = 0;
 
+glm::vec3 getWorldRayFromCursor(Camera& camera, const double& screenPosX, const double& screenPosY);
+void processInput(Camera& camera, Terrain& activeTerrain);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_callback(GLFWwindow* window, double mouseXPosition, double mouseYPosition);
@@ -123,7 +125,7 @@ void initOpenGL()
     glClearColor( 0.0, 0.0, 0.0, 1.0 );
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LESS );
-    glEnable(GL_CULL_FACE);
+    /* glEnable(GL_CULL_FACE); */
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 }
@@ -146,7 +148,7 @@ void displayFrame(){
 
 }
 
-void processInput(Camera& camera)
+void processInput(Camera& camera, Terrain& activeTerrain)
 {
     glfwPollEvents();
 
@@ -158,12 +160,22 @@ void processInput(Camera& camera)
         camera.processMouse(float( lastMouseXPosition - mouseXPosition ), float( lastMouseYPosition - mouseYPosition ));
         glfwSetCursorPos(window, lastMouseXPosition, lastMouseYPosition);
     }
+    else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+    {
+        glm::vec3 rayDirection = getWorldRayFromCursor(camera, mouseXPosition, mouseYPosition);
+        std::cout << std::endl << "Screen coords: x = " << mouseXPosition << ", y = " << mouseYPosition << std::endl;
+        std::cout << "Ray direction: x = " << rayDirection.x << ", y = " << rayDirection.y << ", z = " << rayDirection.z << std::endl;
+        std::cout << "cam direction: x = " << camera.getViewDirection().x << ", y = " << camera.getViewDirection().y << ", z = " << camera.getViewDirection().z << std::endl;
+        activeTerrain.getRayTerrainIntersection(rayDirection, camera.getPosition());
+    }
     else
     {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         lastMouseXPosition = mouseXPosition;
         lastMouseYPosition = mouseYPosition;
     }
+    /* glm::vec3 rayDirection = getWorldRayFromCursor(camera, mouseXPosition, mouseYPosition); */
+    /* activeTerrain.getRayTerrainIntersection(rayDirection, camera.getPosition()); */
 
     if(glfwGetKey(window, GLFW_KEY_ESCAPE)  == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
     if(glfwGetKey(window, GLFW_KEY_Q )      == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
@@ -178,6 +190,34 @@ void processInput(Camera& camera)
     {
         std::cout << std::endl << "Camera coords: x = " << camera.getPosition().x << ", y = " << camera.getPosition().y << ", z = " << camera.getPosition().z << std::endl;
     }
+
+}
+
+glm::vec3 getWorldRayFromCursor(Camera& camera, const double& screenPosX, const double& screenPosY)
+{
+    float x = (2.0f * screenPosX) / wWidth - 1.0f;
+    float y = 1.0f - (2.0f * screenPosY) / wHeight;
+    float z = -1.0f;
+
+    glm::vec3 norm3DCoordsRay(x, y, z);
+    glm::vec4 homogenCoordsRay(norm3DCoordsRay, 1.0);
+
+    glm::vec4 camCoordsRay = glm::inverse(camera.getProjectionMatrix()) * homogenCoordsRay;
+
+    camCoordsRay = glm::vec4(camCoordsRay.x, camCoordsRay.y, -1.0, 0.0);
+
+    glm::vec3 worldCoordsRay = glm::vec3(glm::normalize(glm::inverse(camera.getViewMatrix()) * camCoordsRay));
+
+    return worldCoordsRay;
+
+    /* camera.update(); */
+    /* float depth; */
+    /* glReadPixels(screenPosX, screenPosY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth); */
+    /* glm::vec3 windowCoords(static_cast<float>(screenPosX), static_cast<float>(wHeight) - static_cast<float>(screenPosY), depth); */
+    /* glm::vec4 viewport(0.0f, 0.0f, wWidth, wHeight); */
+
+    /* return glm::unProject(windowCoords, camera.getViewMatrix(), camera.getProjectionMatrix(), viewport); */
+    /* return glm::unProject(windowCoords, glm::mat4(1.0f), camera.getProjectionMatrix(), viewport); */
 
 }
 
@@ -381,7 +421,7 @@ int main()
             //here update game
             /* glfwPollEvents(); */
 
-            processInput(camera);
+            processInput(camera, *pActiveTerrain);
 
             newTime += frameTime;
 
