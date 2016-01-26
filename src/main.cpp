@@ -14,6 +14,7 @@
 #include "Texture.h"
 #include "Grass.h"
 #include "WorleyNoise.h"
+#include "SimplexNoise.h"
 #include "Skydome.h"
 #include "Clouds.h"
 
@@ -370,18 +371,20 @@ int main()
      */
 
     // Skydome noise parameters
-    int noiseSkyDimX = 256, noiseSkyDimY = 128, noiseSkyDimZ = 64;
-    seed = 42, octaves = 2, frequency = 2.0;
+    int noiseSkyDimX = 512, noiseSkyDimY = 512, noiseSkyDimZ = 64;
+    seed = 123, octaves = 8, frequency = 8.0, amplitude = 4;
 
     // Setup noise for clouds
-    PerlinNoise pNoise3D;
+    SimplexNoise pNoise3D;
     pNoise3D.setParams(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
     pNoise3D.setOctavesFreqAmp(octaves, frequency, amplitude);
     pNoise3D.generateNoiseImage();
+//    pNoise3D.saveToFile("3DnoiseSimplex.tga");
 
     // Skydome initialization
     Skydome skydome(skydomeShaderProgram, &camera);
     skydome.generateGeometry(noiseDimX / 3, 64, 64);
+    skydome.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
     skydome.setBuffers();
 
     // Clouds initialization
@@ -433,7 +436,64 @@ int main()
              * Check for portal intersection
              *
              */
+            float diff = glm::length(glm::vec3(camera.getPosition() - pActivePortal->getPosition()));
+
+            if((diff < 2.5) && pActivePortal->isActive())
+            {
+                // Do teleportation
+                pActivePortal->teleport();
+                camera.setPosition(pActivePortal->getPosition2());
+                /* camera->setOrientation(); */
+                camera.update();
+
+                std::cout << "Generate new noise" << std::endl;
+                // Generate new inactive terrain
+                int noiseDimX = 256;
+                int noiseDimY = 256;
+                double seed = 1.0 + 42.0 * pActivePortal->getPosition().x;
+                int octaves = seed < 0 ? static_cast<int>(-seed) % 17 : static_cast<int>(seed) % 17;
+                std::cout << "Octaves: "<< octaves << std::endl;
+                double frequency = mod(seed, 16.0);
+                double amplitude = mod(seed, 8.0);
+                Noise* pNewNoise = new PerlinNoise();
+                pNewNoise->setParams(noiseDimX, noiseDimY, seed);
+                pNewNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
+
+                delete pActiveNoise;
+                pActiveNoise    = pInactiveNoise;
+                pInactiveNoise  = pNewNoise;
+
+                std::cout << "Generate new terrain" << std::endl;
+                Terrain* pNewTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, pInactiveNoise);
+                pNewTerrain->setVPMatrix(camera.getVPMatrix());
+                pNewTerrain->setInvViewMatrix(camera.getInvViewMatrix());
+                pNewTerrain->enableNormals();
+                pNewTerrain->computeTerrain();
+                pNewTerrain->genHeightMapTexture();
+                pNewTerrain->saveNoiseToFile("newTerrain_noise.tga");
+                pNewTerrain->linkHeightMapTexture(terrainShaderProgram);
+                pNewTerrain->linkHeightMapTexture(defaultShaderProgram);
+                pNewTerrain->draw();
+
+                // swap terrains
+                delete pActiveTerrain;
+                pActiveTerrain      = pInactiveTerrain;
+                pInactiveTerrain    = pNewTerrain;
+
+                grass.setTerrainVao(pActiveTerrain->getVAO(), pActiveTerrain->getTotalIndices());
+                std::cout << "Generate new portal" << std::endl;
+                // Setup new portal
+                Portal* pNewPortal = new Portal(defaultShaderProgram);
+                pNewPortal->init( &camera, pActiveTerrain, pInactiveTerrain );
+
+                // swap portals
+                delete pInactivePortal;
+                pInactivePortal = pActivePortal;
+                pActivePortal   = pNewPortal;
+            }
+
             portalIntersection(camera, pActiveNoise, pInactiveNoise, pActiveTerrain, pInactiveTerrain, pActivePortal, pInactivePortal, terrainShaderProgram, defaultShaderProgram);
+
         }
 
                     //update Frame

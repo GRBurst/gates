@@ -13,6 +13,7 @@
 #include <iostream>
 #include <random>
 #include <cmath>
+#include <algorithm>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Camera.h"
@@ -35,6 +36,7 @@ public:
 	float* getCloudAttributes(){return &cloudAttributes.front()[0];}
 	int getCloudNumber(){return cloudNumber; }
 private:
+	//bool sortZ (glm::vec3 i, glm::vec3 j);
 	Clouds *mClouds;
 	std::vector<float> meshAttributes;
 	std::vector<glm::vec3> cloudAttributes;
@@ -48,6 +50,7 @@ private:
 	int verticesNumber, cloudNumber;
 	int mCloudSeed;
 	double mCloudProbability;
+
 };
 
 #endif /* SRC_SKYDOME_H_ */

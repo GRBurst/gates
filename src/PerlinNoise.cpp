@@ -53,22 +53,22 @@ void PerlinNoise::printParams()
 }
 
 void PerlinNoise::generateNoiseImage(){
-    if(mStart){
-        mStart = false;
-        initPermutationTable();
-        if (mZDim == 1)
-        	init2DGradientTable();
-        else
-        	init3DGradientTable();
-    }
 
+	initPermutationTable();
+	if (mZDim == 1)
+		init2DGradientTable();
+	else
+		init3DGradientTable();
+
+    mStart = false;
 //    printParams();
     if (mZDim == 1){
     	for(int y = 0; y < mYDim; y++){
 			for(int x = 0; x < mXDim; x++){
-				float value = static_cast<float>(noise(static_cast<double>(x), static_cast<double>(y)));
+				float value = static_cast<float>(fbm(static_cast<double>(x), static_cast<double>(y)));
 				//value = value -floor(value);
 				mNoiseValues[y * mXDim + x] = value;
+//				std::cout << value << std::endl;
 				if (value < mMin)
 					mMin = value;
 				if (value > mMax)
@@ -76,26 +76,36 @@ void PerlinNoise::generateNoiseImage(){
 			}
 		}
     	mMax = mMax - mMin;
-		for(int y = 0; y < mYDim; y++){
-			for(int x = 0; x < mXDim; x++){
-				mNoiseValues[y * mXDim + x] = (mNoiseValues[y * mXDim + x] - mMin) / mMax;
+    	if (mMax != 0)
+			for(int y = 0; y < mYDim; y++){
+				for(int x = 0; x < mXDim; x++){
+					mNoiseValues[y * mXDim + x] = (mNoiseValues[y * mXDim + x] - mMin) / mMax;
+				}
 			}
-		}
     }
     else
     {
     	for(int z = 0; z < mZDim; z++){
     		for(int y = 0; y < mYDim; y++){
 				for(int x = 0; x < mXDim; x++){
-					float value = static_cast<float>(noise(static_cast<double>(x), static_cast<double>(y), static_cast<double>(z)));
+					float value = static_cast<float>(fbm(static_cast<double>(x), static_cast<double>(y), static_cast<double>(z)));
 					mNoiseValues[z * mYDim * mXDim + y * mXDim + x] = value;
-//					if (value < mMin)
-//						mMin = value;
-//					if (value > mMax)
-//						mMax = value;
+					if (value < mMin)
+						mMin = value;
+					if (value > mMax)
+						mMax = value;
 				}
 			}
     	}
+    	if (mMax != 0)
+			for(int z = 0; z < mZDim; z++){
+				for(int y = 0; y < mYDim; y++){
+					for(int x = 0; x < mXDim; x++){
+						mNoiseValues[z * mYDim * mXDim + y * mXDim + x] = (mNoiseValues[z * mYDim * mXDim + y * mXDim + x] - mMin) / mMax;
+
+					}
+				}
+			}
     }
 
 
@@ -103,7 +113,7 @@ void PerlinNoise::generateNoiseImage(){
     std::cout << "perlinNoise: min = " << mMin << ", max = " << mMax << std::endl;
 }
 
-double PerlinNoise::noise(double x, double y){
+double PerlinNoise::fbm(double x, double y){
 	double result = 0.0;
 	double amp = mAmplitude;
 	x = x / (double)mXDim;
@@ -119,7 +129,7 @@ double PerlinNoise::noise(double x, double y){
 	return result;
 }
 
-double PerlinNoise::noise(double x, double y, double z){
+double PerlinNoise::fbm(double x, double y, double z){
 	double result = 0.0;
 	double amp = mAmplitude;
 	x = x / (double)mXDim;
@@ -189,8 +199,7 @@ double PerlinNoise::calculateNoiseValue(double x, double y){
 	q = glm::dvec2(mGradientTable2d.at(b11));
 	v[1] = glm::dot(q, glm::dvec2(r1.x, r1.y));
 	//b = lerp(s.x, u, v);
-
-	return clamp(lerp(s.y, lerp(s.x, u[0], v[0]), lerp(s.x, u[1], v[1])), 0.0, 1.0);
+	return lerp(s.y, lerp(s.x, u[0], v[0]), lerp(s.x, u[1], v[1]));
 //	return lerp(s.y, a, b);
 }
 
@@ -257,7 +266,7 @@ double PerlinNoise::calculateNoiseValue(double x, double y, double z){
 	e = lerp(s.y, a, b);
 	f = lerp(s.y, c, d);
 
-	return lerp(s.z, f, e);
+	return lerp(s.z, e, f);
 //	return lerp(s.y, a, b);
 }
 glm::dvec4 PerlinNoise::interpolationPolynomial(glm::dvec4 vec){
@@ -304,7 +313,8 @@ void PerlinNoise::init2DGradientTable(){
 		for (int j = 0; j < 2; j++)
 			mGradientTable2d.at(i)[j] = distribution(generator);
 		mGradientTable2d.at(i) = glm::normalize(mGradientTable2d.at(i));
-		//std::cout << mGradientTable2d.at(i).x << ", b0  " <<  mGradientTable2d.at(i).y << std::endl;
+		//std::cout << glm::length(mGradientTable2d.at(i))<< std::endl;
+
 	}
 	//std::cin.get();
 

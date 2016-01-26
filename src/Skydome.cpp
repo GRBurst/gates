@@ -9,7 +9,7 @@
 
 Skydome::Skydome(GLint shaderProgram, Camera* camera) : mClouds(0), meshAttributes(0), cloudAttributes(0), mVao(0), mVbo(0), mShaderProgram(0),
 														muVPLocation(0), muInvViewLocation(0), muTime(0),
-														camera(0), verticesNumber(0), cloudNumber(0), mCloudSeed(212), mCloudProbability(0.15)
+														camera(0), verticesNumber(0), cloudNumber(0), mCloudSeed(212), mCloudProbability(0.35)
 {
 	// TODO Auto-generated constructor stub
 	mShaderProgram = shaderProgram;
@@ -20,6 +20,8 @@ Skydome::~Skydome()
 {
 	// TODO Auto-generated destructor stub
 }
+
+bool sortZ (glm::vec3 i, glm::vec3 j) { return (i.z<j.z); }
 
 void Skydome::loadTexture(float* textureData, int width, int height, int depth){
 	Texture* texture = new Texture();
@@ -46,16 +48,16 @@ void Skydome::draw()
 	glBindVertexArray(mVao);
 	glDrawArrays(GL_TRIANGLES, 0, verticesNumber );
 	glBindVertexArray(0);
-	mClouds->draw();
+//	mClouds->draw();
 }
 
 void Skydome::generateGeometry(float r, int azimuths, int meridians)
 {
-	float cloudHeightMin = 0.3f;
+	float cloudHeightMin = 0.5f;
 	float cloudHeightMax = 0.75f * r;
 	//UV Generation is spherical
 	std::default_random_engine generator(mCloudSeed);
-	std::uniform_real_distribution<float> distribution (0.0, r / 15);
+	std::uniform_real_distribution<float> distribution (0.0, r / 5);
 	//meshAttributes.resize(azimuths * 30 + (meridians + 1) * azimuths * 30); //azimuths * 2 * 3 * ( 3+ 2) + (meridians - 2) * azimuths * 6 * (3 + 2)
 	//verticesNumber = azimuths * 18 + (meridians + 1) * azimuths * 18;
 	std::bernoulli_distribution bernoulli(mCloudProbability);
@@ -170,6 +172,7 @@ void Skydome::generateGeometry(float r, int azimuths, int meridians)
 	}
 	verticesNumber = (meshAttributes.size() / 5) * 3;
 	cloudNumber = cloudAttributes.size();
+	std::sort(cloudAttributes.begin(), cloudAttributes.end(), sortZ);
 }
 
 void Skydome::setBuffers()

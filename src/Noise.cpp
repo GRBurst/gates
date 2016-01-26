@@ -64,27 +64,31 @@ float *Noise::getInverseTextureData(){
 }
 
 bool Noise::saveToFile(const char* filename){
-	char* bmp = new char[mXDim*mYDim];
+	char* bmp = new char[mXDim*mYDim*mZDim];
 	char* it = bmp;
-	for (int x = 0; x < this-> mXDim * this->mYDim; x++){
-		*it = (char)(mNoiseValues[x] * 255);
-		it++;
-			//std::cout<< (y + x) + y * mXDim << std::endl;
-			//std::cout << mNoiseValues[x][y] << std::endl;
+	float* itF = &mNoiseValues.front();
+	for(int i = 0; i < mZDim; i++){
+		for (int x = 0; x < this-> mXDim * this->mYDim; x++){
+			*it = (char)(*itF * 255);
+			it++;
+			itF++;
+				//std::cout<< (y + x) + y * mXDim << std::endl;
+				//std::cout << mNoiseValues[x][y] << std::endl;
+		}
+
 	}
-
-
-	uint16_t header[9] = {0, 3, 0, 0 ,0 ,0, (uint16_t)mXDim, (uint16_t)mYDim, 8};
+	uint16_t header[9] = {0, 3, 0, 0 ,0 ,0, (uint16_t)mXDim, (uint16_t)mYDim * (uint16_t)mZDim, 8};
 	std::ofstream file(filename, std::ios::binary);
 	if(file.is_open()){
 		file.write((char*) (&header), sizeof(header));
-		file.write(bmp, sizeof(char)*mXDim*mYDim);
+		file.write(bmp, sizeof(char)*mXDim*mYDim * mZDim);
 		file.close();
 	}
 	else{
 		std::cout << "Error TGA Save: File not found" << std::endl;
 		return false;
 	}
+
 	return true;
 
 }
