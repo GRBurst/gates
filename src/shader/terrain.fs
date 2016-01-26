@@ -4,6 +4,7 @@ in float fHeight;
 in vec2 fUV;
 in vec3 fNormal;
 in vec3 fPos;
+in vec3 wPos;
 
 /* layout(binding = 0) uniform sampler2D heightMap; */
 uniform sampler2D heightMap;
@@ -34,8 +35,8 @@ out vec4 color;
 /* } */
 bool doHighLight()
 {
-    vec3 ray = (uRayTerrainIntersection-fPos);
-    float diff = length(vec2(ray.x, ray.z));
+    vec2 ray = vec2(uRayTerrainIntersection.x - wPos.x, uRayTerrainIntersection.z - wPos.z);
+    float diff = length(ray);
     if(diff < 5.0) return true;
 
     return false;
@@ -97,6 +98,7 @@ void main()
     /* else if(place()) color = vec4(); */
     if(doHighLight()) color = vec4(0.0, 1.0, 1.0, 1.0);
     else color = phong(terrainColor1);
+    /* color = phong(terrainColor1); */
 
     //color = terrainColor * vec4(diff, 1.0);
     //color = vec4(diff, 1.0);

@@ -14,11 +14,22 @@ out float fHeight;
 out vec2 fUV;
 out vec3 fNormal;
 out vec3 fPos;
+out vec3 wPos;
 
 vec2 calculateUV()
 {
     return vec2((25.0 + vPosition.x) / 50.0, (25.0 + vPosition.y) / 50.0);
     //return vec2(0.2, 0.1);
+}
+
+float getHightScale()
+{
+
+    vec2 ray = vec2(uRayTerrainIntersection.x - vPosition.x, uRayTerrainIntersection.z - vPosition.z);
+    float diff = length(ray);
+    if(diff < 2.5) return (2.5 - diff);
+
+    return 1.0;
 }
 
 void main()
@@ -38,9 +49,11 @@ void main()
 
     fUV = calculateUV();
     fNormal = vNormal;
+    # fHeight = getHightScale() * vPosition.y;
     fHeight = vPosition.y;
 
     fPos = vec3(pos);
+    wPos = vPosition;
     gl_Position = pos;
 
     //fColor = vec3(y, y, y);
