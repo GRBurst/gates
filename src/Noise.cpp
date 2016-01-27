@@ -52,7 +52,7 @@ double Noise::clamp(double x, double min, double max){
 //}
 
 float *Noise::getTextureData(){
-	return &mNoiseValues[0];
+	return mNoiseValues.data();
 }
 
 float *Noise::getInverseTextureData(){

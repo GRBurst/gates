@@ -37,7 +37,7 @@ class WorleyNoise : public Noise
         int getZDim();
         void setZDim(int zDim){ mZDim = zDim; };
         
-        float* getNoiseValues() {return &mNoiseValues[0]; };
+        float* getNoiseValues() {return mNoiseValues.data(); };
 
         /* void makeSomeNoise(Array_2D<float>& map, int zz); */
 

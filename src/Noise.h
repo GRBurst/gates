@@ -29,6 +29,7 @@ class Noise
 
         void setParams(int x, int y, int seed);
         void setParams(int x, int y, int z, int seed);
+        virtual std::vector<float> getDataVector() { return mNoiseValues; };
 		virtual float* getTextureData();
 		virtual float* getInverseTextureData();
 		virtual void generateNoiseImage() = 0;

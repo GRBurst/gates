@@ -164,10 +164,10 @@ void processInput(Camera& camera, Terrain& activeTerrain)
     else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
     {
         glm::vec3 rayDirection = getWorldRayFromCursor(camera, mouseXPosition, mouseYPosition);
-        std::cout << std::endl << "Screen coords: x = " << mouseXPosition << ", y = " << mouseYPosition << std::endl;
-        std::cout << "Ray direction: x = " << rayDirection.x << ", y = " << rayDirection.y << ", z = " << rayDirection.z << std::endl;
-        std::cout << "cam direction: x = " << camera.getViewDirection().x << ", y = " << camera.getViewDirection().y << ", z = " << camera.getViewDirection().z << std::endl;
-        activeTerrain.getRayTerrainIntersection(rayDirection, camera.getPosition());
+        /* std::cout << std::endl << "Screen coords: x = " << mouseXPosition << ", y = " << mouseYPosition << std::endl; */
+        /* std::cout << "Ray direction: x = " << rayDirection.x << ", y = " << rayDirection.y << ", z = " << rayDirection.z << std::endl; */
+        /* std::cout << "cam direction: x = " << camera.getViewDirection().x << ", y = " << camera.getViewDirection().y << ", z = " << camera.getViewDirection().z << std::endl; */
+        activeTerrain.getRayTerrainIntersection(rayDirection);
     }
     else
     {
@@ -316,7 +316,7 @@ int main()
      */
 
     // Common parameters
-    int noiseDimX = 256, noiseDimY = 256, noiseDimZ = 64;
+    int noiseDimX = 512, noiseDimY = 512, noiseDimZ = 1;
     int seed = 42, octaves = 16;
     double frequency = 8.0, amplitude = 4.0;
 
@@ -326,15 +326,14 @@ int main()
     pActiveNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
 
     // Setup initial terrain
-    pActiveTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, pActiveNoise);
-    pActiveTerrain->setVPMatrix(camera.getVPMatrix());
-    pActiveTerrain->setInvViewMatrix(camera.getInvViewMatrix());
+    pActiveTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pActiveNoise);
     pActiveTerrain->enableNormals();
     pActiveTerrain->computeTerrain();
     pActiveTerrain->genHeightMapTexture();
     pActiveTerrain->saveNoiseToFile("PerlinNoise_Terrain.tga");
     pActiveTerrain->linkHeightMapTexture(terrainShaderProgram);
     pActiveTerrain->linkHeightMapTexture(defaultShaderProgram);
+    /* pActiveTerrain->debug(); */
 
     // Setup worled (cell) noise for second terrain
     pInactiveNoise = new WorleyNoise();
@@ -342,9 +341,7 @@ int main()
     pInactiveNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
 
     // Setup initial inactive terrain (in portal)
-    pInactiveTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, pInactiveNoise);
-    pInactiveTerrain->setVPMatrix(camera.getVPMatrix());
-    pInactiveTerrain->setInvViewMatrix(camera.getInvViewMatrix());
+    pInactiveTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pInactiveNoise);
     pInactiveTerrain->enableNormals();
     pInactiveTerrain->computeTerrain();
     pInactiveTerrain->genHeightMapTexture();
@@ -371,7 +368,7 @@ int main()
      */
 
     // Skydome noise parameters
-    int noiseSkyDimX = 512, noiseSkyDimY = 512, noiseSkyDimZ = 64;
+    int noiseSkyDimX = 512, noiseSkyDimY = 512, noiseSkyDimZ = 4;
     seed = 123, octaves = 8, frequency = 8.0, amplitude = 4;
 
     // Setup noise for clouds
@@ -464,9 +461,7 @@ int main()
                 pInactiveNoise  = pNewNoise;
 
                 std::cout << "Generate new terrain" << std::endl;
-                Terrain* pNewTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, pInactiveNoise);
-                pNewTerrain->setVPMatrix(camera.getVPMatrix());
-                pNewTerrain->setInvViewMatrix(camera.getInvViewMatrix());
+                Terrain* pNewTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pInactiveNoise);
                 pNewTerrain->enableNormals();
                 pNewTerrain->computeTerrain();
                 pNewTerrain->genHeightMapTexture();
@@ -530,8 +525,6 @@ int main()
         model.draw();
 
         // Active terrain
-        pActiveTerrain->setVPMatrix(camera.getVPMatrix());
-        pActiveTerrain->setInvViewMatrix(camera.getInvViewMatrix());
         pActiveTerrain->setGrid(gDrawGrid);
         pActiveTerrain->draw();
 
@@ -558,8 +551,6 @@ int main()
         model.draw();
 
         // Inactive or next terrain
-        pInactiveTerrain->setVPMatrix(camera.getVPMatrix());
-        pInactiveTerrain->setInvViewMatrix(camera.getInvViewMatrix());
         pInactiveTerrain->setGrid(gDrawGrid);
         pInactiveTerrain->draw();
 
@@ -637,9 +628,7 @@ bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pInactiveN
         pInactiveNoise  = pNewNoise;
 
         std::cout << "Generate new terrain" << std::endl;
-        Terrain* pNewTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, pInactiveNoise);
-        pNewTerrain->setVPMatrix(camera.getVPMatrix());
-        pNewTerrain->setInvViewMatrix(camera.getInvViewMatrix());
+        Terrain* pNewTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pInactiveNoise);
         pNewTerrain->enableNormals();
         pNewTerrain->computeTerrain();
         pNewTerrain->genHeightMapTexture();
