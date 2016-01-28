@@ -30,6 +30,7 @@ class Terrain {
         void linkHeightMapTexture(GLint shader);
 
         void enableNormals();
+        void enableNormalMap();
         void draw();
 
         // Getters / setters
@@ -72,12 +73,16 @@ class Terrain {
 
         void computeTerrainPositions();
         void computeTerrainNormals();
+        void computeTerrainTangents();
 
         void build();
         void setBuffers();
         void buildVBO();
         void buildIBO();
         void buildDebug();
+
+        void updateArea(glm::ivec2& bl, glm::ivec2& tl, glm::ivec2& br, glm::ivec2& tr );
+        void updateVertexBuffer(int offset, int size, float* newVertexData);
 
         // Member variables
         unsigned int mXDim, mZDim;
@@ -97,11 +102,12 @@ class Terrain {
         float mTerrainMinPos;
         float mTerrainPosRange;
         bool mUseNormals;
+        bool mUseNormalMap;
 
         /* GLfloat* mVertices = NULL; */
         /* GLint* mIndices = NULL; */
-        /* std::vector<GLfloat> mVertices; */
         std::vector<GLfloat> mVertices;
+        /* std::vector<glm::vec3> mVertices; */
         std::vector<GLint> mIndices;
         std::vector<GLint> mIndicesStrip;
         unsigned int mFloatsPerVertex;
@@ -132,14 +138,8 @@ class Terrain {
             glm::vec3 c;
         } Triangle;
         // normal, counterclockwise edges
-        glm::vec3 computeTriangleNormal(Triangle &t)
-        {
-            return glm::cross(glm::vec3(t.c - t.a), glm::vec3(t.b - t.a));
-        };
-        glm::vec3 computeVertexNormal(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, glm::vec3 v4, glm::vec3 v5, glm::vec3 v6 )
-        {
-            return glm::normalize(v1 + v2 + v3 + v4 + v5 + v6);
-        };
+        glm::vec3 computeTriangleNormal(Triangle &t);
+        glm::vec3 computeVertexNormal(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, glm::vec3 v4, glm::vec3 v5, glm::vec3 v6 );
 
 };
 #endif /* TERRAIN_H_ */

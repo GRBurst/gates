@@ -1,7 +1,9 @@
 #version 410 core
 layout (location = 0) in vec3 vPosition;
 layout (location = 1) in vec3 vNormal;
-//in vec2 fUV;
+layout (location = 2) in vec3 vTangent;
+layout (location = 3) in vec3 vBitangent;
+layout (location = 4) in vec3 vUV;
 
 uniform sampler2D heightMap;
 uniform mat4 uVPMatrix;

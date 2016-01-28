@@ -126,7 +126,7 @@ void initOpenGL()
     glClearColor( 0.0, 0.0, 0.0, 1.0 );
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LESS );
-    /* glEnable(GL_CULL_FACE); */
+    glEnable(GL_CULL_FACE);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 }
@@ -155,19 +155,25 @@ void processInput(Camera& camera, Terrain& activeTerrain)
 
     double mouseXPosition, mouseYPosition;
     glfwGetCursorPos(window, &mouseXPosition, &mouseYPosition);
-    if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+    static bool rayButtonPressed = false;
+    if(!glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) && rayButtonPressed)
     {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        camera.processMouse(float( lastMouseXPosition - mouseXPosition ), float( lastMouseYPosition - mouseYPosition ));
-        glfwSetCursorPos(window, lastMouseXPosition, lastMouseYPosition);
+        rayButtonPressed = false;
     }
-    else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+    else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) && !rayButtonPressed)
     {
+        rayButtonPressed = true;
         glm::vec3 rayDirection = getWorldRayFromCursor(camera, mouseXPosition, mouseYPosition);
         /* std::cout << std::endl << "Screen coords: x = " << mouseXPosition << ", y = " << mouseYPosition << std::endl; */
         /* std::cout << "Ray direction: x = " << rayDirection.x << ", y = " << rayDirection.y << ", z = " << rayDirection.z << std::endl; */
         /* std::cout << "cam direction: x = " << camera.getViewDirection().x << ", y = " << camera.getViewDirection().y << ", z = " << camera.getViewDirection().z << std::endl; */
         activeTerrain.getRayTerrainIntersection(rayDirection);
+    }
+    else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+    {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        camera.processMouse(float( lastMouseXPosition - mouseXPosition ), float( lastMouseYPosition - mouseYPosition ));
+        glfwSetCursorPos(window, lastMouseXPosition, lastMouseYPosition);
     }
     else
     {
@@ -175,6 +181,7 @@ void processInput(Camera& camera, Terrain& activeTerrain)
         lastMouseXPosition = mouseXPosition;
         lastMouseYPosition = mouseYPosition;
     }
+
     /* glm::vec3 rayDirection = getWorldRayFromCursor(camera, mouseXPosition, mouseYPosition); */
     /* activeTerrain.getRayTerrainIntersection(rayDirection, camera.getPosition()); */
 
@@ -254,7 +261,7 @@ int main()
     // Input initialization
     /* glfwSetKeyCallback( window, key_callback ); */
     /* glfwSetCursorPosCallback(window, mouse_callback); */
-    glfwSetScrollCallback(window, scroll_callback);
+    /* glfwSetScrollCallback(window, scroll_callback); */
     glfwSetWindowSizeCallback( window, resize_callback );
 
     /* glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); */
@@ -316,7 +323,7 @@ int main()
      */
 
     // Common parameters
-    int noiseDimX = 512, noiseDimY = 512, noiseDimZ = 1;
+    int noiseDimX = 256, noiseDimY = 256, noiseDimZ = 1;
     int seed = 42, octaves = 16;
     double frequency = 8.0, amplitude = 4.0;
 
