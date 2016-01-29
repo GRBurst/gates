@@ -47,7 +47,8 @@ class Terrain {
         glm::vec2 getIndexCordFromTerrain(const glm::vec3& position) const;
 
         glm::vec3 computePosition(unsigned int x, unsigned int y) const;
-        void modifyHeight(const glm::vec3& ray);
+        void modifyHeight();
+        void highlightRay(const glm::vec3& ray);
         void changeModifyRadius(const double& yoffset);
         float getIndexDistances(const glm::ivec2& p1, const glm::ivec2& p2) const;
 
@@ -84,7 +85,7 @@ class Terrain {
         void buildIBO();
         void buildDebug();
 
-        void updateArea( const glm::ivec2& ip );
+        void updateArea( );
         void updateVertexBuffer(unsigned int offset, unsigned int size, float* newVertexData);
         glm::ivec2 getIntersectionPoint(const glm::vec3& position, const glm::vec3& ray);
 
@@ -133,6 +134,7 @@ class Terrain {
         GLint muRayTerrainIntersectionLocation;
         float mModifyRadius;
         GLint muModifyRadius;
+        glm::ivec2 mIntersectionCoords;
         glm::vec3 mCamPos;
         GLint muCamPos;
 

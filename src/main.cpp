@@ -31,7 +31,8 @@ const double frameTime = 1.0 / UPDATES_PER_SECOND;
 Camera camera;
 Terrain *pActiveTerrain;
 double lastMouseXPosition, lastMouseYPosition;
-int gDrawGrid = 0;
+static int gDrawGrid = 0;
+static bool gEditMode = false;
 
 glm::vec3 getWorldRayFromCursor(const double& screenPosX, const double& screenPosY);
 void processInput();
@@ -157,34 +158,35 @@ void processInput()
     glfwGetCursorPos(window, &mouseXPosition, &mouseYPosition);
     static bool rayButtonPressed = false;
 
-    if(!glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) && rayButtonPressed)
+    if(gEditMode)
     {
-        rayButtonPressed = false;
-    }
-    else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) && !rayButtonPressed)
-    {
-        rayButtonPressed = true;
         glm::vec3 rayDirection = getWorldRayFromCursor(mouseXPosition, mouseYPosition);
-        /* std::cout << std::endl << "Screen coords: x = " << mouseXPosition << ", y = " << mouseYPosition << std::endl; */
-        /* std::cout << "Ray direction: x = " << rayDirection.x << ", y = " << rayDirection.y << ", z = " << rayDirection.z << std::endl; */
-        /* std::cout << "cam direction: x = " << camera.getViewDirection().x << ", y = " << camera.getViewDirection().y << ", z = " << camera.getViewDirection().z << std::endl; */
-        pActiveTerrain->modifyHeight(rayDirection);
-    }
-    else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
-    {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        camera.processMouse(float( lastMouseXPosition - mouseXPosition ), float( lastMouseYPosition - mouseYPosition ));
-        glfwSetCursorPos(window, lastMouseXPosition, lastMouseYPosition);
+        pActiveTerrain->highlightRay(rayDirection);
+        if(!glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) && rayButtonPressed)
+        {
+            rayButtonPressed = false;
+        }
+        else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) && !rayButtonPressed)
+        {
+            rayButtonPressed = true;
+            pActiveTerrain->modifyHeight();
+        }
     }
     else
     {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        lastMouseXPosition = mouseXPosition;
-        lastMouseYPosition = mouseYPosition;
+        if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+        {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            camera.processMouse(float( lastMouseXPosition - mouseXPosition ), float( lastMouseYPosition - mouseYPosition ));
+            glfwSetCursorPos(window, lastMouseXPosition, lastMouseYPosition);
+        }
+        else
+        {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            lastMouseXPosition = mouseXPosition;
+            lastMouseYPosition = mouseYPosition;
+        }
     }
-
-    /* glm::vec3 rayDirection = getWorldRayFromCursor(camera, mouseXPosition, mouseYPosition); */
-    /* activeTerrain.getRayTerrainIntersection(rayDirection, camera.getPosition()); */
 
     if(glfwGetKey(window, GLFW_KEY_W )  == GLFW_PRESS) camera.moveForward( float(frameTime) );
     if(glfwGetKey(window, GLFW_KEY_S )  == GLFW_PRESS) camera.moveBack( float(frameTime) );
@@ -619,6 +621,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         case GLFW_KEY_Q :
             if(action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
             break;
+        case GLFW_KEY_E :
+            if(action == GLFW_PRESS) gEditMode = ((gEditMode == true) ? false : true);
+            break;
         case GLFW_KEY_I :
             if(action == GLFW_PRESS) camera.setCamSpeed( 10.0 );
             break;
@@ -642,37 +647,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 /* void mouse_callback(GLFWwindow* window, double mouseXPosition, double mouseYPosition, const Camera &camera) */
 void mouse_callback(GLFWwindow* window, double mouseXPosition, double mouseYPosition)
 {
-
-    /* static bool rayButtonPressed = false; */
-    /* if(!glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) && rayButtonPressed) */
-    /* { */
-    /*     rayButtonPressed = false; */
-    /* } */
-    /* else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) && !rayButtonPressed) */
-    if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-    {
-        /* rayButtonPressed = true; */
-        glm::vec3 rayDirection = getWorldRayFromCursor(mouseXPosition, mouseYPosition);
-        /* std::cout << std::endl << "Screen coords: x = " << mouseXPosition << ", y = " << mouseYPosition << std::endl; */
-        /* std::cout << "Ray direction: x = " << rayDirection.x << ", y = " << rayDirection.y << ", z = " << rayDirection.z << std::endl; */
-        /* std::cout << "cam direction: x = " << camera.getViewDirection().x << ", y = " << camera.getViewDirection().y << ", z = " << camera.getViewDirection().z << std::endl; */
-        pActiveTerrain->modifyHeight(rayDirection);
-    }
-    else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
-    {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        camera.processMouse(float( lastMouseXPosition - mouseXPosition ), float( lastMouseYPosition - mouseYPosition ));
-        glfwSetCursorPos(window, lastMouseXPosition, lastMouseYPosition);
-    }
-    else
-    {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        lastMouseXPosition = mouseXPosition;
-        lastMouseYPosition = mouseYPosition;
-    }
-
-    /* glm::vec3 rayDirection = getWorldRayFromCursor(camera, mouseXPosition, mouseYPosition); */
-    /* activeTerrain.getRayTerrainIntersection(rayDirection, camera.getPosition()); */
 
 }
 
