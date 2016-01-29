@@ -262,7 +262,7 @@ int main()
     // Input initialization
     /* glfwSetKeyCallback( window, key_callback ); */
     /* glfwSetCursorPosCallback(window, mouse_callback); */
-    /* glfwSetScrollCallback(window, scroll_callback); */
+    glfwSetScrollCallback(window, scroll_callback);
     glfwSetWindowSizeCallback( window, resize_callback );
 
     /* glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); */
@@ -675,5 +675,5 @@ void mouse_callback(GLFWwindow* window, double mouseXPosition, double mouseYPosi
 /* void scroll_callback(GLFWwindow* window, double xoffset, double yoffset, const Camera &camera) */
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    // TODO
+    pActiveTerrain->changeModifyRadius(yoffset);
 }

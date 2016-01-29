@@ -27,6 +27,7 @@ Terrain::Terrain(GLint shaderProgram, unsigned int xDim, unsigned int zDim, Came
     mTotalIndices = (6 * (mXDim-1) * (mZDim-1));
 
     mRayTerrainIntersection = glm::vec3(0.0, 0.0, 0.0);
+    mModifyRadius = 2.5;
     mVPMatrix = camera->getVPMatrix();
     mInvViewMatrix = camera->getInvViewMatrix();
 }
@@ -89,7 +90,7 @@ void Terrain::draw()
     glUniform1i(muHeightMapTerrainRatioLocation, mHeightMapTerrainRatio);
     glUniform1i(muDrawGridLocation, mDrawGrid);
     glUniform3f(muRayTerrainIntersectionLocation, mRayTerrainIntersection.x, mRayTerrainIntersection.y, mRayTerrainIntersection.z);
-    glUniform3f(muCamPos, mCamPos.x, mCamPos.y, mCamPos.z);
+    glUniform1f(muModifyRadius, mModifyRadius);
 
     // Bind Attributes
     glBindVertexArray(mVao);
@@ -190,6 +191,14 @@ void Terrain::modifyHeight(const glm::vec3& ray)
         updateArea(intersectionPoint);
 }
 
+void Terrain::changeModifyRadius(const double& yoffset)
+{
+    if(yoffset < 0.0)
+        mModifyRadius += 0.1f * static_cast<float>(yoffset);
+    else
+        mModifyRadius += 0.1f * static_cast<float>(yoffset);
+
+}
 
 // Noise getters
 void Terrain::saveNoiseToFile(const char* filename) const
@@ -642,7 +651,7 @@ void Terrain::setBuffers()
     muHeightMapTerrainRatioLocation = glGetUniformLocation(mShaderProgram, "uHeightMapTerrainRatio");
     muDrawGridLocation = glGetUniformLocation(mShaderProgram, "uDrawGrid");
     muRayTerrainIntersectionLocation = glGetUniformLocation(mShaderProgram, "uRayTerrainIntersection");
-    muCamPos = glGetUniformLocation(mShaderProgram, "uCamPos");
+    muModifyRadius = glGetUniformLocation(mShaderProgram, "uModifyRadius");
 
     //Generate & bind vao
     glGenVertexArrays(1, &mVao);

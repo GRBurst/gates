@@ -12,7 +12,7 @@ uniform mat4 uVPMatrix;
 uniform int uHeightMapTerrainRatio;
 uniform int uDrawGrid;
 uniform vec3 uRayTerrainIntersection;
-uniform vec3 uCamPos;
+uniform float uModifyRadius;
 
 vec3 lightCol = vec3(1.0, 1.0, 1.0);
 vec3 lightPos = vec3(0.0, 100.0, 0.0);
@@ -37,7 +37,7 @@ bool doHighLight()
 {
     vec2 ray = vec2(uRayTerrainIntersection.x - wPos.x, uRayTerrainIntersection.z - wPos.z);
     float diff = length(ray);
-    if((diff < 0.5) && (diff > 0.49)) return true;
+    if((diff < uModifyRadius+0.1) && (diff > uModifyRadius)) return true;
 
     return false;
 }

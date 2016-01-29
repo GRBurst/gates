@@ -48,6 +48,7 @@ class Terrain {
 
         glm::vec3 computePosition(unsigned int x, unsigned int y) const;
         void modifyHeight(const glm::vec3& ray);
+        void changeModifyRadius(const double& yoffset);
 
         /* std::vector<float> getNoiseValues() const { return mNoiseValues; }; */
         float* getNoiseValues() { return mNoiseValues.data(); };
@@ -129,6 +130,8 @@ class Terrain {
         int mDrawGrid;
         glm::vec3 mRayTerrainIntersection;
         GLint muRayTerrainIntersectionLocation;
+        float mModifyRadius;
+        GLint muModifyRadius;
         glm::vec3 mCamPos;
         GLint muCamPos;
 

@@ -11,7 +11,7 @@ uniform mat3 uInvViewMatrix;
 uniform int uHeightMapTerrainRatio;
 uniform int uDrawGrid;
 uniform vec3 uRayTerrainIntersection;
-uniform vec3 uCamPos;
+uniform float uModifyRadius;
 out float fHeight;
 out vec2 fUV;
 out vec3 fNormal;
@@ -29,7 +29,7 @@ float getHightScale()
 
     vec2 ray = vec2(uRayTerrainIntersection.x - vPosition.x, uRayTerrainIntersection.z - vPosition.z);
     float diff = length(ray);
-    if(diff < 2.5) return (2.5 - diff);
+    if(diff < uModifyRadius) return (uModifyRadius - diff);
 
     return 1.0;
 }
