@@ -164,10 +164,10 @@ void processInput(Camera& camera, Terrain& activeTerrain)
     {
         rayButtonPressed = true;
         glm::vec3 rayDirection = getWorldRayFromCursor(camera, mouseXPosition, mouseYPosition);
-        /* std::cout << std::endl << "Screen coords: x = " << mouseXPosition << ", y = " << mouseYPosition << std::endl; */
-        /* std::cout << "Ray direction: x = " << rayDirection.x << ", y = " << rayDirection.y << ", z = " << rayDirection.z << std::endl; */
-        /* std::cout << "cam direction: x = " << camera.getViewDirection().x << ", y = " << camera.getViewDirection().y << ", z = " << camera.getViewDirection().z << std::endl; */
-        activeTerrain.getRayTerrainIntersection(rayDirection);
+        std::cout << std::endl << "Screen coords: x = " << mouseXPosition << ", y = " << mouseYPosition << std::endl;
+        std::cout << "Ray direction: x = " << rayDirection.x << ", y = " << rayDirection.y << ", z = " << rayDirection.z << std::endl;
+        std::cout << "cam direction: x = " << camera.getViewDirection().x << ", y = " << camera.getViewDirection().y << ", z = " << camera.getViewDirection().z << std::endl;
+        activeTerrain.modifyHeight(rayDirection);
     }
     else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
     {

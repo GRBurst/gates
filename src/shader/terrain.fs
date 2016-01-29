@@ -78,12 +78,14 @@ void main()
         terrainColor1 = vec3(0.1, 0.15, 0.8) - vec3(0.0, 0.0, fHeight * 2);
     }
     else if (fHeight < (0.2 + fNormal.y/1.0))
+    /* else if (fHeight < (0.2)) */
     {
         terrainColor1 = vec3(0.1, 0.6, 0.1) * (0.1 + fHeight);
         /* terrainColor2 = vec3(0.8 * fHeight); */
         /* terrainColor1 = mix(terrainColor1, terrainColor2, fHeight/(2.0)); */
     }
     else if (fHeight < (2.2 - fNormal.y))
+    /* else if (fHeight < (2.2)) */
     {
         terrainColor1 = vec3(0.8 * fHeight);
         /* terrainColor2 = vec3(1.0); */

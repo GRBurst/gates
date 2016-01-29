@@ -47,7 +47,7 @@ class Terrain {
         glm::vec2 getIndexCordFromTerrain(const glm::vec3& position) const;
 
         glm::vec3 computePosition(unsigned int x, unsigned int y) const;
-        void getRayTerrainIntersection(glm::vec3& ray);
+        void modifyHeight(const glm::vec3& ray);
 
         /* std::vector<float> getNoiseValues() const { return mNoiseValues; }; */
         float* getNoiseValues() { return mNoiseValues.data(); };
@@ -70,6 +70,7 @@ class Terrain {
         unsigned int getIndexBottomPosition(unsigned int index) const;
         unsigned int getIndexTopRightPosition(unsigned int index) const;
         unsigned int getIndexBottomLeftPosition(unsigned int index) const;
+        unsigned int getIndexFromPosition( const glm::ivec2& pos ) const;
 
         void computeTerrainPositions();
         void computeTerrainNormals();
@@ -81,8 +82,9 @@ class Terrain {
         void buildIBO();
         void buildDebug();
 
-        void updateArea(glm::ivec2& bl, glm::ivec2& tl, glm::ivec2& br, glm::ivec2& tr );
-        void updateVertexBuffer(int offset, int size, float* newVertexData);
+        void updateArea( const glm::ivec2& ip );
+        void updateVertexBuffer(unsigned int offset, unsigned int size, float* newVertexData);
+        glm::ivec2 getIntersectionPoint(const glm::vec3& position, const glm::vec3& ray);
 
         // Member variables
         unsigned int mXDim, mZDim;

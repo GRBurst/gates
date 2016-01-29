@@ -178,93 +178,18 @@ glm::vec3 Terrain::computePosition(unsigned int x, unsigned int z) const
     return glm::vec3(xPosition, yPosition, -zPosition);
 }
 
-void Terrain::getRayTerrainIntersection(glm::vec3& ray)
+void Terrain::modifyHeight(const glm::vec3& ray)
 {
 
-    float dist0, dist1, dist2, dist3;
-    glm::vec3 cord0, cord1, cord2, cord3;
-    glm::ivec2 floorVals, ceilVals;
-    glm::ivec2 indexCord, indexCord0, indexCord1, indexCord2, indexCord3;
-
+    /* updateArea(indexCord0, indexCord1, indexCord2, indexCord3); */
     glm::vec3 curPos = mCamera->getPosition();
-    float interpolHeight = curPos.y;
-    float scale = 0.1f;
-    int bisectState = 0;
-    glm::vec3 tmpRay = scale * ray;
-    /* std::cout << "camPosition: x = " << curPos.x << ", y = " << curPos.y << ", z = " << curPos.z << std::endl; */
-    /* std::cout << "ray trace: " << std::endl; */
-    while( (curPos.y > -1.0f) && (curPos.y < 25.0f))
-    {
-        if(curPos.y < interpolHeight )
-        {
-            /* std::cout << "INTERSECTION at hight = " << interpolHeight << std::endl; */
-            break;
-        }
-
-        /* curPos += scale * tmpRay; */
-        curPos += tmpRay;
-
-        /* indexCord = getIndexCordFromTerrain(curPos); */
-        /* floorVals = floor(getIndexCordFromTerrain(curPos)); */
-        /* ceilVals = ceil(getIndexCordFromTerrain(curPos)); */
-        /* if((floorVals.x < 0) || (floorVals.y < 0)){ curPos -= scale*tmpRay; return;} */
-        /* if((ceilVals.x > mXDim - 1) || (ceilVals.y > mZDim - 1)){ curPos -= scale*tmpRay; return;} */
-
-        indexCord0 = floor(getIndexCordFromTerrain(curPos));    // Bottom left
-        indexCord3 = ceil(getIndexCordFromTerrain(curPos));     // Top right
-        indexCord1 = glm::ivec2(indexCord0.x, indexCord3.y);    // Top left
-        indexCord2 = glm::ivec2(indexCord3.x, indexCord0.y);    // Bottom right
-
-        cord0 = getTerrainPosition(indexCord0); // Bottom left
-        cord1 = getTerrainPosition(indexCord1); // Top left
-        cord2 = getTerrainPosition(indexCord2); // Bottom right
-        cord3 = getTerrainPosition(indexCord3); // Top right
-
-        dist0 = sqrt((curPos.x - cord0.x)*(curPos.x - cord0.x) + (curPos.z - cord0.z)*(curPos.z - cord0.z));
-        dist1 = sqrt((curPos.x - cord1.x)*(curPos.x - cord1.x) + (curPos.z - cord1.z)*(curPos.z - cord1.z));
-        dist2 = sqrt((curPos.x - cord2.x)*(curPos.x - cord2.x) + (curPos.z - cord2.z)*(curPos.z - cord2.z));
-        dist3 = sqrt((curPos.x - cord3.x)*(curPos.x - cord3.x) + (curPos.z - cord3.z)*(curPos.z - cord3.z));
-
-        interpolHeight = dist0 * cord0.y + dist1 * cord1.y + dist2 * cord2.y + dist3 * cord3.y;
-        /* rayHeight = camPosition.y + (tmpRay.y * distance); */
-        /* std::cout << "index pos 0: x = " << indexCord0.x << ", y = " << indexCord0.y << std::endl; */
-        /* std::cout << "index pos 1: x = " << indexCord1.x << ", y = " << indexCord1.y << std::endl; */
-        /* std::cout << "index pos 2: x = " << indexCord2.x << ", y = " << indexCord2.y << std::endl; */
-        /* std::cout << "index pos 3: x = " << indexCord3.x << ", y = " << indexCord3.y << std::endl; */
-        /* std::cout << "current pos: x = " << curPos.x << ", y = " << curPos.y << ", z = " << curPos.z << "\t <=>" ; */
-        /* std::cout << "terrain pos: x = " << cord0.x << ", y = " << cord0.y << ", z = " << cord0.z << std::endl; */
+    glm::ivec2 intersectionPoint = getIntersectionPoint(curPos, ray);
 
 
-        /* if((glm::length(curPos.y - interpolHeight) < 0.1f) || (bisectState > 8) || (bisectState < 8) ) */
-        /* { */
-        /*     std::cout << "INTERSECTION at hight = " << interpolHeight << std::endl; */
-        /*     break; */
-        /* } */
-        /* else if((bisectState > 0) && (curPos.y < interpolHeight)) */
-        /* { */
-        /*     scale *= -0.5; */
-        /*     bisectState *= -2; */
-        /*     std::cout << "bisectState = -1, scale = -0.5" << std::endl; */
-        /* } */
-        /* else if((bisectState < 0) && (curPos.y > interpolHeight)) */
-        /* { */
-        /*     scale *= -0.5; */
-        /*     bisectState *= -2; */
-        /*     std::cout << "bisectState = 1, scale = 0.5" << std::endl; */
-        /* } */
-        /* else if((curPos.y < interpolHeight) && (bisectState == 0)) */
-        /* { */
-        /*     bisectState = -1; */
-        /*     scale = -0.5; */
-        /*     std::cout << "starting bisection:" << std::endl; */
-        /* } */
-
-    }
-    /* mRayTerrainIntersection = glm::vec3(curPos.x, curPos.y, -curPos.z); */
-
-    updateArea(indexCord0, indexCord1, indexCord2, indexCord3);
-    mRayTerrainIntersection = curPos;
+    if(intersectionPoint.x > -1)
+        updateArea(intersectionPoint);
 }
+
 
 // Noise getters
 void Terrain::saveNoiseToFile(const char* filename) const
@@ -624,32 +549,39 @@ void Terrain::buildDebug()
 
 }
 
-void Terrain::updateArea(glm::ivec2& bl, glm::ivec2& tl, glm::ivec2& br, glm::ivec2& tr )
+unsigned int Terrain::getIndexFromPosition( const glm::ivec2& pos ) const
+{
+    return mFloatsPerVertex * ((pos.y * mXDim) + pos.x);
+}
+
+void Terrain::updateArea( const glm::ivec2& ip )
 {
 
-    int blOffset = mFloatsPerVertex * ((bl.y * mXDim) + bl.x);
-    int tlOffset = mFloatsPerVertex * ((tl.y * mXDim) + tl.x);
-    int brOffset = mFloatsPerVertex * ((br.y * mXDim) + br.x);
-    int trOffset = mFloatsPerVertex * ((tr.y * mXDim) + tr.x);
-    /* std::cout << "buffer blOffset = " << blOffset << std::endl; */
+    std::cout << "indices for update area: x = " << ip.x << ", z = " << ip.y << std::endl;
+    unsigned int i = getIndexFromPosition(ip);
+    unsigned int t = getIndexTopPosition(i);
+    unsigned int b = getIndexBottomPosition(i);
+    unsigned int l = getIndexLeftPosition(i);
+    unsigned int r = getIndexRightPosition(i);
+    std::cout << "(i,t,b,l,r) = (" << i << ", " << t << ", " << b << ", " << l << ", " << r << ")" << std::endl;
 
-    int relTlOffset = tlOffset - blOffset;
-    int relBrOffset = brOffset - blOffset;
-    int relTrOffset = trOffset - blOffset;
+    unsigned int offset = t;
+    unsigned int size = mFloatsPerVertex + (b - t);
 
     // Set new hights
-    mVertices.at(blOffset + 1) += 0.5f;
-    mVertices.at(tlOffset + 1) += 0.5f;
-    mVertices.at(brOffset + 1) += 0.5f;
-    mVertices.at(trOffset + 1) += 0.5f;
+    mVertices.at(i+1) += 2.5f;
+    mVertices.at(t+1) += 1.25f;
+    mVertices.at(b+1) += 1.25f;
+    mVertices.at(l+1) += 1.25f;
+    mVertices.at(r+1) += 1.25f;
 
     // Fill update buffer
-    int size = relTrOffset + mFloatsPerVertex;
-    float newData[size];
-    /* std::cout << "buffer offset = " << blOffset << ", size = " << size << std::endl; */
+    std::vector<float> newData;
+    newData.resize(size);
+    std::cout << "buffer offset = " << offset << ", size = " << size << std::endl;
     for(unsigned int i = 0; i < size; i++)
     {
-        newData[i] = mVertices.at(blOffset + i);
+        newData.at(i) = mVertices.at(offset + i);
     }
 
 
@@ -662,11 +594,11 @@ void Terrain::updateArea(glm::ivec2& bl, glm::ivec2& tl, glm::ivec2& br, glm::iv
     /* int offset  = mFloatsPerVertex * ((coords.y * mXDim) + coords.x); */
     /* int size    = 60 * mFloatsPerVertex; */
 
-    updateVertexBuffer(blOffset, size, newData);
+    updateVertexBuffer(offset, size, newData.data());
 
 }
 
-void Terrain::updateVertexBuffer(int offset, int size, float* newVertexData)
+void Terrain::updateVertexBuffer(unsigned int offset, unsigned int size, float* newVertexData)
 {
 
     // Bind Attributes
@@ -679,7 +611,7 @@ void Terrain::updateVertexBuffer(int offset, int size, float* newVertexData)
     float* vertexData = reinterpret_cast<float*>(glMapBufferRange(GL_ARRAY_BUFFER, offset*sizeof(GLfloat), size*sizeof(GLfloat), GL_MAP_WRITE_BIT));
 
     // Fill Buffer
-    for(int i = 0; i < size; i++)
+    for(unsigned int i = 0; i < size; i++)
     {
         vertexData[i] = newVertexData[i];
     }
@@ -775,5 +707,94 @@ glm::vec3 Terrain::computeTriangleNormal(Terrain::Triangle &t)
 glm::vec3 Terrain::computeVertexNormal(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, glm::vec3 v4, glm::vec3 v5, glm::vec3 v6 )
 {
     return glm::normalize(v1 + v2 + v3 + v4 + v5 + v6);
+}
+
+
+glm::ivec2 Terrain::getIntersectionPoint(const glm::vec3& position, const glm::vec3& ray)
+{
+    glm::vec2 is = getIndexCordFromTerrain(position);
+    glm::ivec2 sp = glm::ivec2(round(is.x), round(is.y));
+    float dy = ray.y * 50.0f/256.0f;
+    float h = position.y;
+    std::cout << "camera position: x = " << position.x << ", y = " << position.y << ", z = " << position.z << "\t dy = " << dy << std::endl;
+
+    int x1 = sp.x;
+    int x2 = ((ray.x < 0) ? 0 : mXDim);
+    int deltaX = round(mXDim * (ray.x));
+    int dx((deltaX > 0) - (deltaX < 0));
+
+    int z1 = sp.y;
+    int z2 = ((ray.z < 0) ? 0 : mZDim);
+    int deltaZ = round(mZDim * (ray.z));
+    int dz((deltaZ > 0) - (deltaZ < 0));
+
+    deltaX = std::abs(deltaX) << 1;
+    deltaZ = std::abs(deltaZ) << 1;
+
+    glm::vec3 tc;
+    std::cout << "x1 = " << x1 << ", x2 = " << x2 << ", dX = " << deltaX << ", dx = " << dx << "\tz1 = " << z1 << ", z2 = " << z2 << ", dZ = " << deltaZ <<", dz = " << dz << std::endl;
+    std::cout << "trace" << std::endl;
+    if(deltaX < deltaZ)
+    {
+
+        int error(deltaX - (deltaZ >> 1));
+        while (z1 != z2)
+        {
+            tc = getTerrainPosition(glm::ivec2(x1, z1));
+            h = position.y + glm::length(tc-position)*ray.y;
+            std::cout << "terrain indices: x = " << x1 << ", z = " << z1 << "\t ray height = " << h << std::endl;
+            std::cout << "terrain position: x = " << tc.x << ", y = " << tc.y << ", z = " << tc.z << std::endl;
+            std::cout << "diffs: dx = " << tc.x-position.x << ", dy = " << tc.y-position.y << ", dz = " << tc.z-position.z << ", dh = " << glm::length(glm::vec2(tc.x-position.x, tc.z-position.z))*ray.y << std::endl;
+            if(tc.y >= h)
+            {
+                mRayTerrainIntersection = tc;
+                std::cout << "INTERSECTION" << std::endl;
+                return glm::ivec2(x1, z1);
+            }
+            if ((error >= 0) && (error || (dz > 0)))
+            {
+                error -= deltaZ;
+                x1 += dx;
+            }
+
+            error += deltaX;
+            z1 += dz;
+
+        }
+
+    }
+    else
+    {
+
+        int error(deltaZ - (deltaX >> 1));
+
+        while (x1 != x2)
+        {
+
+            tc = getTerrainPosition(glm::ivec2(x1, z1));
+            h = position.y + glm::length(tc-position)*ray.y;
+            std::cout << "terrain indices: x = " << x1 << ", z = " << z1 << "\t ray height = " << h << std::endl;
+            std::cout << "terrain position: x = " << tc.x << ", y = " << tc.y << ", z = " << tc.z << std::endl;
+            std::cout << "diffs: dx = " << tc.x-position.x << ", dy = " << tc.y-position.y << ", dz = " << tc.z-position.z << ", dh = " << glm::length(glm::vec2(tc.x-position.x, tc.z-position.z))*ray.y << std::endl;
+            if(tc.y >= h)
+            {
+                mRayTerrainIntersection = tc;
+                std::cout << "INTERSECTION" << std::endl;
+                return glm::ivec2(x1, z1);
+            }
+            if ((error >= 0) && (error || (dx > 0)))
+            {
+                error -= deltaX;
+                z1 += dz;
+            }
+
+            error += deltaZ;
+            x1 += dx;
+
+        }
+    }
+
+    std::cout << "NO INTERSECTION" << std::endl;
+    return glm::ivec2(-1, -1);
 }
 
