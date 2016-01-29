@@ -12,6 +12,7 @@ uniform mat4 uVPMatrix;
 uniform int uHeightMapTerrainRatio;
 uniform int uDrawGrid;
 uniform vec3 uRayTerrainIntersection;
+uniform float uEditMode;
 uniform float uModifyRadius;
 
 vec3 lightCol = vec3(1.0, 1.0, 1.0);
@@ -35,8 +36,11 @@ out vec4 color;
 /* } */
 bool doHighLight()
 {
-    float radius = length(vec2(uRayTerrainIntersection.x - wPos.x, uRayTerrainIntersection.z - wPos.z));
-    if((radius < uModifyRadius + 0.1) && (radius > uModifyRadius )) return true;
+    if(uEditMode < 2.0)
+    {
+        float radius = length(vec2(uRayTerrainIntersection.x - wPos.x, uRayTerrainIntersection.z - wPos.z));
+        if((radius < uModifyRadius + 0.1) && (radius > uModifyRadius )) return true;
+    }
 
     return false;
 }
@@ -97,7 +101,7 @@ void main()
 
     /* if(ray()) color = vec4(0.0, 1.0, 1.0, 1.0); */
     /* else if(place()) color = vec4(); */
-    if(doHighLight()) color = vec4(0.0, 1.0, 1.0, 1.0);
+    if(doHighLight()) color = vec4(uEditMode, 1.0-uEditMode, 1.0-uEditMode, 1.0);
     else color = phong(terrainColor1);
     /* color = phong(terrainColor1); */
 

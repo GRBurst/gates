@@ -32,7 +32,7 @@ Camera camera;
 Terrain *pActiveTerrain;
 double lastMouseXPosition, lastMouseYPosition;
 static int gDrawGrid = 0;
-static bool gEditMode = false;
+static unsigned int gEditMode = 2;
 
 glm::vec3 getWorldRayFromCursor(const double& screenPosX, const double& screenPosY);
 void processInput();
@@ -158,10 +158,10 @@ void processInput()
     glfwGetCursorPos(window, &mouseXPosition, &mouseYPosition);
     static bool rayButtonPressed = false;
 
-    if(gEditMode)
+    if(gEditMode < 2)
     {
         glm::vec3 rayDirection = getWorldRayFromCursor(mouseXPosition, mouseYPosition);
-        pActiveTerrain->highlightRay(rayDirection);
+        pActiveTerrain->highlightRay(rayDirection, gEditMode);
         if(!glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) && rayButtonPressed)
         {
             rayButtonPressed = false;
@@ -172,20 +172,18 @@ void processInput()
             pActiveTerrain->modifyHeight();
         }
     }
+
+    if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+    {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        camera.processMouse(float( lastMouseXPosition - mouseXPosition ), float( lastMouseYPosition - mouseYPosition ));
+        glfwSetCursorPos(window, lastMouseXPosition, lastMouseYPosition);
+    }
     else
     {
-        if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
-        {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            camera.processMouse(float( lastMouseXPosition - mouseXPosition ), float( lastMouseYPosition - mouseYPosition ));
-            glfwSetCursorPos(window, lastMouseXPosition, lastMouseYPosition);
-        }
-        else
-        {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            lastMouseXPosition = mouseXPosition;
-            lastMouseYPosition = mouseYPosition;
-        }
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        lastMouseXPosition = mouseXPosition;
+        lastMouseYPosition = mouseYPosition;
     }
 
     if(glfwGetKey(window, GLFW_KEY_W )  == GLFW_PRESS) camera.moveForward( float(frameTime) );
@@ -622,7 +620,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             if(action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
             break;
         case GLFW_KEY_E :
-            if(action == GLFW_PRESS) gEditMode = ((gEditMode == true) ? false : true);
+            if(action == GLFW_PRESS)
+            {
+                gEditMode = (gEditMode + 1) % 3;
+                pActiveTerrain->unHighlightRay();
+            }
             break;
         case GLFW_KEY_I :
             if(action == GLFW_PRESS) camera.setCamSpeed( 10.0 );

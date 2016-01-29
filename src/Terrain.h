@@ -48,7 +48,8 @@ class Terrain {
 
         glm::vec3 computePosition(unsigned int x, unsigned int y) const;
         void modifyHeight();
-        void highlightRay(const glm::vec3& ray);
+        void highlightRay(const glm::vec3& ray, unsigned int& mode);
+        void unHighlightRay() { this->mEditMode = 2.0; };
         void changeModifyRadius(const double& yoffset);
         float getIndexDistances(const glm::ivec2& p1, const glm::ivec2& p2) const;
 
@@ -132,8 +133,8 @@ class Terrain {
         int mDrawGrid;
         glm::vec3 mRayTerrainIntersection;
         GLint muRayTerrainIntersectionLocation;
-        float mModifyRadius;
-        GLint muModifyRadius;
+        float mModifyRadius, mEditMode;
+        GLint muModifyRadius, muEditLocation;
         glm::ivec2 mIntersectionCoords;
         glm::vec3 mCamPos;
         GLint muCamPos;

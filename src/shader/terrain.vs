@@ -11,7 +11,9 @@ uniform mat3 uInvViewMatrix;
 uniform int uHeightMapTerrainRatio;
 uniform int uDrawGrid;
 uniform vec3 uRayTerrainIntersection;
+uniform float uEditMode;
 uniform float uModifyRadius;
+
 out float fHeight;
 out vec2 fUV;
 out vec3 fNormal;

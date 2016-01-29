@@ -27,6 +27,7 @@ Terrain::Terrain(GLint shaderProgram, unsigned int xDim, unsigned int zDim, Came
     mTotalIndices = (6 * (mXDim-1) * (mZDim-1));
 
     mRayTerrainIntersection = glm::vec3(0.0, 0.0, 0.0);
+    mEditMode = 2.0f;
     mModifyRadius = 1.0f;
     mVPMatrix = camera->getVPMatrix();
     mInvViewMatrix = camera->getInvViewMatrix();
@@ -90,6 +91,7 @@ void Terrain::draw()
     glUniform1i(muHeightMapTerrainRatioLocation, mHeightMapTerrainRatio);
     glUniform1i(muDrawGridLocation, mDrawGrid);
     glUniform3f(muRayTerrainIntersectionLocation, mRayTerrainIntersection.x, mRayTerrainIntersection.y, mRayTerrainIntersection.z);
+    glUniform1f(muEditLocation, mEditMode);
     glUniform1f(muModifyRadius, mModifyRadius);
 
     // Bind Attributes
@@ -179,16 +181,17 @@ glm::vec3 Terrain::computePosition(unsigned int x, unsigned int z) const
     return glm::vec3(xPosition, yPosition, -zPosition);
 }
 
-void Terrain::highlightRay(const glm::vec3& ray)
+void Terrain::highlightRay(const glm::vec3& ray, unsigned int& mode)
 {
     glm::vec3 curPos = mCamera->getPosition();
     mIntersectionCoords = getIntersectionPoint(curPos, ray);
+    mEditMode = static_cast<float>(mode);
 }
 
 void Terrain::modifyHeight()
 {
     /* updateArea(indexCord0, indexCord1, indexCord2, indexCord3); */
-    if(mRayTerrainIntersection.x > -1)
+    if(mIntersectionCoords.x > -1)
         updateArea();
 }
 
@@ -589,7 +592,7 @@ void Terrain::updateArea( )
         v++;
     }
 
-    float scale = 0.1f;
+    float scale = ((mEditMode == 0.0) ? 0.1f : -0.1f);
     for(int i = -v; i <= v; i++)
     {
         for(int j = -h; j <= h; j++)
@@ -693,6 +696,7 @@ void Terrain::setBuffers()
     muHeightMapTerrainRatioLocation = glGetUniformLocation(mShaderProgram, "uHeightMapTerrainRatio");
     muDrawGridLocation = glGetUniformLocation(mShaderProgram, "uDrawGrid");
     muRayTerrainIntersectionLocation = glGetUniformLocation(mShaderProgram, "uRayTerrainIntersection");
+    muEditLocation = glGetUniformLocation(mShaderProgram, "uEditMode");
     muModifyRadius = glGetUniformLocation(mShaderProgram, "uModifyRadius");
 
     //Generate & bind vao
