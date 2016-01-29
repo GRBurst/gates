@@ -37,7 +37,7 @@ void processInput(Camera& camera, Terrain& activeTerrain);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_callback(GLFWwindow* window, double mouseXPosition, double mouseYPosition);
-bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pInactiveNoise, Terrain*& pActiveTerrain, Terrain*& pInactiveTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, const GLint& terrainShaderProgram, const GLint& defaultShaderProgram);
+bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pNextNoise, Terrain*& pActiveTerrain, Terrain*& pNextTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, const GLint& terrainShaderProgram, const GLint& defaultShaderProgram);
 
 void debugCallback(GLenum source, GLenum type, GLuint id,
                    GLenum severity, GLsizei length,
@@ -305,14 +305,14 @@ int main()
     GLint cloudsShaderProgram = cloudsShader.linkShaders();
     /*
      * Setup main Pointer
-     * Terrain Pointer: pActiveTerrain, pInactiveTerrain
+     * Terrain Pointer: pActiveTerrain, pNextTerrain
      * Portal Pointer: pActivePortal, pInactivePortal
      *
      */
 
-    Terrain *pActiveTerrain, *pInactiveTerrain;
+    Terrain *pActiveTerrain, *pNextTerrain;
     Portal *pActivePortal, *pInactivePortal;
-    Noise *pActiveNoise, *pInactiveNoise;
+    Noise *pActiveNoise, *pNextNoise;
 
     /*
      * Setup initial terrains and noise
@@ -343,16 +343,16 @@ int main()
     /* pActiveTerrain->debug(); */
 
     // Setup worled (cell) noise for second terrain
-    pInactiveNoise = new WorleyNoise();
-    pInactiveNoise->setParams(noiseDimX, noiseDimY, seed);
-    pInactiveNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
+    pNextNoise = new WorleyNoise();
+    pNextNoise->setParams(noiseDimX, noiseDimY, seed);
+    pNextNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
 
     // Setup initial inactive terrain (in portal)
-    pInactiveTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pInactiveNoise);
-    pInactiveTerrain->enableNormals();
-    pInactiveTerrain->computeTerrain();
-    pInactiveTerrain->genHeightMapTexture();
-    pInactiveTerrain->saveNoiseToFile("WorleyNoise_Terrain.tga");
+    pNextTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pNextNoise);
+    pNextTerrain->enableNormals();
+    pNextTerrain->computeTerrain();
+    pNextTerrain->genHeightMapTexture();
+    pNextTerrain->saveNoiseToFile("WorleyNoise_Terrain.tga");
 
     /*
      * Setup Portals
@@ -363,10 +363,10 @@ int main()
 
     // Portal
     pActivePortal = new Portal(defaultShaderProgram);
-    pActivePortal->init( &camera, pActiveTerrain, pInactiveTerrain );
+    pActivePortal->init( &camera, pActiveTerrain, pNextTerrain );
 
     pInactivePortal = new Portal(defaultShaderProgram);
-    pInactivePortal->init( &camera, pActiveTerrain, pInactiveTerrain );
+    pInactivePortal->init( &camera, pActiveTerrain, pNextTerrain );
     pInactivePortal->deaktivate();
 
     /*
@@ -435,7 +435,7 @@ int main()
             loops++;
 
             /*
-             * portalIntersection(&camera, pActiveTerrain, pInactiveTerrain, pActivePortal, pInactivePortal, terrainShaderProgram, defaultShaderProgram); 
+             * portalIntersection(&camera, pActiveTerrain, pNextTerrain, pActivePortal, pInactivePortal, terrainShaderProgram, defaultShaderProgram); 
              *
              * Check for portal intersection
              *
@@ -464,11 +464,11 @@ int main()
                 pNewNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
 
                 delete pActiveNoise;
-                pActiveNoise    = pInactiveNoise;
-                pInactiveNoise  = pNewNoise;
+                pActiveNoise    = pNextNoise;
+                pNextNoise  = pNewNoise;
 
                 std::cout << "Generate new terrain" << std::endl;
-                Terrain* pNewTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pInactiveNoise);
+                Terrain* pNewTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pNextNoise);
                 pNewTerrain->enableNormals();
                 pNewTerrain->computeTerrain();
                 pNewTerrain->genHeightMapTexture();
@@ -479,14 +479,14 @@ int main()
 
                 // swap terrains
                 delete pActiveTerrain;
-                pActiveTerrain      = pInactiveTerrain;
-                pInactiveTerrain    = pNewTerrain;
+                pActiveTerrain      = pNextTerrain;
+                pNextTerrain    = pNewTerrain;
 
                 grass.setTerrainVao(pActiveTerrain->getVAO(), pActiveTerrain->getTotalIndices());
                 std::cout << "Generate new portal" << std::endl;
                 // Setup new portal
                 Portal* pNewPortal = new Portal(defaultShaderProgram);
-                pNewPortal->init( &camera, pActiveTerrain, pInactiveTerrain );
+                pNewPortal->init( &camera, pActiveTerrain, pNextTerrain );
 
                 // swap portals
                 delete pInactivePortal;
@@ -494,7 +494,7 @@ int main()
                 pActivePortal   = pNewPortal;
             }
 
-            portalIntersection(camera, pActiveNoise, pInactiveNoise, pActiveTerrain, pInactiveTerrain, pActivePortal, pInactivePortal, terrainShaderProgram, defaultShaderProgram);
+            portalIntersection(camera, pActiveNoise, pNextNoise, pActiveTerrain, pNextTerrain, pActivePortal, pInactivePortal, terrainShaderProgram, defaultShaderProgram);
 
         }
 
@@ -558,8 +558,8 @@ int main()
         model.draw();
 
         // Inactive or next terrain
-        pInactiveTerrain->setGrid(gDrawGrid);
-        pInactiveTerrain->draw();
+        pNextTerrain->setGrid(gDrawGrid);
+        pNextTerrain->draw();
 
         // Grass
         grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
@@ -591,11 +591,11 @@ int main()
 
     // Pointers
     delete pActiveTerrain;
-    delete pInactiveTerrain;
+    delete pNextTerrain;
     delete pActivePortal;
     delete pInactivePortal;
     delete pActiveNoise;
-    delete pInactiveNoise;
+    delete pNextNoise;
 
     // Programs
     glDeleteProgram(defaultShaderProgram);
@@ -606,7 +606,7 @@ int main()
 
 }
 
-bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pInactiveNoise, Terrain*& pActiveTerrain, Terrain*& pInactiveTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, const GLint& terrainShaderProgram, const GLint& defaultShaderProgram)
+bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pNextNoise, Terrain*& pActiveTerrain, Terrain*& pNextTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, const GLint& terrainShaderProgram, const GLint& defaultShaderProgram)
 {
     float diff = glm::length(glm::vec3(camera.getPosition() - pActivePortal->getPosition()));
 
@@ -631,11 +631,11 @@ bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pInactiveN
         pNewNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
 
         delete pActiveNoise;
-        pActiveNoise    = pInactiveNoise;
-        pInactiveNoise  = pNewNoise;
+        pActiveNoise    = pNextNoise;
+        pNextNoise  = pNewNoise;
 
         std::cout << "Generate new terrain" << std::endl;
-        Terrain* pNewTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pInactiveNoise);
+        Terrain* pNewTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pNextNoise);
         pNewTerrain->enableNormals();
         pNewTerrain->computeTerrain();
         pNewTerrain->genHeightMapTexture();
@@ -646,14 +646,14 @@ bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pInactiveN
 
         // swap terrains
         delete pActiveTerrain;
-        pActiveTerrain      = pInactiveTerrain;
-        pInactiveTerrain    = pNewTerrain;
+        pActiveTerrain      = pNextTerrain;
+        pNextTerrain    = pNewTerrain;
 
 
         std::cout << "Generate new portal" << std::endl;
         // Setup new portal
         Portal* pNewPortal = new Portal(defaultShaderProgram);
-        pNewPortal->init( &camera, pActiveTerrain, pInactiveTerrain );
+        pNewPortal->init( &camera, pActiveTerrain, pNextTerrain );
 
         // swap portals
         delete pInactivePortal;
