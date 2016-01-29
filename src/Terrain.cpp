@@ -27,7 +27,7 @@ Terrain::Terrain(GLint shaderProgram, unsigned int xDim, unsigned int zDim, Came
     mTotalIndices = (6 * (mXDim-1) * (mZDim-1));
 
     mRayTerrainIntersection = glm::vec3(0.0, 0.0, 0.0);
-    mModifyRadius = 2.5;
+    mModifyRadius = 1.0f;
     mVPMatrix = camera->getVPMatrix();
     mInvViewMatrix = camera->getInvViewMatrix();
 }
