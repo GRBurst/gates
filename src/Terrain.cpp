@@ -362,13 +362,18 @@ void Terrain::computeTerrainPositions()
 
 void Terrain::computeTerrainNormals()
 {
+    computeTerrainNormals(0, mVertices.size());
+}
+
+void Terrain::computeTerrainNormals(unsigned int min, unsigned int max)
+{
 
     /* for(std::vector<glm::vec3>::iterator normal = mVertices.begin(); normal != mVertices.end(); normal += 2) */
     glm::vec3 c, l, r, t, b, tr, bl;
     glm::vec3 normalA, normalB, normalC, normalD, normalE, normalF, vNormal;
     unsigned int index;
     /* Triangle A, B, c, D, E, F; */
-    for(unsigned int i = 0; i < mVertices.size(); i += mFloatsPerVertex)
+    for(unsigned int i = min; i < max; i += mFloatsPerVertex)
     /* for(unsigned int i = 0; i < mVertices.size(); i += mElementsPerVertex) */
     {
         c = glm::vec3(mVertices.at(i), mVertices.at(i+1), mVertices.at(i+2));
@@ -428,6 +433,11 @@ void Terrain::computeTerrainNormals()
 }
 
 void Terrain::computeTerrainTangents()
+{
+    computeTerrainTangents(0, mVertices.size());
+}
+
+void Terrain::computeTerrainTangents(unsigned int min, unsigned int max)
 {
     float dUVx = 1.0f / mXDim;
     float dUVz = 1.0f / mZDim;
@@ -609,6 +619,7 @@ void Terrain::updateArea( )
         }
         scale *= 0.95f;
     }
+
     /* unsigned int mi = getIndexFromPosition(mIntersectionCoords); */
     /* unsigned int t = getIndexTopPosition(i); */
     /* unsigned int b = getIndexBottomPosition(i); */
@@ -621,6 +632,9 @@ void Terrain::updateArea( )
     unsigned int offset = getIndexFromPosition(glm::ivec2(mIntersectionCoords.x-h, mIntersectionCoords.y-v));
     unsigned int offsetEnd = getIndexFromPosition(glm::ivec2(mIntersectionCoords.x+h, mIntersectionCoords.y+v));
     unsigned int size = mFloatsPerVertex + (offsetEnd - offset);
+    if(mUseNormalMap) computeTerrainTangents(offset, offset + size);
+    else if(mUseNormals) computeTerrainNormals(offset, offset + size);
+
 
     // Set new hights
     /* mVertices.at(i+1) += 2.5f; */

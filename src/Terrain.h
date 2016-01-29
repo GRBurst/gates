@@ -26,6 +26,7 @@ class Terrain {
         // Control functions
         void generateHeights();
         void computeTerrain();
+ 
         void genHeightMapTexture();
         void linkHeightMapTexture(GLint shader);
 
@@ -78,7 +79,9 @@ class Terrain {
 
         void computeTerrainPositions();
         void computeTerrainNormals();
+        void computeTerrainNormals(unsigned int min, unsigned int max);
         void computeTerrainTangents();
+        void computeTerrainTangents(unsigned int min, unsigned int max);
 
         void build();
         void setBuffers();
