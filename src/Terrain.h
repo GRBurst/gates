@@ -49,6 +49,7 @@ class Terrain {
         glm::vec3 computePosition(unsigned int x, unsigned int y) const;
         void modifyHeight(const glm::vec3& ray);
         void changeModifyRadius(const double& yoffset);
+        float getIndexDistances(const glm::ivec2& p1, const glm::ivec2& p2) const;
 
         /* std::vector<float> getNoiseValues() const { return mNoiseValues; }; */
         float* getNoiseValues() { return mNoiseValues.data(); };

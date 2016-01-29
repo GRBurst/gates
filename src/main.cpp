@@ -255,7 +255,7 @@ int main()
     /* glfwSetCursorPosCallback(window, mouse_callback); */
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetWindowSizeCallback( window, resize_callback );
-    glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, 1);
+    /* glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, 1); */
     /* glfwSetInputMode(window, GLFW_STICKY_KEYS, 1); */
 
     /* glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); */
@@ -653,9 +653,9 @@ void mouse_callback(GLFWwindow* window, double mouseXPosition, double mouseYPosi
     {
         /* rayButtonPressed = true; */
         glm::vec3 rayDirection = getWorldRayFromCursor(mouseXPosition, mouseYPosition);
-        std::cout << std::endl << "Screen coords: x = " << mouseXPosition << ", y = " << mouseYPosition << std::endl;
-        std::cout << "Ray direction: x = " << rayDirection.x << ", y = " << rayDirection.y << ", z = " << rayDirection.z << std::endl;
-        std::cout << "cam direction: x = " << camera.getViewDirection().x << ", y = " << camera.getViewDirection().y << ", z = " << camera.getViewDirection().z << std::endl;
+        /* std::cout << std::endl << "Screen coords: x = " << mouseXPosition << ", y = " << mouseYPosition << std::endl; */
+        /* std::cout << "Ray direction: x = " << rayDirection.x << ", y = " << rayDirection.y << ", z = " << rayDirection.z << std::endl; */
+        /* std::cout << "cam direction: x = " << camera.getViewDirection().x << ", y = " << camera.getViewDirection().y << ", z = " << camera.getViewDirection().z << std::endl; */
         pActiveTerrain->modifyHeight(rayDirection);
     }
     else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)

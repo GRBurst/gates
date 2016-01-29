@@ -193,9 +193,9 @@ void Terrain::modifyHeight(const glm::vec3& ray)
 
 void Terrain::changeModifyRadius(const double& yoffset)
 {
-    if(yoffset < 0.0)
+    if((yoffset < 0.0) && (mModifyRadius > 0.2f))
         mModifyRadius += 0.1f * static_cast<float>(yoffset);
-    else
+    else if((yoffset > 0.0))
         mModifyRadius += 0.1f * static_cast<float>(yoffset);
 
 }
@@ -563,31 +563,72 @@ unsigned int Terrain::getIndexFromPosition( const glm::ivec2& pos ) const
     return mFloatsPerVertex * ((pos.y * mXDim) + pos.x);
 }
 
+float Terrain::getIndexDistances(const glm::ivec2& p1, const glm::ivec2& p2) const
+{
+
+    glm::vec3 t1 = getTerrainPosition(p1);
+    glm::vec3 t2 = getTerrainPosition(p2);
+    return glm::distance(t1, t2);
+}
+
 void Terrain::updateArea( const glm::ivec2& ip )
 {
 
-    std::cout << "indices for update area: x = " << ip.x << ", z = " << ip.y << std::endl;
-    unsigned int i = getIndexFromPosition(ip);
-    unsigned int t = getIndexTopPosition(i);
-    unsigned int b = getIndexBottomPosition(i);
-    unsigned int l = getIndexLeftPosition(i);
-    unsigned int r = getIndexRightPosition(i);
-    std::cout << "(i,t,b,l,r) = (" << i << ", " << t << ", " << b << ", " << l << ", " << r << ")" << std::endl;
+    /* std::cout << "indices for update area: x = " << ip.x << ", z = " << ip.y << std::endl; */
+    /* std::cout << "update radius = " << mModifyRadius << std::endl; */
+    int h = 0, v = 0;
+    for(unsigned int x = 1; x < mXDim; x++)
+    {
+        if(getIndexDistances(ip, glm::ivec2(ip.x - x, ip.y)) > mModifyRadius) break;
+        h++;
+    }
+    for(unsigned int z = 1; z < mZDim; z++)
+    {
+        if(getIndexDistances(ip, glm::ivec2(ip.x, ip.y - z)) > mModifyRadius) break;
+        v++;
+    }
 
-    unsigned int offset = t;
-    unsigned int size = mFloatsPerVertex + (b - t);
+    float scale = 0.1f;
+    for(int i = -v; i <= v; i++)
+    {
+        for(int j = -h; j <= h; j++)
+        {
+            if(getIndexDistances(ip, glm::ivec2(ip.x + j, ip.y + i)) < mModifyRadius)
+            {
+                /* std::cout << "Updating position: x = " << ip.x + j << ", z = " << ip.y + i << ", with height = " << scale << std::endl; */
+                mVertices.at(getIndexFromPosition(glm::ivec2(ip.x + j, ip.y + i)) + 1) += scale;
+            }
+            /* else */
+            /* { */
+            /*     std::cout << "NOT UPDATE position: x = " << ip.x + j << ", z = " << ip.y + i << ", with height = " << scale << std::endl; */
+            /* } */
+        }
+        scale *= 0.95f;
+    }
+    /* unsigned int mi = getIndexFromPosition(ip); */
+    /* unsigned int t = getIndexTopPosition(i); */
+    /* unsigned int b = getIndexBottomPosition(i); */
+    /* unsigned int l = getIndexLeftPosition(i); */
+    /* unsigned int r = getIndexRightPosition(i); */
+    /* std::cout << "(i,t,b,l,r) = (" << i << ", " << t << ", " << b << ", " << l << ", " << r << ")" << std::endl; */
+    /* unsigned int offset = t; */
+    /* unsigned int size = mFloatsPerVertex + (b - t); */
+
+    unsigned int offset = getIndexFromPosition(glm::ivec2(ip.x-h, ip.y-v));
+    unsigned int offsetEnd = getIndexFromPosition(glm::ivec2(ip.x+h, ip.y+v));
+    unsigned int size = mFloatsPerVertex + (offsetEnd - offset);
 
     // Set new hights
-    mVertices.at(i+1) += 2.5f;
-    mVertices.at(t+1) += 1.25f;
-    mVertices.at(b+1) += 1.25f;
-    mVertices.at(l+1) += 1.25f;
-    mVertices.at(r+1) += 1.25f;
+    /* mVertices.at(i+1) += 2.5f; */
+    /* mVertices.at(t+1) += 1.25f; */
+    /* mVertices.at(b+1) += 1.25f; */
+    /* mVertices.at(l+1) += 1.25f; */
+    /* mVertices.at(r+1) += 1.25f; */
 
     // Fill update buffer
     std::vector<float> newData;
     newData.resize(size);
-    std::cout << "buffer offset = " << offset << ", size = " << size << std::endl;
+    /* std::cout << "buffer offset = " << offset << ", buffer end = " << offsetEnd << ", size = " << size << std::endl; */
     for(unsigned int i = 0; i < size; i++)
     {
         newData.at(i) = mVertices.at(offset + i);
@@ -725,7 +766,7 @@ glm::ivec2 Terrain::getIntersectionPoint(const glm::vec3& position, const glm::v
     glm::ivec2 sp = glm::ivec2(round(is.x), round(is.y));
     float dy = ray.y * 50.0f/256.0f;
     float h = position.y;
-    std::cout << "camera position: x = " << position.x << ", y = " << position.y << ", z = " << position.z << "\t dy = " << dy << std::endl;
+    /* std::cout << "camera position: x = " << position.x << ", y = " << position.y << ", z = " << position.z << "\t dy = " << dy << std::endl; */
 
     int x1 = sp.x;
     int x2 = ((ray.x < 0) ? 0 : mXDim);
@@ -741,8 +782,8 @@ glm::ivec2 Terrain::getIntersectionPoint(const glm::vec3& position, const glm::v
     deltaZ = std::abs(deltaZ) << 1;
 
     glm::vec3 tc;
-    std::cout << "x1 = " << x1 << ", x2 = " << x2 << ", dX = " << deltaX << ", dx = " << dx << "\tz1 = " << z1 << ", z2 = " << z2 << ", dZ = " << deltaZ <<", dz = " << dz << std::endl;
-    std::cout << "trace" << std::endl;
+    /* std::cout << "x1 = " << x1 << ", x2 = " << x2 << ", dX = " << deltaX << ", dx = " << dx << "\tz1 = " << z1 << ", z2 = " << z2 << ", dZ = " << deltaZ <<", dz = " << dz << std::endl; */
+    /* std::cout << "trace" << std::endl; */
     if(deltaX < deltaZ)
     {
 
@@ -750,14 +791,14 @@ glm::ivec2 Terrain::getIntersectionPoint(const glm::vec3& position, const glm::v
         while (z1 != z2)
         {
             tc = getTerrainPosition(glm::ivec2(x1, z1));
-            h = position.y + glm::length(tc-position)*ray.y;
-            std::cout << "terrain indices: x = " << x1 << ", z = " << z1 << "\t ray height = " << h << std::endl;
-            std::cout << "terrain position: x = " << tc.x << ", y = " << tc.y << ", z = " << tc.z << std::endl;
-            std::cout << "diffs: dx = " << tc.x-position.x << ", dy = " << tc.y-position.y << ", dz = " << tc.z-position.z << ", dh = " << glm::length(glm::vec2(tc.x-position.x, tc.z-position.z))*ray.y << std::endl;
+            h = position.y + glm::distance(tc, position)*ray.y;
+            /* std::cout << "terrain indices: x = " << x1 << ", z = " << z1 << "\t ray height = " << h << std::endl; */
+            /* std::cout << "terrain position: x = " << tc.x << ", y = " << tc.y << ", z = " << tc.z << std::endl; */
+            /* std::cout << "diffs: dx = " << tc.x-position.x << ", dy = " << tc.y-position.y << ", dz = " << tc.z-position.z << ", dh = " << glm::length(glm::vec2(tc.x-position.x, tc.z-position.z))*ray.y << std::endl; */
             if(tc.y >= h)
             {
                 mRayTerrainIntersection = tc;
-                std::cout << "INTERSECTION" << std::endl;
+                /* std::cout << "INTERSECTION" << std::endl; */
                 return glm::ivec2(x1, z1);
             }
             if ((error >= 0) && (error || (dz > 0)))
@@ -781,14 +822,14 @@ glm::ivec2 Terrain::getIntersectionPoint(const glm::vec3& position, const glm::v
         {
 
             tc = getTerrainPosition(glm::ivec2(x1, z1));
-            h = position.y + glm::length(tc-position)*ray.y;
-            std::cout << "terrain indices: x = " << x1 << ", z = " << z1 << "\t ray height = " << h << std::endl;
-            std::cout << "terrain position: x = " << tc.x << ", y = " << tc.y << ", z = " << tc.z << std::endl;
-            std::cout << "diffs: dx = " << tc.x-position.x << ", dy = " << tc.y-position.y << ", dz = " << tc.z-position.z << ", dh = " << glm::length(glm::vec2(tc.x-position.x, tc.z-position.z))*ray.y << std::endl;
+            h = position.y + glm::distance(tc, position)*ray.y;
+            /* std::cout << "terrain indices: x = " << x1 << ", z = " << z1 << "\t ray height = " << h << std::endl; */
+            /* std::cout << "terrain position: x = " << tc.x << ", y = " << tc.y << ", z = " << tc.z << std::endl; */
+            /* std::cout << "diffs: dx = " << tc.x-position.x << ", dy = " << tc.y-position.y << ", dz = " << tc.z-position.z << ", dh = " << glm::length(glm::vec2(tc.x-position.x, tc.z-position.z))*ray.y << std::endl; */
             if(tc.y >= h)
             {
                 mRayTerrainIntersection = tc;
-                std::cout << "INTERSECTION" << std::endl;
+                /* std::cout << "INTERSECTION" << std::endl; */
                 return glm::ivec2(x1, z1);
             }
             if ((error >= 0) && (error || (dx > 0)))
@@ -803,7 +844,7 @@ glm::ivec2 Terrain::getIntersectionPoint(const glm::vec3& position, const glm::v
         }
     }
 
-    std::cout << "NO INTERSECTION" << std::endl;
+    /* std::cout << "NO INTERSECTION" << std::endl; */
     return glm::ivec2(-1, -1);
 }
 

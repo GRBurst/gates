@@ -35,9 +35,8 @@ out vec4 color;
 /* } */
 bool doHighLight()
 {
-    vec2 ray = vec2(uRayTerrainIntersection.x - wPos.x, uRayTerrainIntersection.z - wPos.z);
-    float diff = length(ray);
-    if((diff < uModifyRadius+0.1) && (diff > uModifyRadius)) return true;
+    float radius = length(vec2(uRayTerrainIntersection.x - wPos.x, uRayTerrainIntersection.z - wPos.z));
+    if((radius < uModifyRadius + 0.1) && (radius > uModifyRadius )) return true;
 
     return false;
 }
