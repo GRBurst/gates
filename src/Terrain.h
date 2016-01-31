@@ -26,7 +26,9 @@ class Terrain {
         // Control functions
         void generateHeights();
         void computeTerrain();
- 
+        void addNoise(const std::vector<float>& noiseValues);
+        void build();
+
         void genHeightMapTexture();
         void linkHeightMapTexture(GLint shader);
 
@@ -83,7 +85,6 @@ class Terrain {
         void computeTerrainTangents();
         void computeTerrainTangents(unsigned int min, unsigned int max);
 
-        void build();
         void setBuffers();
         void buildVBO();
         void buildIBO();

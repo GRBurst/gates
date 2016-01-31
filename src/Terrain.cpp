@@ -40,6 +40,16 @@ Terrain::~Terrain()
 /*
  * Public control functions
  */
+/* void Terrain::addNoise(std::vector<float> noiseValues) */
+void Terrain::addNoise(const std::vector<float>& noiseValues)
+{
+    /* mVertices.at(mFloatsPerVertex * ((z * mXDim) + x) + 1) += noiseValues.at(z * mHeightMapTerrainRatio * mNoise->getXDim() + x); */
+    for(unsigned int i = 0; i < mNoiseValues.size(); i++)
+    {
+        mNoiseValues.at(i) += noiseValues.at(i);
+        /* mNoiseValues.at(i) += 1.0f; */
+    }
+}
 void Terrain::generateHeights()
 {
     mNoise->generateNoiseImage();
@@ -49,8 +59,14 @@ void Terrain::generateHeights()
 void Terrain::computeTerrain()
 {
     generateHeights();
-    build();
+}
+
+void Terrain::build()
+{
+    buildVBO();
+    buildIBO();
     setBuffers();
+    /* buildDebug(); */
 }
 
 void Terrain::genHeightMapTexture()
@@ -498,9 +514,9 @@ void Terrain::computeTerrainTangents(unsigned int min, unsigned int max)
 void Terrain::buildVBO()
 {
     // Position(3), Normal(3), Tangent(3), Bitangent(3), UV(2)
-    mVertices.resize(mTotalVertices * mFloatsPerVertex);
     /* mVertices.resize(mTotalVertices * mElementsPerVertex); */
 
+    mVertices.resize(mTotalVertices * mFloatsPerVertex);
     computeTerrainPositions();
 
     if(mUseNormals)
@@ -548,13 +564,6 @@ void Terrain::buildIBO()
 
     /* } */
 
-}
-
-void Terrain::build()
-{
-    buildVBO();
-    buildIBO();
-    /* buildDebug(); */
 }
 
 void Terrain::buildDebug()

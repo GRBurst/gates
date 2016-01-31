@@ -325,18 +325,27 @@ int main()
     pActiveNoise->setParams(noiseDimX, noiseDimY, seed);
     pActiveNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
 
+    Noise *pActiveNoise2 = new WorleyNoise();
+    pActiveNoise2->setParams(noiseDimX, noiseDimY, seed);
+    pActiveNoise2->setOctavesFreqAmp(octaves, frequency, amplitude);
+    pActiveNoise2->generateNoiseImage();
+    pActiveNoise2->saveToFile("WorleyNoise.tga");
+
+
     // Setup initial terrain
     pActiveTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pActiveNoise);
     pActiveTerrain->enableNormals();
     pActiveTerrain->computeTerrain();
+    /* pActiveTerrain->addNoise(pActiveNoise2->getDataVector()); */
+    pActiveTerrain->build();
     pActiveTerrain->genHeightMapTexture();
-    pActiveTerrain->saveNoiseToFile("PerlinNoise_Terrain.tga");
+    pActiveTerrain->saveNoiseToFile("Terrain1.tga");
     pActiveTerrain->linkHeightMapTexture(terrainShaderProgram);
     pActiveTerrain->linkHeightMapTexture(defaultShaderProgram);
     /* pActiveTerrain->debug(); */
 
     // Setup worled (cell) noise for second terrain
-    pNextNoise = new WorleyNoise();
+    pNextNoise = new PerlinNoise();
     pNextNoise->setParams(noiseDimX, noiseDimY, seed);
     pNextNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
 
@@ -344,8 +353,9 @@ int main()
     pNextTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pNextNoise);
     pNextTerrain->enableNormals();
     pNextTerrain->computeTerrain();
+    pNextTerrain->build();
     pNextTerrain->genHeightMapTexture();
-    pNextTerrain->saveNoiseToFile("WorleyNoise_Terrain.tga");
+    pNextTerrain->saveNoiseToFile("Terrain2.tga");
 
     /*
      * Setup Portals
@@ -578,6 +588,7 @@ bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pNextNoise
         Terrain* pNewTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pNextNoise);
         pNewTerrain->enableNormals();
         pNewTerrain->computeTerrain();
+        pNewTerrain->build();
         pNewTerrain->genHeightMapTexture();
         pNewTerrain->saveNoiseToFile("newTerrain_noise.tga");
         pNewTerrain->linkHeightMapTexture(terrainShaderProgram);
