@@ -43,13 +43,15 @@ Terrain::~Terrain()
 /* void Terrain::addNoise(std::vector<float> noiseValues) */
 void Terrain::addNoise(const std::vector<float>& noiseValues)
 {
-    /* mVertices.at(mFloatsPerVertex * ((z * mXDim) + x) + 1) += noiseValues.at(z * mHeightMapTerrainRatio * mNoise->getXDim() + x); */
     for(unsigned int i = 0; i < mNoiseValues.size(); i++)
-    {
         mNoiseValues.at(i) += noiseValues.at(i);
-        /* mNoiseValues.at(i) += 1.0f; */
-    }
 }
+void Terrain::multiplyNoise(const std::vector<float>& noiseValues)
+{
+    for(unsigned int i = 0; i < mNoiseValues.size(); i++)
+        mNoiseValues.at(i) *= noiseValues.at(i);
+}
+
 void Terrain::generateHeights()
 {
     mNoise->generateNoiseImage();

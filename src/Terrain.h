@@ -27,6 +27,7 @@ class Terrain {
         void generateHeights();
         void computeTerrain();
         void addNoise(const std::vector<float>& noiseValues);
+        void multiplyNoise(const std::vector<float>& noiseValues);
         void build();
 
         void genHeightMapTexture();
