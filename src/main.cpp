@@ -13,10 +13,12 @@
 #include "Terrain.h"
 #include "Texture.h"
 #include "Grass.h"
+#include "Vect.h"
 #include "WorleyNoise.h"
-#include "SimplexNoise.h"
 #include "Skydome.h"
 #include "Clouds.h"
+#include "ImprovedPerlinNoise.h"
+#include "SimplexNoise.h"
 
 
 using namespace glm;
@@ -332,14 +334,16 @@ int main()
 
     // Skydome noise parameters
     int noiseSkyDimX = 512, noiseSkyDimY = 512, noiseSkyDimZ = 64;
-    seed = 123, octaves = 8, frequency = 8.0, amplitude = 4;
+    seed = 2, octaves = 8, frequency = 8.0, amplitude = 0.7;
 
     // Setup noise for clouds
     SimplexNoise pNoise3D;
     pNoise3D.setParams(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
     pNoise3D.setOctavesFreqAmp(octaves, frequency, amplitude);
+    pNoise3D.setScale(false);
     pNoise3D.generateNoiseImage();
-//    pNoise3D.saveToFile("3DnoiseSimplex.tga");
+
+   pNoise3D.saveToFile("3DnoiseSimplex.tga");
 
     // Skydome initialization
     Skydome skydome(skydomeShaderProgram, &camera);

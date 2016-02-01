@@ -6,10 +6,58 @@
  */
 
 #include "Noise.h"
-Noise::Noise() : mXDim(256), mYDim(256), mZDim(1), mWDim(1), mSeed(1024), mOctaves(1), mFrequency(1.0), mAmplitude(1.0), mNoiseType(PERLIN)
+Noise::Noise() : mXDim(256), mYDim(256), mZDim(1), mUDim(1), mVDim(1), mWDim(1), mSeed(1024), mOctaves(1), mFrequency(1.0), mAmplitude(1.0), mTileable(false), mScaleZeroToOne(true)
 {
-	// TODO Auto-generated constructor stub
 
+}
+
+Noise::Noise(int x, int y, int seed) : mZDim(1), mUDim(1), mVDim(1), mWDim(1), mSeed(1024), mOctaves(1), mFrequency(1.0), mAmplitude(1.0), mTileable(false), mScaleZeroToOne(true)
+{
+	 this->mXDim = x;
+	 this->mYDim = y;
+	 this->mSeed = seed;
+}
+
+Noise::Noise(int x, int y, int z, int seed) : mUDim(1), mVDim(1), mWDim(1), mSeed(1024), mOctaves(1), mFrequency(1.0), mAmplitude(1.0), mTileable(false), mScaleZeroToOne(true)
+{
+	 this->mXDim = x;
+	 this->mYDim = y;
+	 this->mZDim = z;
+	 this->mSeed = seed;
+}
+
+Noise::Noise(int x, int y, int z, int u, int seed) : mVDim(1), mWDim(1), mSeed(1024), mOctaves(1), mFrequency(1.0), mAmplitude(1.0), mTileable(false), mScaleZeroToOne(true)
+{
+	 this->mXDim = x;
+	 this->mYDim = y;
+	 this->mZDim = z;
+	 this->mUDim = u;
+	 this->mSeed = seed;
+}
+
+Noise::Noise(int x, int y, int z, int seed, int octaves, double frequency, double amplitude) : mUDim(1), mVDim(1), mWDim(1), mSeed(1024), mOctaves(1), mFrequency(1.0),
+		mAmplitude(1.0), mTileable(false), mScaleZeroToOne(true)
+{
+	 this->mXDim = x;
+	 this->mYDim = y;
+	 this->mZDim = z;
+	 this->mSeed = seed;
+	 this->mOctaves = octaves;
+	 this->mFrequency = frequency;
+	 this->mAmplitude = amplitude;
+}
+
+Noise::Noise(int x, int y, int z, int w, int seed, int octaves, double frequency, double amplitude): mUDim(1), mVDim(1), mSeed(1024), mOctaves(1), mFrequency(1.0),
+		mAmplitude(1.0), mTileable(false), mScaleZeroToOne(true)
+{
+	 this->mXDim = x;
+	 this->mYDim = y;
+	 this->mZDim = z;
+	 this->mWDim = w;
+	 this->mSeed = seed;
+	 this->mOctaves = octaves;
+	 this->mFrequency = frequency;
+	 this->mAmplitude = amplitude;
 }
 
 Noise::~Noise()
@@ -32,6 +80,9 @@ void Noise::setParams(int x, int y, int z, int seed){
 	mNoiseValues.resize(mXDim * mYDim * mZDim);
 }
 
+void Noise::setScale(bool scale){
+	this->mScaleZeroToOne = scale;
+}
 
 double Noise::clamp(double x, double min, double max){
 	if (x > max)
@@ -39,6 +90,11 @@ double Noise::clamp(double x, double min, double max){
 	if (x < min)
 		x = min;
 	return x;
+}
+
+void Noise::generateTileableNoiseImage(){
+	mTileable = true;
+	this->generateNoiseImage();
 }
 
 //float* Noise::getSphericalTexture(){

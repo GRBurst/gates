@@ -10,7 +10,20 @@ PerlinNoise::PerlinNoise()
 {
 
 }
+PerlinNoise::PerlinNoise(int x, int y, int seed) : Noise(x, y, seed)
+{
 
+}
+
+PerlinNoise::PerlinNoise(int x, int y, int z, int seed) : Noise(x, y, z, seed)
+{
+
+}
+
+PerlinNoise::PerlinNoise(int x, int y, int z, int seed, int octaves, double frequency, double amplitude) : Noise(x, y, z, seed, octaves, frequency, amplitude)
+{
+
+}
 PerlinNoise::~PerlinNoise()
 {
 	// TODO Auto-generated destructor stub
@@ -75,13 +88,15 @@ void PerlinNoise::generateNoiseImage(){
 					mMax = value;
 			}
 		}
-    	mMax = mMax - mMin;
-    	if (mMax != 0)
-			for(int y = 0; y < mYDim; y++){
-				for(int x = 0; x < mXDim; x++){
-					mNoiseValues[y * mXDim + x] = (mNoiseValues[y * mXDim + x] - mMin) / mMax;
+    	if (mScaleZeroToOne){
+			mMax = mMax - mMin;
+			if (mMax != 0)
+				for(int y = 0; y < mYDim; y++){
+					for(int x = 0; x < mXDim; x++){
+						mNoiseValues[y * mXDim + x] = (mNoiseValues[y * mXDim + x] - mMin) / mMax;
+					}
 				}
-			}
+    	}
     }
     else
     {
@@ -97,15 +112,18 @@ void PerlinNoise::generateNoiseImage(){
 				}
 			}
     	}
-    	if (mMax != 0)
-			for(int z = 0; z < mZDim; z++){
-				for(int y = 0; y < mYDim; y++){
-					for(int x = 0; x < mXDim; x++){
-						mNoiseValues[z * mYDim * mXDim + y * mXDim + x] = (mNoiseValues[z * mYDim * mXDim + y * mXDim + x] - mMin) / mMax;
+    	if (mScaleZeroToOne){
+			mMax = mMax - mMin;
+			if (mMax != 0)
+				for(int z = 0; z < mZDim; z++){
+					for(int y = 0; y < mYDim; y++){
+						for(int x = 0; x < mXDim; x++){
+							mNoiseValues[z * mYDim * mXDim + y * mXDim + x] = (mNoiseValues[z * mYDim * mXDim + y * mXDim + x] - mMin) / mMax;
 
+						}
 					}
 				}
-			}
+    	}
     }
 
 
@@ -147,6 +165,8 @@ double PerlinNoise::fbm(double x, double y, double z){
 	}
 	return result;
 }
+
+
 
 //double clamp(double x, double min, double max){
 //	if (x > max)

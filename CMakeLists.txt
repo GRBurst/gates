@@ -88,6 +88,7 @@ set(Game_HEAD   src/main.h
                 src/Texture.h
                 src/WorleyNoise.h
                 src/PerlinNoise.h
+		src/ImprovedPerlinNoise.h
 		src/SimplexNoise.h
     )
 
@@ -105,6 +106,7 @@ set(Game_SRC    src/main.cpp
                 src/Texture.cpp
                 src/WorleyNoise.cpp
                 src/PerlinNoise.cpp
+		src/ImprovedPerlinNoise.cpp
 		src/SimplexNoise.cpp
     )
 

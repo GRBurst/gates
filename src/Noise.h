@@ -17,40 +17,44 @@
 #include <algorithm>
 #include <glm/glm.hpp>
 #include <math.h>
-#include "NoiseType.h"
 //Factory Class
 class Noise
 {
 	public:
 
 		Noise();
-
+		Noise(int x, int y, int seed);
+		Noise(int x, int y, int z, int seed);
+		Noise(int x, int y, int z, int w, int seed);
+		Noise(int x, int y, int z, int seed, int octaves, double frequency, double amplitude);
+		Noise(int x, int y, int z, int w, int seed, int octaves, double frequency, double amplitude);
 		virtual ~Noise();
 
         void setParams(int x, int y, int seed);
         void setParams(int x, int y, int z, int seed);
 		virtual float* getTextureData();
 		virtual float* getInverseTextureData();
+		virtual void generateTileableNoiseImage();
 		virtual void generateNoiseImage() = 0;
 		virtual void setOctavesFreqAmp(int octaves, double frequency, double amplitude)
-        {
+		{
             mOctaves = octaves; mFrequency = frequency; mAmplitude = amplitude;
         };
+		virtual void setScale(bool scale);
 //		virtual float* getSphericalTexture();
 		bool saveToFile(const char* filename);
 		int getXDim(){ return mXDim;};
 		int getYDim(){ return mYDim;};
 		int getZDim(){ return mZDim;};
-		int getWDim(){ return mWDim;};
-		double calculateNoiseValue(double x, double y);
+		int getUDim(){ return mUDim;};
 		glm::ivec2 getDimension(){ return glm::ivec2(mXDim, mYDim);}
 	protected:
 		double clamp(double x, double min, double max);
-		int mXDim, mYDim, mZDim, mWDim, mSeed;
-		NoiseType mNoiseType;
+		int mXDim, mYDim, mZDim, mUDim, mVDim, mWDim, mSeed;
 		int mOctaves;
 		double mFrequency, mAmplitude;
-
+		bool mTileable;
+		bool mScaleZeroToOne;
         std::vector<float> mNoiseValues;
 
 };

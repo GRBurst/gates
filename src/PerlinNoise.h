@@ -21,12 +21,16 @@ class PerlinNoise : public Noise
 {
 	public:
 		PerlinNoise();
+		PerlinNoise(int x, int y, int seed);
+		PerlinNoise(int x, int y, int z, int seed);
+		PerlinNoise(int x, int y, int z, int seed, int octaves, double frequency, double amplitude);
 		~PerlinNoise();
         void printParams();
 		void generateNoiseImage();
 
 		double calculateNoiseValue(double x, double y);
 		double calculateNoiseValue(double x, double y, double z);
+		double calculateNoiseValue(double x, double y, double z, double u);
 		glm::ivec2 getDimension(){ return glm::ivec2(mXDim, mYDim);}
 	protected:
 		glm::dvec4 interpolationPolynomial(glm::dvec4 vec);
