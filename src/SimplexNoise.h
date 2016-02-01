@@ -1,32 +1,65 @@
 /*
- * Simplex.h
+ * SimplexNoise.h
  *
- *  Created on: Jan 25, 2016
+ *  Created on: Jan 26, 2016
  *      Author: adrian
  */
 
 #ifndef SRC_SIMPLEXNOISE_H_
 #define SRC_SIMPLEXNOISE_H_
-#include <vector>
-#include <algorithm>
-#include <random>
-#include "PerlinNoise.h"
 #include "Noise.h"
+#include "PerlinNoise.h"
+#include <random>
+#include <vector>
+#include <iostream>
+#include <stdio.h>
+#include <algorithm>
+#include <glm/glm.hpp>
+#include <math.h>
+#include <glm/gtx/string_cast.hpp>
+#include "Vect.h"
+
 class SimplexNoise : public PerlinNoise
 {
 public:
 	SimplexNoise();
+	SimplexNoise(int x, int y, int seed);
+	SimplexNoise(int x, int y, int z, int seed);
+	SimplexNoise(int x, int y, int z, int w, int seed);
+	SimplexNoise(int x, int y, int z, int seed, int octaves, double frequency, double amplitude);
+	SimplexNoise(int x, int y, int z, int w, int seed, int octaves, double frequency, double amplitude);
 	virtual ~SimplexNoise();
-	double calculateNoiseValue(double x) { return calculateNoiseValue(x, 0, 0); }
-	double calculateNoiseValue(double x, double y) { return calculateNoiseValue(x, y, 0); }
-	double calculateNoiseValue(double x, double y, double z);
 	void generateNoiseImage();
+	double calculateNoiseValue(double x, double y);
+	double calculateNoiseValue(double x, double y, double z);
+	double calculateNoiseValue(double x, double y, double z, double w);
 private:
-	std::vector<int> mPermutationTable;
-	double grad(int hash, double x, double y, double z);
-	double interpolationPolynomial(double t);
+
+	double fbm(double x, double y, double z);
+	double fbm(double x, double y, double z, double u);
 	void initPermutationTable();
-	double fbm(double x, double y, double z = 0.0);
+	int mSampleSize = 256;
+	int N = 4096;
+	std::vector<std::vector<int>>mGradientTable3d{std::vector<int>{1,1,0},std::vector<int>{-1,1,0},std::vector<int>{1,-1,0},std::vector<int>{-1,-1,0},
+		std::vector<int>{1,0,1},std::vector<int>{-1,0,1},std::vector<int>{1,0,-1},std::vector<int>{-1,0,-1},
+		std::vector<int>{0,1,1},std::vector<int>{0,-1,1},std::vector<int>{0,1,-1},std::vector<int>{0,-1,-1}};
+	std::vector<std::vector<int>>mGradientTable4d{{0,1,1,1},{0,1,1,-1},{0,1,-1,1},{0,1,-1,-1},
+			{0,-1,1,1},{0,-1,1,-1},{0,-1,-1,1},{0,-1,-1,-1},
+			{1,0,1,1},{1,0,1,-1},{1,0,-1,1},{1,0,-1,-1},
+			{-1,0,1,1},{-1,0,1,-1},{-1,0,-1,1},{-1,0,-1,-1},
+			{1,1,0,1},{1,1,0,-1},{1,-1,0,1},{1,-1,0,-1},
+			{-1,1,0,1},{-1,1,0,-1},{-1,-1,0,1},{-1,-1,0,-1},
+			{1,1,1,0},{1,1,-1,0},{1,-1,1,0},{1,-1,-1,0},
+			{-1,1,1,0},{-1,1,-1,0},{-1,-1,1,0},{-1,-1,-1,0}};
+	//Skewing Factors
+	double F2 = (sqrt(3) - 1) / 2.0;
+	double G2 = (3 - sqrt(3))/ 6.0;
+	double F3 = 1 / 3.0;
+	double G3 = 1 / 6.0;
+	double F4 = (sqrt(5) - 1) / 4.0;
+	double G4 = (5 - sqrt(5)) / 20.0;
+	double F5 = (sqrt(6) - 1) / 5.0;
+	double G5 = (6 - sqrt(6)) / 30.0;
 
 };
 
