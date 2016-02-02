@@ -31,13 +31,17 @@ const int MAX_FRAMESKIP = 10;
 const double frameTime = 1.0 / UPDATES_PER_SECOND;
 
 Camera camera;
+Terrain *pActiveTerrain;
 double lastMouseXPosition, lastMouseYPosition;
-int gDrawGrid = 0;
+static int gDrawGrid = 0;
+static unsigned int gEditMode = 2;
 
+glm::vec3 getWorldRayFromCursor(const double& screenPosX, const double& screenPosY);
+void processInput();
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_callback(GLFWwindow* window, double mouseXPosition, double mouseYPosition);
-bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pInactiveNoise, Terrain*& pActiveTerrain, Terrain*& pInactiveTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, const GLint& terrainShaderProgram, const GLint& defaultShaderProgram);
+bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pNextNoise, Terrain*& pActiveTerrain, Terrain*& pNextTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, Grass& grass, const GLint& terrainShaderProgram, const GLint& defaultShaderProgram);
 
 void debugCallback(GLenum source, GLenum type, GLuint id,
                    GLenum severity, GLsizei length,
@@ -149,12 +153,28 @@ void displayFrame(){
 
 }
 
-void processInput(Camera& camera)
+void processInput()
 {
-    glfwPollEvents();
 
     double mouseXPosition, mouseYPosition;
     glfwGetCursorPos(window, &mouseXPosition, &mouseYPosition);
+    static bool rayButtonPressed = false;
+
+    if(gEditMode < 2)
+    {
+        glm::vec3 rayDirection = getWorldRayFromCursor(mouseXPosition, mouseYPosition);
+        pActiveTerrain->highlightRay(rayDirection, gEditMode);
+        if(!glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) && rayButtonPressed)
+        {
+            rayButtonPressed = false;
+        }
+        else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) && !rayButtonPressed)
+        {
+            rayButtonPressed = true;
+            pActiveTerrain->modifyHeight();
+        }
+    }
+
     if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
     {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -168,19 +188,38 @@ void processInput(Camera& camera)
         lastMouseYPosition = mouseYPosition;
     }
 
-    if(glfwGetKey(window, GLFW_KEY_ESCAPE)  == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
-    if(glfwGetKey(window, GLFW_KEY_Q )      == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
-    if(glfwGetKey(window, GLFW_KEY_W )      == GLFW_PRESS) camera.moveForward( float(frameTime) );
-    if(glfwGetKey(window, GLFW_KEY_S )      == GLFW_PRESS) camera.moveBack( float(frameTime) );
-    if(glfwGetKey(window, GLFW_KEY_A )      == GLFW_PRESS) camera.moveLeft( float(frameTime) );
-    if(glfwGetKey(window, GLFW_KEY_D )      == GLFW_PRESS) camera.moveRight( float(frameTime) );
-    if(glfwGetKey(window, GLFW_KEY_I )      == GLFW_PRESS) camera.setCamSpeed( 10.0 );
-    if(glfwGetKey(window, GLFW_KEY_K )      == GLFW_PRESS) camera.setCamSpeed( 0.1 );
-    if(glfwGetKey(window, GLFW_KEY_G )      == GLFW_PRESS) gDrawGrid = (gDrawGrid + 1) % 3;
-    if(glfwGetKey(window, GLFW_KEY_C )      == GLFW_PRESS)
-    {
-        std::cout << std::endl << "Camera coords: x = " << camera.getPosition().x << ", y = " << camera.getPosition().y << ", z = " << camera.getPosition().z << std::endl;
-    }
+    if(glfwGetKey(window, GLFW_KEY_W )  == GLFW_PRESS) camera.moveForward( float(frameTime) );
+    if(glfwGetKey(window, GLFW_KEY_S )  == GLFW_PRESS) camera.moveBack( float(frameTime) );
+    if(glfwGetKey(window, GLFW_KEY_A )  == GLFW_PRESS) camera.moveLeft( float(frameTime) );
+    if(glfwGetKey(window, GLFW_KEY_D )  == GLFW_PRESS) camera.moveRight( float(frameTime) );
+
+}
+
+glm::vec3 getWorldRayFromCursor(const double& screenPosX, const double& screenPosY)
+{
+    float x = (2.0f * screenPosX) / wWidth - 1.0f;
+    float y = 1.0f - (2.0f * screenPosY) / wHeight;
+    float z = -1.0f;
+
+    glm::vec3 norm3DCoordsRay(x, y, z);
+    glm::vec4 homogenCoordsRay(norm3DCoordsRay, 1.0);
+
+    glm::vec4 camCoordsRay = glm::inverse(camera.getProjectionMatrix()) * homogenCoordsRay;
+
+    camCoordsRay = glm::vec4(camCoordsRay.x, camCoordsRay.y, -1.0, 0.0);
+
+    glm::vec3 worldCoordsRay = glm::vec3(glm::normalize(glm::inverse(camera.getViewMatrix()) * camCoordsRay));
+
+    return worldCoordsRay;
+
+    /* camera.update(); */
+    /* float depth; */
+    /* glReadPixels(screenPosX, screenPosY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth); */
+    /* glm::vec3 windowCoords(static_cast<float>(screenPosX), static_cast<float>(wHeight) - static_cast<float>(screenPosY), depth); */
+    /* glm::vec4 viewport(0.0f, 0.0f, wWidth, wHeight); */
+
+    /* return glm::unProject(windowCoords, camera.getViewMatrix(), camera.getProjectionMatrix(), viewport); */
+    /* return glm::unProject(windowCoords, glm::mat4(1.0f), camera.getProjectionMatrix(), viewport); */
 
 }
 
@@ -214,10 +253,12 @@ int main()
     initOpenGL();
 
     // Input initialization
-    /* glfwSetKeyCallback( window, key_callback ); */
+    glfwSetKeyCallback( window, key_callback );
     /* glfwSetCursorPosCallback(window, mouse_callback); */
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetWindowSizeCallback( window, resize_callback );
+    /* glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, 1); */
+    /* glfwSetInputMode(window, GLFW_STICKY_KEYS, 1); */
 
     /* glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); */
     glfwSetCursorPos(window, wWidth / 2, wHeight / 2);
@@ -260,14 +301,13 @@ int main()
     GLint cloudsShaderProgram = cloudsShader.linkShaders();
     /*
      * Setup main Pointer
-     * Terrain Pointer: pActiveTerrain, pInactiveTerrain
+     * Terrain Pointer: pActiveTerrain, pNextTerrain
      * Portal Pointer: pActivePortal, pInactivePortal
      *
      */
-
-    Terrain *pActiveTerrain, *pInactiveTerrain;
+    Terrain *pNextTerrain;
     Portal *pActivePortal, *pInactivePortal;
-    Noise *pActiveNoise, *pInactiveNoise;
+    Noise *pActiveNoise, *pNextNoise;
 
     /*
      * Setup initial terrains and noise
@@ -278,7 +318,7 @@ int main()
      */
 
     // Common parameters
-    int noiseDimX = 256, noiseDimY = 256, noiseDimZ = 64;
+    int noiseDimX = 256, noiseDimY = 256, noiseDimZ = 1;
     int seed = 42, octaves = 16;
     double frequency = 8.0, amplitude = 4.0;
 
@@ -287,30 +327,37 @@ int main()
     pActiveNoise->setParams(noiseDimX, noiseDimY, seed);
     pActiveNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
 
+    Noise *pActiveNoise2 = new WorleyNoise();
+    pActiveNoise2->setParams(noiseDimX, noiseDimY, seed);
+    pActiveNoise2->setOctavesFreqAmp(octaves, frequency, amplitude);
+    pActiveNoise2->generateNoiseImage();
+    pActiveNoise2->saveToFile("WorleyNoise.tga");
+
+
     // Setup initial terrain
-    pActiveTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, pActiveNoise);
-    pActiveTerrain->setVPMatrix(camera.getVPMatrix());
-    pActiveTerrain->setInvViewMatrix(camera.getInvViewMatrix());
+    pActiveTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pActiveNoise);
     pActiveTerrain->enableNormals();
     pActiveTerrain->computeTerrain();
+    /* pActiveTerrain->addNoise(pActiveNoise2->getDataVector()); */
+    pActiveTerrain->build();
     pActiveTerrain->genHeightMapTexture();
-    pActiveTerrain->saveNoiseToFile("PerlinNoise_Terrain.tga");
+    pActiveTerrain->saveNoiseToFile("Terrain1.tga");
     pActiveTerrain->linkHeightMapTexture(terrainShaderProgram);
     pActiveTerrain->linkHeightMapTexture(defaultShaderProgram);
+    /* pActiveTerrain->debug(); */
 
     // Setup worled (cell) noise for second terrain
-    pInactiveNoise = new WorleyNoise();
-    pInactiveNoise->setParams(noiseDimX, noiseDimY, seed);
-    pInactiveNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
+    pNextNoise = new PerlinNoise();
+    pNextNoise->setParams(noiseDimX, noiseDimY, seed);
+    pNextNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
 
     // Setup initial inactive terrain (in portal)
-    pInactiveTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, pInactiveNoise);
-    pInactiveTerrain->setVPMatrix(camera.getVPMatrix());
-    pInactiveTerrain->setInvViewMatrix(camera.getInvViewMatrix());
-    pInactiveTerrain->enableNormals();
-    pInactiveTerrain->computeTerrain();
-    pInactiveTerrain->genHeightMapTexture();
-    pInactiveTerrain->saveNoiseToFile("WorleyNoise_Terrain.tga");
+    pNextTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pNextNoise);
+    pNextTerrain->enableNormals();
+    pNextTerrain->computeTerrain();
+    pNextTerrain->build();
+    pNextTerrain->genHeightMapTexture();
+    pNextTerrain->saveNoiseToFile("Terrain2.tga");
 
     /*
      * Setup Portals
@@ -321,10 +368,10 @@ int main()
 
     // Portal
     pActivePortal = new Portal(defaultShaderProgram);
-    pActivePortal->init( &camera, pActiveTerrain, pInactiveTerrain );
+    pActivePortal->init( &camera, pActiveTerrain, pNextTerrain );
 
     pInactivePortal = new Portal(defaultShaderProgram);
-    pInactivePortal->init( &camera, pActiveTerrain, pInactiveTerrain );
+    pInactivePortal->init( &camera, pActiveTerrain, pNextTerrain );
     pInactivePortal->deaktivate();
 
     /*
@@ -333,8 +380,9 @@ int main()
      */
 
     // Skydome noise parameters
+
     int noiseSkyDimX = 512, noiseSkyDimY = 512, noiseSkyDimZ = 64;
-    seed = 2, octaves = 8, frequency = 8.0, amplitude = 0.7;
+    seed = 123, octaves = 8, frequency = 8.0, amplitude = 4;
 
     // Setup noise for clouds
     SimplexNoise pNoise3D;
@@ -386,81 +434,24 @@ int main()
         while (oldTime < newTime && loops < MAX_FRAMESKIP)
         {
             //here update game
-            /* glfwPollEvents(); */
+            glfwPollEvents();
 
-            processInput(camera);
+            processInput();
 
             newTime += frameTime;
 
             loops++;
 
             /*
-             * portalIntersection(&camera, pActiveTerrain, pInactiveTerrain, pActivePortal, pInactivePortal, terrainShaderProgram, defaultShaderProgram); 
              *
              * Check for portal intersection
              *
              */
-            float diff = glm::length(glm::vec3(camera.getPosition() - pActivePortal->getPosition()));
-
-            if((diff < 2.5) && pActivePortal->isActive())
-            {
-                // Do teleportation
-                pActivePortal->teleport();
-                camera.setPosition(pActivePortal->getPosition2());
-                /* camera->setOrientation(); */
-                camera.update();
-
-                std::cout << "Generate new noise" << std::endl;
-                // Generate new inactive terrain
-                int noiseDimX = 256;
-                int noiseDimY = 256;
-                double seed = 1.0 + 42.0 * pActivePortal->getPosition().x;
-                int octaves = seed < 0 ? static_cast<int>(-seed) % 17 : static_cast<int>(seed) % 17;
-                std::cout << "Octaves: "<< octaves << std::endl;
-                double frequency = mod(seed, 16.0);
-                double amplitude = mod(seed, 8.0);
-                Noise* pNewNoise = new PerlinNoise();
-                pNewNoise->setParams(noiseDimX, noiseDimY, seed);
-                pNewNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
-
-                delete pActiveNoise;
-                pActiveNoise    = pInactiveNoise;
-                pInactiveNoise  = pNewNoise;
-
-                std::cout << "Generate new terrain" << std::endl;
-                Terrain* pNewTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, pInactiveNoise);
-                pNewTerrain->setVPMatrix(camera.getVPMatrix());
-                pNewTerrain->setInvViewMatrix(camera.getInvViewMatrix());
-                pNewTerrain->enableNormals();
-                pNewTerrain->computeTerrain();
-                pNewTerrain->genHeightMapTexture();
-                pNewTerrain->saveNoiseToFile("newTerrain_noise.tga");
-                pNewTerrain->linkHeightMapTexture(terrainShaderProgram);
-                pNewTerrain->linkHeightMapTexture(defaultShaderProgram);
-                pNewTerrain->draw();
-
-                // swap terrains
-                delete pActiveTerrain;
-                pActiveTerrain      = pInactiveTerrain;
-                pInactiveTerrain    = pNewTerrain;
-
-                grass.setTerrainVao(pActiveTerrain->getVAO(), pActiveTerrain->getTotalIndices());
-                std::cout << "Generate new portal" << std::endl;
-                // Setup new portal
-                Portal* pNewPortal = new Portal(defaultShaderProgram);
-                pNewPortal->init( &camera, pActiveTerrain, pInactiveTerrain );
-
-                // swap portals
-                delete pInactivePortal;
-                pInactivePortal = pActivePortal;
-                pActivePortal   = pNewPortal;
-            }
-
-            portalIntersection(camera, pActiveNoise, pInactiveNoise, pActiveTerrain, pInactiveTerrain, pActivePortal, pInactivePortal, terrainShaderProgram, defaultShaderProgram);
-
+            portalIntersection(camera, pActiveNoise, pNextNoise, pActiveTerrain, pNextTerrain, pActivePortal, pInactivePortal, grass, terrainShaderProgram, defaultShaderProgram);
         }
 
-                    //update Frame
+
+        //update Frame
 
         // Clear buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -494,8 +485,6 @@ int main()
         model.draw();
 
         // Active terrain
-        pActiveTerrain->setVPMatrix(camera.getVPMatrix());
-        pActiveTerrain->setInvViewMatrix(camera.getInvViewMatrix());
         pActiveTerrain->setGrid(gDrawGrid);
         pActiveTerrain->draw();
 
@@ -522,10 +511,8 @@ int main()
         model.draw();
 
         // Inactive or next terrain
-        pInactiveTerrain->setVPMatrix(camera.getVPMatrix());
-        pInactiveTerrain->setInvViewMatrix(camera.getInvViewMatrix());
-        pInactiveTerrain->setGrid(gDrawGrid);
-        pInactiveTerrain->draw();
+        pNextTerrain->setGrid(gDrawGrid);
+        pNextTerrain->draw();
 
         // Grass
         grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
@@ -557,11 +544,11 @@ int main()
 
     // Pointers
     delete pActiveTerrain;
-    delete pInactiveTerrain;
+    delete pNextTerrain;
     delete pActivePortal;
     delete pInactivePortal;
     delete pActiveNoise;
-    delete pInactiveNoise;
+    delete pNextNoise;
 
     // Programs
     glDeleteProgram(defaultShaderProgram);
@@ -572,8 +559,9 @@ int main()
 
 }
 
-bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pInactiveNoise, Terrain*& pActiveTerrain, Terrain*& pInactiveTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, const GLint& terrainShaderProgram, const GLint& defaultShaderProgram)
+bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pNextNoise, Terrain*& pActiveTerrain, Terrain*& pNextTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, Grass& grass, const GLint& terrainShaderProgram, const GLint& defaultShaderProgram)
 {
+
     float diff = glm::length(glm::vec3(camera.getPosition() - pActivePortal->getPosition()));
 
     if((diff < 2.5) && pActivePortal->isActive())
@@ -581,7 +569,7 @@ bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pInactiveN
         // Do teleportation
         pActivePortal->teleport();
         camera.setPosition(pActivePortal->getPosition2());
-        /* camera.setOrientation(); */
+        /* camera->setOrientation(); */
         camera.update();
 
         std::cout << "Generate new noise" << std::endl;
@@ -589,23 +577,23 @@ bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pInactiveN
         int noiseDimX = 256;
         int noiseDimY = 256;
         double seed = 1.0 + 42.0 * pActivePortal->getPosition().x;
-        int octaves = static_cast<int>(4.0 * seed) % 17;
-        double frequency = fmod(seed, 67.0);
-        double amplitude = fmod(seed, 11.0);
-        Noise* pNewNoise = new WorleyNoise();
-        pNewNoise->setParams(noiseDimX, noiseDimY, static_cast<int>(seed));
+        int octaves = seed < 0 ? static_cast<int>(-seed) % 17 : static_cast<int>(seed) % 17;
+        std::cout << "Octaves: "<< octaves << std::endl;
+        double frequency = mod(seed, 16.0);
+        double amplitude = mod(seed, 8.0);
+        Noise* pNewNoise = new PerlinNoise();
+        pNewNoise->setParams(noiseDimX, noiseDimY, seed);
         pNewNoise->setOctavesFreqAmp(octaves, frequency, amplitude);
 
         delete pActiveNoise;
-        pActiveNoise    = pInactiveNoise;
-        pInactiveNoise  = pNewNoise;
+        pActiveNoise    = pNextNoise;
+        pNextNoise  = pNewNoise;
 
         std::cout << "Generate new terrain" << std::endl;
-        Terrain* pNewTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, pInactiveNoise);
-        pNewTerrain->setVPMatrix(camera.getVPMatrix());
-        pNewTerrain->setInvViewMatrix(camera.getInvViewMatrix());
+        Terrain* pNewTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pNextNoise);
         pNewTerrain->enableNormals();
         pNewTerrain->computeTerrain();
+        pNewTerrain->build();
         pNewTerrain->genHeightMapTexture();
         pNewTerrain->saveNoiseToFile("newTerrain_noise.tga");
         pNewTerrain->linkHeightMapTexture(terrainShaderProgram);
@@ -614,14 +602,14 @@ bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pInactiveN
 
         // swap terrains
         delete pActiveTerrain;
-        pActiveTerrain      = pInactiveTerrain;
-        pInactiveTerrain    = pNewTerrain;
+        pActiveTerrain  = pNextTerrain;
+        pNextTerrain    = pNewTerrain;
 
-
+        grass.setTerrainVao(pActiveTerrain->getVAO(), pActiveTerrain->getTotalIndices());
         std::cout << "Generate new portal" << std::endl;
         // Setup new portal
         Portal* pNewPortal = new Portal(defaultShaderProgram);
-        pNewPortal->init( &camera, pActiveTerrain, pInactiveTerrain );
+        pNewPortal->init( &camera, pActiveTerrain, pNextTerrain );
 
         // swap portals
         delete pInactivePortal;
@@ -632,7 +620,6 @@ bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pInactiveN
     }
 
     return false;
-
 }
 
 
@@ -648,17 +635,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         case GLFW_KEY_Q :
             if(action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
             break;
-        case GLFW_KEY_W :
-            if(action == GLFW_PRESS) camera.moveForward( float(frameTime) );
-            break;
-        case GLFW_KEY_S :
-            if(action == GLFW_PRESS) camera.moveBack( float(frameTime) );
-            break;
-        case GLFW_KEY_A :
-            if(action == GLFW_PRESS) camera.moveLeft( float(frameTime) );
-            break;
-        case GLFW_KEY_D :
-            if(action == GLFW_PRESS) camera.moveRight( float(frameTime) );
+        case GLFW_KEY_E :
+            if(action == GLFW_PRESS)
+            {
+                gEditMode = (gEditMode + 1) % 3;
+                pActiveTerrain->unHighlightRay();
+            }
             break;
         case GLFW_KEY_I :
             if(action == GLFW_PRESS) camera.setCamSpeed( 10.0 );
@@ -676,8 +658,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             }
             break;
 
-        default: std::cout << "Key has no function!" << std::endl;
-            break;
     }
         //mRight * (float)mDeltaTime * mCamSpeed
 }
@@ -685,17 +665,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 /* void mouse_callback(GLFWwindow* window, double mouseXPosition, double mouseYPosition, const Camera &camera) */
 void mouse_callback(GLFWwindow* window, double mouseXPosition, double mouseYPosition)
 {
-    int width, height;
-
-    glfwGetWindowSize(window, &width, &height);
-    glfwSetCursorPos(window, width/2.0, height/2.0);
-
-    camera.processMouse(float( width/2.0 - mouseXPosition ), float( height/2.0 - mouseYPosition ));
 
 }
 
 /* void scroll_callback(GLFWwindow* window, double xoffset, double yoffset, const Camera &camera) */
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    // TODO
+    pActiveTerrain->changeModifyRadius(yoffset);
 }

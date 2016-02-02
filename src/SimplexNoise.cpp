@@ -126,188 +126,12 @@ float  grad( int hash, float x, float y , float z ) {
     return ((h&1)? -u : u) + ((h&2)? -v : v);
 }
 double SimplexNoise::calculateNoiseValue(double x, double y, double z){
-//	int corners[4][3]; //corners of tetrahedral simplex
-//	double distances[4][3];
-//	double skew = (x+y+z) * F3;
-//	corners[0][0] = (int)(std::floor(x + skew));
-//	corners[0][1] = (int)(std::floor(y + skew));
-//	corners[0][2] = (int)(std::floor(z + skew));
-//
-//	double unskew = (corners[0][0] + corners[0][1] + corners[0][2]) * G3;
-//	distances[0][0] = x - corners[0][0] + unskew;
-//	distances[0][1] = y - corners[0][1] + unskew;
-//	distances[0][2] = z - corners[0][2] + unskew;
-//
-//	if(distances[0][0] < distances[0][1]){
-//		if (distances[0][1] < distances[0][2]){
-//			corners[1][0] = 0; corners[1][1] = 0; corners[1][2] = 1;
-//			corners[2][0] = 0; corners[2][1] = 1; corners[2][2] = 1;
-//		}
-//		else if (distances[0][0] < distances[0][2]){
-//			corners[1][0] = 0; corners[1][1] = 1; corners[1][2] = 0;
-//			corners[2][0] = 0; corners[2][1] = 1; corners[2][2] = 1;
-//		}
-//		else{
-//			corners[1][0] = 0; corners[1][1] = 1; corners[1][2] = 0;
-//			corners[2][0] = 1; corners[2][1] = 1; corners[2][2] = 0;
-//		}
-//	}
-//	else{
-//		if (distances[0][0] < distances[0][2]){
-//			corners[1][0] = 0; corners[1][1] = 0; corners[1][2] = 1;
-//			corners[2][0] = 1; corners[2][1] = 0; corners[2][2] = 1;
-//		}
-//		else if (distances[0][1] < distances[0][2]){
-//			corners[1][0] = 1; corners[1][1] = 0; corners[1][2] = 0;
-//			corners[2][0] = 1; corners[2][1] = 0; corners[2][2] = 1;
-//		}
-//		else{
-//			corners[1][0] = 1; corners[1][1] = 0; corners[1][2] = 0;
-//			corners[2][0] = 1; corners[2][1] = 1; corners[2][2] = 0;
-//		}
-//
-//	}
-//	corners[3][0] = 1;
-//	corners[3][1] = 1;
-//	corners[3][2] = 1;
-//	for (int i = 1; i < 4; i++){
-//		for(int j = 0; j < 3; j++)
-//		{
-//			distances[i][j] = distances[0][j] - corners[i][j] + unskew * i;
-//		}
-//	}
-//	int cornersMod[3];
-//	for (int i = 0; i < 3; i++)
-//	{
-//		cornersMod[i] = corners[0][i] & (mSampleSize - 1);
-//	}
-//	int gradient_indices[4];
-//	gradient_indices[0] = mPermutationTable[cornersMod[0] + mPermutationTable[cornersMod[1] + mPermutationTable[cornersMod[2]]]] % 12;
-//	for (int i = 1; i < 4; i++)
-//	{
-//			gradient_indices[i] = mPermutationTable[cornersMod[0] + corners[i][0] + mPermutationTable[cornersMod[1] + corners[i][1]
-//																 + mPermutationTable[cornersMod[2] + corners[i][2]]]] % 12;
-//	}
-//	double final_sum = 0.0;
-//	double t[4];
-//	for (int i = 0; i < 4; i++){
-//		t[i] = 0.6 - distances[i][0] * distances[i][0] - distances[i][1] * distances[i][1] - distances[i][2] * distances[i][2];
-//		if (t[i] < 0) t[i] = 0.0;
-//		else{
-//			t[i] *= t[i];
-//			final_sum += t[i] * t[i] * dot(mGradientTable3d.at(gradient_indices[i]), distances[i]);
-////			for  (int j = 0; j < 3; j++)
-////				std::cout << mGradientTable3d.at(gradient_indices[i])[j] << ", ";
-////			std::cout <<std::endl;
-//		}
-//
-//	}
-//	double res = 32.0 * final_sum;
-////	std::cout << res << std::endl;
-//	return res;
-#define F3 0.333333333f
-#define G3 0.166666667f
-
-    float n0, n1, n2, n3; // Noise contributions from the four corners
-
-    // Skew the input space to determine which simplex cell we're in
-    float s = (x+y+z)*F3; // Very nice and simple skew factor for 3D
-    float xs = x+s;
-    float ys = y+s;
-    float zs = z+s;
-    int i = std::floor(xs);
-    int j = std::floor(ys);
-    int k = std::floor(zs);
-
-    float t = (float)(i+j+k)*G3;
-    float X0 = i-t; // Unskew the cell origin back to (x,y,z) space
-    float Y0 = j-t;
-    float Z0 = k-t;
-    float x0 = x-X0; // The x,y,z distances from the cell origin
-    float y0 = y-Y0;
-    float z0 = z-Z0;
-
-    // For the 3D case, the simplex shape is a slightly irregular tetrahedron.
-    // Determine which simplex we are in.
-    int i1, j1, k1; // Offsets for second corner of simplex in (i,j,k) coords
-    int i2, j2, k2; // Offsets for third corner of simplex in (i,j,k) coords
-
-/* This code would benefit from a backport from the GLSL version! */
-    if(x0>=y0) {
-      if(y0>=z0)
-        { i1=1; j1=0; k1=0; i2=1; j2=1; k2=0; } // X Y Z order
-        else if(x0>=z0) { i1=1; j1=0; k1=0; i2=1; j2=0; k2=1; } // X Z Y order
-        else { i1=0; j1=0; k1=1; i2=1; j2=0; k2=1; } // Z X Y order
-      }
-    else { // x0<y0
-      if(y0<z0) { i1=0; j1=0; k1=1; i2=0; j2=1; k2=1; } // Z Y X order
-      else if(x0<z0) { i1=0; j1=1; k1=0; i2=0; j2=1; k2=1; } // Y Z X order
-      else { i1=0; j1=1; k1=0; i2=1; j2=1; k2=0; } // Y X Z order
-    }
-
-    // A step of (1,0,0) in (i,j,k) means a step of (1-c,-c,-c) in (x,y,z),
-    // a step of (0,1,0) in (i,j,k) means a step of (-c,1-c,-c) in (x,y,z), and
-    // a step of (0,0,1) in (i,j,k) means a step of (-c,-c,1-c) in (x,y,z), where
-    // c = 1/6.
-
-    float x1 = x0 - i1 + G3; // Offsets for second corner in (x,y,z) coords
-    float y1 = y0 - j1 + G3;
-    float z1 = z0 - k1 + G3;
-    float x2 = x0 - i2 + 2.0f*G3; // Offsets for third corner in (x,y,z) coords
-    float y2 = y0 - j2 + 2.0f*G3;
-    float z2 = z0 - k2 + 2.0f*G3;
-    float x3 = x0 - 1.0f + 3.0f*G3; // Offsets for last corner in (x,y,z) coords
-    float y3 = y0 - 1.0f + 3.0f*G3;
-    float z3 = z0 - 1.0f + 3.0f*G3;
-
-    // Wrap the integer indices at 256, to avoid indexing perm[] out of bounds
-    int ii = i & 0xff;
-    int jj = j & 0xff;
-    int kk = k & 0xff;
-
-    // Calculate the contribution from the four corners
-    float t0 = 0.6f - x0*x0 - y0*y0 - z0*z0;
-    if(t0 < 0.0f) n0 = 0.0f;
-    else {
-      t0 *= t0;
-      n0 = t0 * t0 * grad(mPermutationTable[ii+mPermutationTable[jj+mPermutationTable[kk]]], x0, y0, z0);
-    }
-
-    float t1 = 0.6f - x1*x1 - y1*y1 - z1*z1;
-    if(t1 < 0.0f) n1 = 0.0f;
-    else {
-      t1 *= t1;
-      n1 = t1 * t1 * grad(mPermutationTable[ii+i1+mPermutationTable[jj+j1+mPermutationTable[kk+k1]]], x1, y1, z1);
-    }
-
-    float t2 = 0.6f - x2*x2 - y2*y2 - z2*z2;
-    if(t2 < 0.0f) n2 = 0.0f;
-    else {
-      t2 *= t2;
-      n2 = t2 * t2 * grad(mPermutationTable[ii+i2+mPermutationTable[jj+j2+mPermutationTable[kk+k2]]], x2, y2, z2);
-    }
-
-    float t3 = 0.6f - x3*x3 - y3*y3 - z3*z3;
-    if(t3<0.0f) n3 = 0.0f;
-    else {
-      t3 *= t3;
-      n3 = t3 * t3 * grad(mPermutationTable[ii+1+mPermutationTable[jj+1+mPermutationTable[kk+1]]], x3, y3, z3);
-    }
-
-    // Add contributions from each corner to get the final noise value.
-    // The result is scaled to stay just inside [-1,1]
-    return 32.0f * (n0 + n1 + n2 + n3); // TODO: The scale factor is preliminary!
-
-}
-
-double SimplexNoise::calculateNoiseValue(double x, double y, double z, double u){
-	int corners[5][4]; //corners of tetrahedral simplex
-	double distances[5][4];
+	int corners[4][3]; //corners of tetrahedral simplex
+	double distances[4][3];
 	double skew = (x+y+z) * F3;
-	corners[0][0] = static_cast<int>(std::floor(x + skew));
-	corners[0][1] = static_cast<int>(std::floor(y + skew));
-	corners[0][2] = static_cast<int>(std::floor(z + skew));
-
+	corners[0][0] = std::floor(x + skew);
+	corners[0][1] = std::floor(y + skew);
+	corners[0][2] = std::floor(z + skew);
 
 	double unskew = (corners[0][0] + corners[0][1] + corners[0][2]) * G3;
 	distances[0][0] = x - corners[0][0] + unskew;
@@ -343,12 +167,13 @@ double SimplexNoise::calculateNoiseValue(double x, double y, double z, double u)
 		}
 
 	}
-
-	for (int i = 1; i < 3; i++){
-		corners[3][i] = 1;
+	corners[3][0] = 1;
+	corners[3][1] = 1;
+	corners[3][2] = 1;
+	for (int i = 1; i < 4; i++){
 		for(int j = 0; j < 3; j++)
 		{
-			distances[i][j] = distances[0][j] - double(corners[i][j]) + unskew * (double)i;
+			distances[i][j] = distances[0][j] - corners[i][j] + G3 * i;
 		}
 	}
 	int cornersMod[3];
@@ -357,24 +182,110 @@ double SimplexNoise::calculateNoiseValue(double x, double y, double z, double u)
 		cornersMod[i] = corners[0][i] & (mSampleSize - 1);
 	}
 	int gradient_indices[4];
-
-	gradient_indices[0] = mPermutationTable[cornersMod[0] + mPermutationTable[cornersMod[1] + mPermutationTable[cornersMod[2]]]];
+	gradient_indices[0] = mPermutationTable[cornersMod[0] + mPermutationTable[cornersMod[1] + mPermutationTable[cornersMod[2]]]] & 11;
 	for (int i = 1; i < 4; i++)
 	{
 			gradient_indices[i] = mPermutationTable[cornersMod[0] + corners[i][0] + mPermutationTable[cornersMod[1] + corners[i][1]
-																 + mPermutationTable[cornersMod[2] + corners[i][2]]]];
+																 + mPermutationTable[cornersMod[2] + corners[i][2]]]] & 11;
 	}
 	double final_sum = 0.0;
 	double t[4];
 	for (int i = 0; i < 4; i++){
-		t[i] = 0.6 - corners[i][0] - corners[i][1] - corners[i][2];
-		if (t[i] < 0) t[0] = 0.0;
+		t[i] = 0.6 - distances[i][0] * distances[i][0] - distances[i][1] * distances[i][1] - distances[i][2] * distances[i][2];
+		if (t[i] < 0) t[i] = 0.0;
 		else{
 			t[i] *= t[i];
 			final_sum += t[i] * t[i] * dot(mGradientTable3d.at(gradient_indices[i]), distances[i]);
+//			for  (int j = 0; j < 3; j++)
+//				std::cout << mGradientTable3d.at(gradient_indices[i])[j] << ", ";
+//			std::cout <<std::endl;
+		}
+
+	}
+	return 32.0 * final_sum;
+//	std::cout << res << std::endl;
+}
+
+double SimplexNoise::calculateNoiseValue(double x, double y, double z, double u){
+	int corners[5][4]; //corners of tetrahedral simplex
+	double distances[5][4];
+	double skew = (x+y+z+u) * F4;
+	corners[0][0] = std::floor(x + skew);
+	corners[0][1] = std::floor(y + skew);
+	corners[0][2] = std::floor(z + skew);
+	corners[0][3] = std::floor(u + skew);
+
+	double unskew = (corners[0][0] + corners[0][1] + corners[0][2] + corners[0][3]) * G4;
+	distances[0][0] = x - corners[0][0] + unskew;
+	distances[0][1] = y - corners[0][1] + unskew;
+	distances[0][2] = z - corners[0][2] + unskew;
+	distances[0][3] = u - corners[0][3] + unskew;
+
+	if(distances[0][0] >= distances[0][1]){
+		if (distances[0][1] >= distances[0][2]){
+			corners[1][0] = 1; corners[1][1] = 0; corners[1][2] = 0;
+			corners[2][0] = 1; corners[2][1] = 1; corners[2][2] = 0;
+		}
+		else if (distances[0][0] >= distances[0][2]){
+			corners[1][0] = 1; corners[1][1] = 0; corners[1][2] = 0;
+			corners[2][0] = 1; corners[2][1] = 0; corners[2][2] = 1;
+		}
+		else{
+			corners[1][0] = 0; corners[1][1] = 0; corners[1][2] = 1;
+			corners[2][0] = 1; corners[2][1] = 0; corners[2][2] = 1;
 		}
 	}
-	return (32.0f * final_sum);
+	else{
+		if (distances[0][1] < distances[0][2]){
+			corners[1][0] = 0; corners[1][1] = 0; corners[1][2] = 1;
+			corners[2][0] = 0; corners[2][1] = 1; corners[2][2] = 1;
+		}
+		else if (distances[0][0] < distances[0][2]){
+			corners[1][0] = 0; corners[1][1] = 1; corners[1][2] = 0;
+			corners[2][0] = 0; corners[2][1] = 1; corners[2][2] = 1;
+		}
+		else{
+			corners[1][0] = 0; corners[1][1] = 1; corners[1][2] = 0;
+			corners[2][0] = 1; corners[2][1] = 1; corners[2][2] = 0;
+		}
+
+	}
+	corners[3][0] = 1;
+	corners[3][1] = 1;
+	corners[3][2] = 1;
+	for (int i = 1; i < 5; i++){
+		for(int j = 0; j < 3; j++)
+		{
+			distances[i][j] = distances[0][j] - corners[i][j] + G4 * i;
+		}
+	}
+	int cornersMod[4];
+	for (int i = 0; i < 4; i++)
+	{
+		cornersMod[i] = corners[0][i] & (mSampleSize - 1);
+	}
+	int gradient_indices[4];
+	gradient_indices[0] = mPermutationTable[cornersMod[0] + mPermutationTable[cornersMod[1] + mPermutationTable[cornersMod[2]]]] & 11;
+	for (int i = 1; i < 4; i++)
+	{
+			gradient_indices[i] = mPermutationTable[cornersMod[0] + corners[i][0] + mPermutationTable[cornersMod[1] + corners[i][1]
+																 + mPermutationTable[cornersMod[2] + corners[i][2]]]] & 11;
+	}
+	double final_sum = 0.0;
+	double t[4];
+	for (int i = 0; i < 4; i++){
+		t[i] = 0.6 - distances[i][0] * distances[i][0] - distances[i][1] * distances[i][1] - distances[i][2] * distances[i][2];
+		if (t[i] < 0) t[i] = 0.0;
+		else{
+			t[i] *= t[i];
+			final_sum += t[i] * t[i] * dot(mGradientTable3d.at(gradient_indices[i]), distances[i]);
+//			for  (int j = 0; j < 3; j++)
+//				std::cout << mGradientTable3d.at(gradient_indices[i])[j] << ", ";
+//			std::cout <<std::endl;
+		}
+
+	}
+	return 32.0 * final_sum;
 }
 
 

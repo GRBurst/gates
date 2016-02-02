@@ -1,132 +1,108 @@
 #ifndef TERRAIN_H_
 #define TERRAIN_H_
-#include "Noise.h"
 #include <GL/glew.h>
 #include <iostream>
 #include <stdio.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "NoiseType.h"
+#include "Camera.h"
+#include "Noise.h"
 #include "Texture.h"
 
 /*
  * Usage:
  * 1.) Construct Terrain();
- * 2.) If not set in 1.), setNoiseParams
- * 3.) Set vp matrix
+ * 2.) Optional: enableNormals()
+ * 3.) computeTerrain()
  * 4.) Optional: genHeightMapTexture()
- * 5.) Optional: enableNormals()
- * 6.) computeTerrain()
- * 7.) draw()
+ * 5.) draw()
  */
 class Terrain {
 
     public:
-        Terrain(GLint shaderProgram, int width, int height);
-        Terrain(GLint shaderProgram, int width, int height, Noise *noise);
+        Terrain(GLint shaderProgram, unsigned int xDim, unsigned int zDim, Camera *const camera, Noise *const noise);
         ~Terrain();
 
-        void generateHeights()
-        {
-        	mNoise->generateNoiseImage();
-        	mNoiseValues = mNoise->getTextureData();
-        };
-        void computeTerrain()
-        {
-            generateHeights();
-            build();
-            setBuffers();
-        };
+        // Control functions
+        void generateHeights();
+        void computeTerrain();
+        void addNoise(const std::vector<float>& noiseValues);
+        void multiplyNoise(const std::vector<float>& noiseValues);
+        void build();
+
         void genHeightMapTexture();
         void linkHeightMapTexture(GLint shader);
 
-        void setInvViewMatrix(glm::mat3 iv) { this->mInvViewMatrix = iv; };
-        void setVPMatrix(glm::mat4 vp) { this->mVPMatrix = vp; };
-
-        void enableNormals() {mUseNormals = true; mFloatsPerVertex += 3;};
+        void enableNormals();
+        void enableNormalMap();
         void draw();
 
-        float getWidth() const
-        {
-            return mWidth;
-        };
-        float getHeight() const
-        {
-            return mHeight;
-        }
-        glm::ivec2 getTerrainDimension()
-        {
-            return glm::ivec2(mWidth, mHeight);
-        };
-        glm::ivec2 getHeightMapDimension()
-        {
-            return glm::ivec2(mNoise->getDimension());
-        };
-        float getHeightMapValue(glm::ivec2 coordinate)
-        {
-            return mNoiseValues[(coordinate.y * (mNoise->getDimension()).x) + coordinate.x];
-        };
-        float getTerrainHeight(glm::ivec2 coordinate)
-        {
-            /* return mTerrainOffset + mTerrainScale * mNoiseValues[(coordinate.y * mWidth) + coordinate.x]; */
-            return mVertices[3 * ((coordinate.y * mWidth) + coordinate.x) + 1];
-        };
-        glm::vec3 computePosition(int x, int y) const;
+        // Getters / setters
+        unsigned int getWidth() const { return mXDim; };
+        unsigned int getHeight() const { return mZDim; };
+        unsigned int getTotalIndices() const { return mTotalIndices; };
+        glm::ivec2 getTerrainDimension() const { return glm::ivec2(mXDim, mZDim); };
+        glm::ivec2 getHeightMapDimension() const { return glm::ivec2(mNoise->getDimension()); };
+        GLuint getVAO() const { return mVao; };
 
-        float* getNoiseValues()
-        {
-            return mNoiseValues;
-        };
-        void setNoiseValues(float* noiseVal){mNoiseValues = noiseVal; };
-        /* float* getHeightValues() */
-        /* { */
-        /*     return mNoiseValues; */
-        /* }; */
-        /* float* getTerrainValues() */
-        /* { */
-        /*     return mNoiseValues; */
-        /* }; */
+        float getHeightMapValue(const glm::ivec2& coordinate) const;
+        float getTerrainHeight(const glm::ivec2& coordinate) const;
+        glm::vec3 getTerrainPosition(const glm::ivec2& coordinate) const;
+        glm::vec2 getIndexCordFromTerrain(const glm::vec3& position) const;
 
-        void setGrid(int mode) {mDrawGrid = mode;};
+        glm::vec3 computePosition(unsigned int x, unsigned int y) const;
+        void modifyHeight();
+        void highlightRay(const glm::vec3& ray, unsigned int& mode);
+        void unHighlightRay() { this->mEditMode = 2.0; };
+        void changeModifyRadius(const double& yoffset);
+        float getIndexDistances(const glm::ivec2& p1, const glm::ivec2& p2) const;
 
-        void saveNoiseToFile(const char* filename = "terrainNoise.tga")
-        {
-            mNoise->saveToFile(filename);
-        }
+        /* std::vector<float> getNoiseValues() const { return mNoiseValues; }; */
+        float* getNoiseValues() { return mNoiseValues.data(); };
+        void setNoiseValues(std::vector<float>& noiseVal){mNoiseValues = noiseVal; };
 
-        GLuint getVAO(){return mVao;}
-        int getTotalIndices();
+        void setGrid(int mode) { mDrawGrid = mode; };
+        void saveNoiseToFile(const char* filename = "terrainNoise.tga") const;
 
         void debug();
 
     private:
-        int getSize();
-        int getVerticeNumber();
-        int getIndicesPerRow();
-        int getDegensRequired();
+        unsigned int getSize() const;
+        unsigned int getVerticeNumber() const;
+        unsigned int getIndicesPerRow() const;
+        unsigned int getDegensRequired() const;
 
-        int getIndexLeftPosition(int index);
-        int getIndexRightPosition(int index);
-        int getIndexTopPosition(int index);
-        int getIndexBottomPosition(int index);
-        int getIndexTopRightPosition(int index);
-        int getIndexBottomLeftPosition(int index);
-        int computeTerrainPositions();
-        //glm::vec3 computeNormals();
-        void computeTerrainNormals(int &offset, int &length);
+        unsigned int getIndexLeftPosition(unsigned int index) const;
+        unsigned int getIndexRightPosition(unsigned int index) const;
+        unsigned int getIndexTopPosition(unsigned int index) const;
+        unsigned int getIndexBottomPosition(unsigned int index) const;
+        unsigned int getIndexTopRightPosition(unsigned int index) const;
+        unsigned int getIndexBottomLeftPosition(unsigned int index) const;
+        unsigned int getIndexFromPosition( const glm::ivec2& pos ) const;
 
-        void build();
+        void computeTerrainPositions();
+        void computeTerrainNormals();
+        void computeTerrainNormals(unsigned int min, unsigned int max);
+        void computeTerrainTangents();
+        void computeTerrainTangents(unsigned int min, unsigned int max);
+
         void setBuffers();
         void buildVBO();
         void buildIBO();
         void buildDebug();
 
-        int mWidth, mHeight;
-        int mTotalIndices, mTotalVertices;
+        void updateArea( );
+        void updateVertexBuffer(unsigned int offset, unsigned int size, float* newVertexData);
+        glm::ivec2 getIntersectionPoint(const glm::vec3& position, const glm::vec3& ray);
 
-        Noise *mNoise = NULL;
-        float* mNoiseValues = NULL;
-        NoiseType noiseType;
+        // Member variables
+        unsigned int mXDim, mZDim;
+        unsigned int mTotalIndices, mTotalStripIndices, mTotalVertices;
+
+        Camera* mCamera;
+        Noise* mNoise;
+        /* float* mNoiseValues = NULL; */
+        std::vector<float> mNoiseValues;
 
         Texture mHeightMapTexture;
         bool mUseHeightMapTexture;
@@ -136,10 +112,16 @@ class Terrain {
         float mTerrainMinPos;
         float mTerrainPosRange;
         bool mUseNormals;
+        bool mUseNormalMap;
 
-        GLfloat* mVertices = NULL;
-        GLint* mIndices = NULL;
-        int mFloatsPerVertex;
+        /* GLfloat* mVertices = NULL; */
+        /* GLint* mIndices = NULL; */
+        std::vector<GLfloat> mVertices;
+        /* std::vector<glm::vec3> mVertices; */
+        std::vector<GLint> mIndices;
+        std::vector<GLint> mIndicesStrip;
+        unsigned int mFloatsPerVertex;
+        unsigned int mElementsPerVertex;
         GLuint mVao;
         GLuint mVbo;
         GLuint mIbo;
@@ -150,9 +132,16 @@ class Terrain {
         GLuint muInvViewLocation;
         glm::mat3 mInvViewMatrix;
         GLint muHeightMapTerrainRatioLocation;
-        int mHeightMapTerrainRatio;
+        unsigned int mHeightMapTerrainRatio;
         GLint muDrawGridLocation;
         int mDrawGrid;
+        glm::vec3 mRayTerrainIntersection;
+        GLint muRayTerrainIntersectionLocation;
+        float mModifyRadius, mEditMode;
+        GLint muModifyRadius, muEditLocation;
+        glm::ivec2 mIntersectionCoords;
+        glm::vec3 mCamPos;
+        GLint muCamPos;
 
         /* float minPos, posRange; */
         typedef struct
@@ -162,14 +151,8 @@ class Terrain {
             glm::vec3 c;
         } Triangle;
         // normal, counterclockwise edges
-        glm::vec3 computeTriangleNormal(Triangle &t)
-        {
-            return glm::cross(glm::vec3(t.c - t.a), glm::vec3(t.b - t.a));
-        };
-        glm::vec3 computeVertexNormal(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, glm::vec3 v4, glm::vec3 v5, glm::vec3 v6 )
-        {
-            return glm::normalize(v1 + v2 + v3 + v4 + v5 + v6);
-        };
+        glm::vec3 computeTriangleNormal(Triangle &t);
+        glm::vec3 computeVertexNormal(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, glm::vec3 v4, glm::vec3 v5, glm::vec3 v6 );
 
 };
 #endif /* TERRAIN_H_ */

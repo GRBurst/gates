@@ -34,8 +34,8 @@ void Portal::init( Camera *const cam, Terrain *const activeTerrain, Terrain *con
     /* std::cout << "generate new positions" << std::endl; */
     // Generate positions
     std::default_random_engine gen(mId + 42);
-    std::uniform_int_distribution<int> hDim1(32, activeTerrain->getWidth() - 32);
-    std::uniform_int_distribution<int> vDim1(32, activeTerrain->getHeight() - 32);
+    std::uniform_int_distribution<int> hDim1(0, activeTerrain->getWidth());
+    std::uniform_int_distribution<int> vDim1(0, activeTerrain->getHeight());
     std::uniform_real_distribution<double> deg(0.0, 360.0);
 
     /* std::cout << "generate new x and y locations" << std::endl; */
@@ -47,8 +47,8 @@ void Portal::init( Camera *const cam, Terrain *const activeTerrain, Terrain *con
     setScale(glm::vec3(1.0, 2.0, 1.0));
     setTranslation(mPosition1);
 
-    std::uniform_int_distribution<int> hDim2(32, inactiveTerrain->getWidth() - 32);
-    std::uniform_int_distribution<int> vDim2(32, inactiveTerrain->getHeight()- 32);
+    std::uniform_int_distribution<int> hDim2(0, inactiveTerrain->getWidth());
+    std::uniform_int_distribution<int> vDim2(0, inactiveTerrain->getHeight());
 
     /* std::cout << "calc inactive terrain locations" << std::endl; */
     mPosition2 = glm::vec3(0.0, 1.0, 0.0) + inactiveTerrain->computePosition(hDim2(gen), vDim2(gen));

@@ -4,12 +4,16 @@ in float fHeight;
 in vec2 fUV;
 in vec3 fNormal;
 in vec3 fPos;
+in vec3 wPos;
 
 /* layout(binding = 0) uniform sampler2D heightMap; */
 uniform sampler2D heightMap;
 uniform mat4 uVPMatrix;
 uniform int uHeightMapTerrainRatio;
 uniform int uDrawGrid;
+uniform vec3 uRayTerrainIntersection;
+uniform float uEditMode;
+uniform float uModifyRadius;
 
 vec3 lightCol = vec3(1.0, 1.0, 1.0);
 vec3 lightPos = vec3(0.0, 100.0, 0.0);
@@ -30,6 +34,16 @@ out vec4 color;
 /*     vec3 spec           = vec3(intSpec * uMatSpec0 * uLightSpec0); */
 /*     oColor = vec4(((amb + dif + spec) * attenuation), 1.0); //vec4(((amb + dif + spec) * attenuation), 1.0);    //vec4(fNormal, 1.0); */
 /* } */
+bool doHighLight()
+{
+    if(uEditMode < 2.0)
+    {
+        float radius = length(vec2(uRayTerrainIntersection.x - wPos.x, uRayTerrainIntersection.z - wPos.z));
+        if((radius < uModifyRadius + 0.1) && (radius > uModifyRadius )) return true;
+    }
+
+    return false;
+}
 vec4 phong(vec3 _color)
 {
     float dist          = length(vec3(fPos - lightPos));
@@ -67,12 +81,14 @@ void main()
         terrainColor1 = vec3(0.1, 0.15, 0.8) - vec3(0.0, 0.0, fHeight * 2);
     }
     else if (fHeight < (0.2 + fNormal.y/1.0))
+    /* else if (fHeight < (0.2)) */
     {
         terrainColor1 = vec3(0.1, 0.6, 0.1) * (0.1 + fHeight);
         /* terrainColor2 = vec3(0.8 * fHeight); */
         /* terrainColor1 = mix(terrainColor1, terrainColor2, fHeight/(2.0)); */
     }
     else if (fHeight < (2.2 - fNormal.y))
+    /* else if (fHeight < (2.2)) */
     {
         terrainColor1 = vec3(0.8 * fHeight);
         /* terrainColor2 = vec3(1.0); */
@@ -83,7 +99,12 @@ void main()
         terrainColor1 = vec3(fHeight);
     }
 
-    color = phong(terrainColor1);
+    /* if(ray()) color = vec4(0.0, 1.0, 1.0, 1.0); */
+    /* else if(place()) color = vec4(); */
+    if(doHighLight()) color = vec4(uEditMode, 1.0-uEditMode, 1.0-uEditMode, 1.0);
+    else color = phong(terrainColor1);
+    /* color = phong(terrainColor1); */
+
     //color = terrainColor * vec4(diff, 1.0);
     //color = vec4(diff, 1.0);
     //color = vec4(fNormal, 1.0);

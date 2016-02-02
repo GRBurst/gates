@@ -29,9 +29,9 @@ void WorleyNoise::generateNoiseImage()
                 /* mNoiseValues.at(index) = (cellNoise(glm::vec3( */
                 /* float value = static_cast<float>(cellNoise(static_cast<double>(x), static_cast<double>(y))); */
                 float value = cellNoise(glm::vec3(
-                            static_cast<float>(x) / 32.0f, 
+                            static_cast<float>(x) / 16.0f, 
                             static_cast<float>(y) / 16.0f, 
-                            static_cast<float>(z)
+                            static_cast<float>(z) / 16.0f
                             ));
                 mNoiseValues[y * mXDim + x] = value;
                 if (value < min)
@@ -55,9 +55,16 @@ void WorleyNoise::generateNoiseImage()
 
 void WorleyNoise::init()
 {
-    
+
     // Params
     mDistSeed = 24793197;
+    /* mDistFunc = std::bind(&WorleyNoise::euclidean_distance, this, std::placeholders::_1, std::placeholders::_2); */
+    /* if((mSeed % 6) == 0) mDistFunc = WorleyNoise::euclidean; */
+    /* if((mSeed % 6) == 1) mDistFunc = WorleyNoise::euclideanSquared; */
+    /* if((mSeed % 6) == 2) mDistFunc = WorleyNoise::manhattan; */
+    /* if((mSeed % 6) == 3) mDistFunc = WorleyNoise::chebychev; */
+    /* if((mSeed % 6) == 4) mDistFunc = WorleyNoise::quadratic; */
+    /* if((mSeed % 6) == 5) mDistFunc = WorleyNoise::minkowski; */
 
     mAvgNumFeaturePoints = 2.5;
     mNumDistF = 3;
@@ -154,7 +161,14 @@ float WorleyNoise::cellNoise( glm::vec3 input )
 
                     featurePoint = generatePoint(evalX + i, evalY + j, evalZ + k);
 
-                    distF.push( euclidian_distance( input, featurePoint ) );
+                    /* if((mSeed % 6) == 0) distF.push( euclidean( input, featurePoint)); */
+                    /* if((mSeed % 6) == 1) distF.push( euclideanSquared( input, featurePoint)); */
+                    /* if((mSeed % 6) == 2) distF.push( manhattan( input, featurePoint)); */
+                    /* if((mSeed % 6) == 3) distF.push( chebychev( input, featurePoint)); */
+                    /* if((mSeed % 6) == 4) distF.push( quadratic( input, featurePoint)); */
+                    /* if((mSeed % 6) == 5) distF.push( minkowski( input, featurePoint)); */
+                    /* distF.push( mDistFunc( input, featurePoint ) ); */
+                    distF.push( euclidean( input, featurePoint));
                 }
             }
         }
@@ -197,42 +211,42 @@ glm::vec3 WorleyNoise::generatePoint(int x, int y, int z)
     return featurePoint;
 }
 
-float WorleyNoise::euclidian_distance( glm::vec3 p1, glm::vec3 p2 ) {
+float WorleyNoise::euclidean_distance( glm::vec3 p1, glm::vec3 p2 ) {
     return ( p1.x - p2.x ) * ( p1.x - p2.x ) + ( p1.y - p2.y ) * ( p1.y - p2.y ) + ( p1.z - p2.z ) *  ( p1.z - p2.z );
 }
 
-float WorleyNoise::euclidean(float x1, float y1, float z1, float x2, float y2, float z2)
+float WorleyNoise::euclidean(glm::vec3 p1, glm::vec3 p2)
 {
-        float dif_x = x1 - x2,
-                  dif_y = y1 - y2,
-                  dif_z = z1 - z2;
+        float dif_x = p1.x - p2.x,
+                  dif_y = p1.y - p2.y,
+                  dif_z = p1.z - p2.z;
         
         return (pow(dif_x * dif_x + dif_y * dif_y + dif_z * dif_z,0.5f));
 }
 
-float WorleyNoise::euclideanSquared(float x1, float y1, float z1, float x2, float y2, float z2)
+float WorleyNoise::euclideanSquared(glm::vec3 p1, glm::vec3 p2)
 {
-        float   dif_x = x1-x2,
-                        dif_y = y1-y2,
-                        dif_z = z1-z2;
+        float   dif_x = p1.x-p2.x,
+                        dif_y = p1.y-p2.y,
+                        dif_z = p1.z-p2.z;
 
         return (dif_x * dif_x + dif_y * dif_y + dif_z * dif_z);
 }
 
-float WorleyNoise::manhattan(float x1, float y1, float z1, float x2, float y2, float z2)
+float WorleyNoise::manhattan(glm::vec3 p1, glm::vec3 p2)
 {
-        float   dif_x = fabs(x1 - x2),
-                        dif_y = fabs(y1 - y2),
-                        dif_z = fabs(z1 - z2);
+        float   dif_x = fabs(p1.x - p2.x),
+                        dif_y = fabs(p1.y - p2.y),
+                        dif_z = fabs(p1.z - p2.z);
 
         return (dif_x + dif_y + dif_z);
 }
 
-float WorleyNoise::chebychev(float x1, float y1, float z1, float x2, float y2, float z2)
+float WorleyNoise::chebychev(glm::vec3 p1, glm::vec3 p2)
 {
-        float   dif_x = fabs(x1 - x2),
-                        dif_y = fabs(y1 - y2),
-                        dif_z = fabs(z1 - z2);
+        float   dif_x = fabs(p1.x - p2.x),
+                        dif_y = fabs(p1.y - p2.y),
+                        dif_z = fabs(p1.z - p2.z);
 
         if (dif_x > dif_y && dif_x > dif_z)
                 return (dif_x);
@@ -242,22 +256,22 @@ float WorleyNoise::chebychev(float x1, float y1, float z1, float x2, float y2, f
                 return (dif_z);
 }
 
-float WorleyNoise::quadratic(float x1, float y1, float z1, float x2, float y2, float z2)
+float WorleyNoise::quadratic(glm::vec3 p1, glm::vec3 p2)
 {
-        float   dif_x = x1 - x2,
-                        dif_y = y1 - y2,
-                        dif_z = z1 - z2;
+        float   dif_x = p1.x - p2.x,
+                        dif_y = p1.y - p2.y,
+                        dif_z = p1.z - p2.z;
                         
         return (dif_x * dif_x + dif_y * dif_y + dif_z * dif_z + dif_x * dif_y + dif_x * dif_z + dif_y * dif_z);
 }
 
-float WorleyNoise::minkowski(float x1, float y1, float z1, float x2, float y2, float z2)
+float WorleyNoise::minkowski(glm::vec3 p1, glm::vec3 p2)
 {
         float minkowski_coefficient = 4.0f;
 
-        float ddx = pow(fabs(x1 - x2), minkowski_coefficient);
-        float ddy = pow(fabs(y1 - y2), minkowski_coefficient);
-        float ddz = pow(fabs(z1 - z2), minkowski_coefficient);
+        float ddx = pow(fabs(p1.x - p2.x), minkowski_coefficient);
+        float ddy = pow(fabs(p1.y - p2.y), minkowski_coefficient);
+        float ddz = pow(fabs(p1.z - p2.z), minkowski_coefficient);
         
         return (pow(ddx + ddy + ddz,1.0f/minkowski_coefficient));
 }

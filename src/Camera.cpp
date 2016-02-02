@@ -8,6 +8,7 @@ Camera::Camera() :
     , mHFoV(45.0f)
     , mAspectRatio(16.0/9.0f)
     , mHorizontalAngle(3.14f)
+    /* , mHorizontalAngle(3.14f) */
     , mVerticalAngle(0.0f)
     /* , mDeltaTime(0.0) */
     , mMouseSpeed(0.001f)

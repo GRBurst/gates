@@ -108,7 +108,7 @@ void Noise::generateTileableNoiseImage(){
 //}
 
 float *Noise::getTextureData(){
-	return &mNoiseValues[0];
+	return mNoiseValues.data();
 }
 
 float *Noise::getInverseTextureData(){
@@ -133,7 +133,7 @@ bool Noise::saveToFile(const char* filename){
 		}
 
 	}
-	uint16_t header[9] = {0, 3, 0, 0 ,0 ,0, (uint16_t)mXDim, (uint16_t)mYDim * (uint16_t)mZDim, 8};
+	uint16_t header[9] = {0, 3, 0, 0 ,0 ,0, static_cast<uint16_t>(mXDim), static_cast<uint16_t>(mYDim*mZDim), 8};
 	std::ofstream file(filename, std::ios::binary);
 	if(file.is_open()){
 		file.write((char*) (&header), sizeof(header));
