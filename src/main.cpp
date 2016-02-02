@@ -381,28 +381,27 @@ int main()
 
     // Skydome noise parameters
 
-    int noiseSkyDimX = 512, noiseSkyDimY = 512, noiseSkyDimZ = 64;
+    int noiseSkyDimX = 128, noiseSkyDimY = 128, noiseSkyDimZ = 8, noiseSkyDimU = 2;
     seed = 123, octaves = 8, frequency = 8.0, amplitude = 4;
 
     // Setup noise for clouds
-    SimplexNoise pNoise3D;
-    pNoise3D.setParams(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
-    pNoise3D.setOctavesFreqAmp(octaves, frequency, amplitude);
-    pNoise3D.setScale(false);
-    pNoise3D.generateNoiseImage();
+    SimplexNoise pNoise4D(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, noiseSkyDimU, seed);
+    pNoise4D.setOctavesFreqAmp(octaves, frequency, amplitude);
+    pNoise4D.setScale(false);
+    pNoise4D.generateNoiseImage();
 
-   pNoise3D.saveToFile("3DnoiseSimplex.tga");
+//   pNoise3D.saveToFile("3DnoiseSimplex.tga");
 
     // Skydome initialization
     Skydome skydome(skydomeShaderProgram, &camera);
-    skydome.generateGeometry(noiseDimX / 3, 64, 64);
-    skydome.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
+    skydome.generateGeometry(noiseDimX / 3, 32, 32);
+    skydome.loadTexture(pNoise4D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
     skydome.setBuffers();
 
     // Clouds initialization
     Clouds clouds(cloudsShaderProgram, skydome.getCloudNumber(), skydome.getCloudAttributes(), &camera);
     clouds.setBuffers();
-    clouds.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
+    clouds.loadTexture(pNoise4D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
     skydome.setClouds(&clouds);
 
     // Grass

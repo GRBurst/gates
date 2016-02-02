@@ -23,6 +23,7 @@ class PerlinNoise : public Noise
 		PerlinNoise();
 		PerlinNoise(int x, int y, int seed);
 		PerlinNoise(int x, int y, int z, int seed);
+		PerlinNoise(int x, int y, int z, int u, int seed);
 		PerlinNoise(int x, int y, int z, int seed, int octaves, double frequency, double amplitude);
 		~PerlinNoise();
         void printParams();

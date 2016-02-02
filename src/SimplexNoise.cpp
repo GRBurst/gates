@@ -28,6 +28,11 @@ SimplexNoise::SimplexNoise(int x, int y, int z, int seed) : PerlinNoise(x, y, z,
 
 }
 
+SimplexNoise::SimplexNoise(int x, int y, int z, int u, int seed) : PerlinNoise(x, y, z, u, seed)
+{
+
+}
+
 SimplexNoise::SimplexNoise(int x, int y, int z, int seed, int octaves, double frequency, double amplitude) : PerlinNoise(x, y, z, seed, octaves, frequency, amplitude)
 {
 
@@ -93,10 +98,12 @@ void SimplexNoise::generateNoiseImage(){
 							mMin = value;
 						if (value > mMax)
 							mMax = value;
+
 					}
 				}
 			}
 		}
+
 		if (mScaleZeroToOne){
 			mMax = mMax - mMin;
 			if (mMax != 0)
@@ -221,40 +228,37 @@ double SimplexNoise::calculateNoiseValue(double x, double y, double z, double u)
 	distances[0][2] = z - corners[0][2] + unskew;
 	distances[0][3] = u - corners[0][3] + unskew;
 
-	if(distances[0][0] >= distances[0][1]){
-		if (distances[0][1] >= distances[0][2]){
-			corners[1][0] = 1; corners[1][1] = 0; corners[1][2] = 0;
-			corners[2][0] = 1; corners[2][1] = 1; corners[2][2] = 0;
-		}
-		else if (distances[0][0] >= distances[0][2]){
-			corners[1][0] = 1; corners[1][1] = 0; corners[1][2] = 0;
-			corners[2][0] = 1; corners[2][1] = 0; corners[2][2] = 1;
-		}
-		else{
-			corners[1][0] = 0; corners[1][1] = 0; corners[1][2] = 1;
-			corners[2][0] = 1; corners[2][1] = 0; corners[2][2] = 1;
-		}
-	}
-	else{
-		if (distances[0][1] < distances[0][2]){
-			corners[1][0] = 0; corners[1][1] = 0; corners[1][2] = 1;
-			corners[2][0] = 0; corners[2][1] = 1; corners[2][2] = 1;
-		}
-		else if (distances[0][0] < distances[0][2]){
-			corners[1][0] = 0; corners[1][1] = 1; corners[1][2] = 0;
-			corners[2][0] = 0; corners[2][1] = 1; corners[2][2] = 1;
-		}
-		else{
-			corners[1][0] = 0; corners[1][1] = 1; corners[1][2] = 0;
-			corners[2][0] = 1; corners[2][1] = 1; corners[2][2] = 0;
-		}
+	int ranks[4];
+	if(distances[0][0] > distances[0][1]) ranks[0]++;
+	else ranks[1]++;
+	if(distances[0][0] > distances[0][2]) ranks[0]++;
+	else ranks[2]++;
+	if(distances[0][0] > distances[0][3]) ranks[0]++;
+	else ranks[3]++;
+	if(distances[0][1] > distances[0][2]) ranks[1]++;
+	else ranks[2]++;
+	if(distances[0][1] > distances[0][3]) ranks[1]++;
+	else ranks[3]++;
+	if(distances[0][2] > distances[0][3]) ranks[2]++;
+	else ranks[3]++;
 
+	for (int i = 1; i < 4; i++){
+		for(int j = 0; j < 4; j++)
+		{
+			if (ranks[i] >= 4 - i)
+				corners[i][j] = 1;
+			else
+				corners[i][j] = 0;
+		}
 	}
-	corners[3][0] = 1;
-	corners[3][1] = 1;
-	corners[3][2] = 1;
+
+	corners[4][0] = 1;
+	corners[4][1] = 1;
+	corners[4][2] = 1;
+	corners[4][3] = 1;
+
 	for (int i = 1; i < 5; i++){
-		for(int j = 0; j < 3; j++)
+		for(int j = 0; j < 4; j++)
 		{
 			distances[i][j] = distances[0][j] - corners[i][j] + G4 * i;
 		}
@@ -264,28 +268,26 @@ double SimplexNoise::calculateNoiseValue(double x, double y, double z, double u)
 	{
 		cornersMod[i] = corners[0][i] & (mSampleSize - 1);
 	}
-	int gradient_indices[4];
-	gradient_indices[0] = mPermutationTable[cornersMod[0] + mPermutationTable[cornersMod[1] + mPermutationTable[cornersMod[2]]]] & 11;
-	for (int i = 1; i < 4; i++)
+	int gradient_indices[5];
+	gradient_indices[0] = mPermutationTable[cornersMod[0] + mPermutationTable[cornersMod[1] + mPermutationTable[cornersMod[2] + mPermutationTable[cornersMod[3]]]]] & 31;
+	for (int i = 1; i < 5; i++)
 	{
 			gradient_indices[i] = mPermutationTable[cornersMod[0] + corners[i][0] + mPermutationTable[cornersMod[1] + corners[i][1]
-																 + mPermutationTable[cornersMod[2] + corners[i][2]]]] & 11;
+																 + mPermutationTable[cornersMod[2] + corners[i][2] + mPermutationTable[cornersMod[3] + corners[i][3]]]]] & 31;
 	}
 	double final_sum = 0.0;
-	double t[4];
-	for (int i = 0; i < 4; i++){
-		t[i] = 0.6 - distances[i][0] * distances[i][0] - distances[i][1] * distances[i][1] - distances[i][2] * distances[i][2];
+	double t[5];
+	for (int i = 0; i < 5; i++){
+		t[i] = 0.6 - distances[i][0] * distances[i][0] - distances[i][1] * distances[i][1] - distances[i][2] * distances[i][2] - distances[i][3] * distances[i][3];
 		if (t[i] < 0) t[i] = 0.0;
 		else{
 			t[i] *= t[i];
-			final_sum += t[i] * t[i] * dot(mGradientTable3d.at(gradient_indices[i]), distances[i]);
-//			for  (int j = 0; j < 3; j++)
-//				std::cout << mGradientTable3d.at(gradient_indices[i])[j] << ", ";
-//			std::cout <<std::endl;
+			final_sum += t[i] * t[i] * dot(mGradientTable4d.at(gradient_indices[i]), distances[i]);
 		}
 
 	}
-	return 32.0 * final_sum;
+//	std::cout << cnt++ << std::endl;
+	return 27.0 * final_sum;
 }
 
 

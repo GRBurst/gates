@@ -25,9 +25,9 @@ public:
 	SimplexNoise();
 	SimplexNoise(int x, int y, int seed);
 	SimplexNoise(int x, int y, int z, int seed);
-	SimplexNoise(int x, int y, int z, int w, int seed);
+	SimplexNoise(int x, int y, int z, int u, int seed);
 	SimplexNoise(int x, int y, int z, int seed, int octaves, double frequency, double amplitude);
-	SimplexNoise(int x, int y, int z, int w, int seed, int octaves, double frequency, double amplitude);
+	SimplexNoise(int x, int y, int z, int u, int seed, int octaves, double frequency, double amplitude);
 	virtual ~SimplexNoise();
 	void generateNoiseImage();
 	double calculateNoiseValue(double x, double y);
@@ -43,14 +43,14 @@ private:
 	std::vector<std::vector<int>>mGradientTable3d{std::vector<int>{1,1,0},std::vector<int>{-1,1,0},std::vector<int>{1,-1,0},std::vector<int>{-1,-1,0},
 		std::vector<int>{1,0,1},std::vector<int>{-1,0,1},std::vector<int>{1,0,-1},std::vector<int>{-1,0,-1},
 		std::vector<int>{0,1,1},std::vector<int>{0,-1,1},std::vector<int>{0,1,-1},std::vector<int>{0,-1,-1}};
-	std::vector<std::vector<int>>mGradientTable4d{{0,1,1,1},{0,1,1,-1},{0,1,-1,1},{0,1,-1,-1},
-			{0,-1,1,1},{0,-1,1,-1},{0,-1,-1,1},{0,-1,-1,-1},
-			{1,0,1,1},{1,0,1,-1},{1,0,-1,1},{1,0,-1,-1},
-			{-1,0,1,1},{-1,0,1,-1},{-1,0,-1,1},{-1,0,-1,-1},
-			{1,1,0,1},{1,1,0,-1},{1,-1,0,1},{1,-1,0,-1},
-			{-1,1,0,1},{-1,1,0,-1},{-1,-1,0,1},{-1,-1,0,-1},
-			{1,1,1,0},{1,1,-1,0},{1,-1,1,0},{1,-1,-1,0},
-			{-1,1,1,0},{-1,1,-1,0},{-1,-1,1,0},{-1,-1,-1,0}};
+	std::vector<std::vector<int>>mGradientTable4d{std::vector<int>{0,1,1,1},std::vector<int>{0,1,1,-1},std::vector<int>{0,1,-1,1},std::vector<int>{0,1,-1,-1},
+		std::vector<int>{0,-1,1,1},std::vector<int>{0,-1,1,-1},std::vector<int>{0,-1,-1,1},std::vector<int>{0,-1,-1,-1},
+		std::vector<int>{1,0,1,1},std::vector<int>{1,0,1,-1},std::vector<int>{1,0,-1,1},std::vector<int>{1,0,-1,-1},
+		std::vector<int>{-1,0,1,1},std::vector<int>{-1,0,1,-1},std::vector<int>{-1,0,-1,1},std::vector<int>{-1,0,-1,-1},
+		std::vector<int>{1,1,0,1},std::vector<int>{1,1,0,-1},std::vector<int>{1,-1,0,1},std::vector<int>{1,-1,0,-1},
+		std::vector<int>{-1,1,0,1},std::vector<int>{-1,1,0,-1},std::vector<int>{-1,-1,0,1},std::vector<int>{-1,-1,0,-1},
+		std::vector<int>{1,1,1,0},std::vector<int>{1,1,-1,0},std::vector<int>{1,-1,1,0},std::vector<int>{1,-1,-1,0},
+		std::vector<int>{-1,1,1,0},std::vector<int>{-1,1,-1,0},std::vector<int>{-1,-1,1,0},std::vector<int>{-1,-1,-1,0}};
 	//Skewing Factors
 	double F2 = (sqrt(3) - 1) / 2.0;
 	double G2 = (3 - sqrt(3))/ 6.0;
@@ -60,7 +60,7 @@ private:
 	double G4 = (5 - sqrt(5)) / 20.0;
 	double F5 = (sqrt(6) - 1) / 5.0;
 	double G5 = (6 - sqrt(6)) / 30.0;
-
+	int cnt = 0;
 };
 
 #endif /* SRC_SIMPLEXNOISE_H_ */

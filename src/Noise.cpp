@@ -16,6 +16,7 @@ Noise::Noise(int x, int y, int seed) : mZDim(1), mUDim(1), mVDim(1), mWDim(1), m
 	 this->mXDim = x;
 	 this->mYDim = y;
 	 this->mSeed = seed;
+	 mNoiseValues.resize(mXDim * mYDim);
 }
 
 Noise::Noise(int x, int y, int z, int seed) : mUDim(1), mVDim(1), mWDim(1), mSeed(1024), mOctaves(1), mFrequency(1.0), mAmplitude(1.0), mTileable(false), mScaleZeroToOne(true)
@@ -24,6 +25,7 @@ Noise::Noise(int x, int y, int z, int seed) : mUDim(1), mVDim(1), mWDim(1), mSee
 	 this->mYDim = y;
 	 this->mZDim = z;
 	 this->mSeed = seed;
+	 mNoiseValues.resize(mXDim * mYDim * mZDim);
 }
 
 Noise::Noise(int x, int y, int z, int u, int seed) : mVDim(1), mWDim(1), mSeed(1024), mOctaves(1), mFrequency(1.0), mAmplitude(1.0), mTileable(false), mScaleZeroToOne(true)
@@ -33,6 +35,7 @@ Noise::Noise(int x, int y, int z, int u, int seed) : mVDim(1), mWDim(1), mSeed(1
 	 this->mZDim = z;
 	 this->mUDim = u;
 	 this->mSeed = seed;
+	 mNoiseValues.resize(mXDim * mYDim * mZDim * mUDim);
 }
 
 Noise::Noise(int x, int y, int z, int seed, int octaves, double frequency, double amplitude) : mUDim(1), mVDim(1), mWDim(1), mSeed(1024), mOctaves(1), mFrequency(1.0),

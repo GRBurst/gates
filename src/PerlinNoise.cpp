@@ -20,6 +20,11 @@ PerlinNoise::PerlinNoise(int x, int y, int z, int seed) : Noise(x, y, z, seed)
 
 }
 
+PerlinNoise::PerlinNoise(int x, int y, int z, int u, int seed) : Noise(x, y, z, u, seed)
+{
+
+}
+
 PerlinNoise::PerlinNoise(int x, int y, int z, int seed, int octaves, double frequency, double amplitude) : Noise(x, y, z, seed, octaves, frequency, amplitude)
 {
 
