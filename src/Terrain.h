@@ -107,6 +107,7 @@ class Terrain {
         Texture mHeightMapTexture;
         bool mUseHeightMapTexture;
         Texture mNormalMapTexture;
+        Texture mWhiteNoiseTexture;
 
         float mTerrainOffset;
         float mTerrainScale;

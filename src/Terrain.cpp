@@ -5,7 +5,8 @@ Terrain::Terrain(GLint shaderProgram, unsigned int xDim, unsigned int zDim, Came
     , mZDim(zDim)
     , mTotalVertices(xDim * zDim)
     , mHeightMapTexture()
-    , mNormalMapTexture("../src/textures/normalmap.png")
+    , mNormalMapTexture("../src/textures/rocknormalmap.jpg")
+    , mWhiteNoiseTexture("../src/textures/whitenoise.png")
     , mLightPos(10.0f, 50.0f, 0.0f)
 {
     this->mShaderProgram = shaderProgram;
@@ -70,6 +71,11 @@ void Terrain::build()
 {
     buildVBO();
     buildIBO();
+
+    mWhiteNoiseTexture.bind();
+    mWhiteNoiseTexture.loadNormalMapOptions();
+    mWhiteNoiseTexture.linkTexture(mShaderProgram, "sWhiteNoise");
+
     if(mUseNormals)
         computeTerrainNormals();
 
@@ -91,7 +97,7 @@ void Terrain::genHeightMapTexture()
     mHeightMapTexture.bind();
     mHeightMapTexture.setData(mNoise->getTextureData(), mNoise->getXDim(), mNoise->getYDim());
     mHeightMapTexture.loadHeightmapOptions();
-    mHeightMapTexture.linkTexture(mShaderProgram, "heightMap");
+    mHeightMapTexture.linkTexture(mShaderProgram, "sHeightMap");
 }
 
 void Terrain::linkHeightMapTexture(GLint shader)
@@ -483,8 +489,8 @@ void Terrain::computeTerrainTangents()
 
 void Terrain::computeTerrainTangents(unsigned int min, unsigned int max)
 {
-    float dUVx = 4.0f / mXDim;
-    float dUVz = 4.0f / mZDim;
+    float dUVx = 1.0f / mXDim;
+    float dUVz = 1.0f / mZDim;
     for(unsigned int z = 0; z < mZDim; z++)
     {
         for(unsigned int x = 0; x < mXDim; x++)

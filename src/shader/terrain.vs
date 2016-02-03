@@ -5,7 +5,9 @@ layout (location = 2) in vec3 vTangent;
 layout (location = 3) in vec3 vBitangent;
 layout (location = 4) in vec2 vUV;
 
-uniform sampler2D heightMap;
+uniform sampler2D sHeightMap;
+uniform sampler2D sNormalMap;
+uniform sampler2D sWhiteNoise;
 uniform mat4 uVMatrix;
 uniform mat4 uVPMatrix;
 uniform mat3 uInvViewMatrix;
@@ -27,7 +29,7 @@ out vec3 fEyeDir_ts;
 out vec3 tangent_cs;
 out vec3 bitangent_cs;
 out vec3 normal_cs;
-out vec4 test;
+out mat3 invTBN;
 
 float getHightScale()
 {
@@ -41,11 +43,13 @@ float getHightScale()
 
 void calcTBN()
 {
+
     vec4 light1_ws = vec4(uLightPos, 1.0f);
+    vec4 camera_ws = vec4(uCamPos, 1.0f);
     vec3 pos_cs = (uVMatrix * vec4(vPosition, 1.0f)).xyz;
 
     vec3 camera_cs = (uVMatrix * vec4(uCamPos, 1.0)).xyz;
-    vec3 eyeDir_cs = pos_cs - camera_cs;
+    vec3 eyeDir_cs = camera_cs - pos_cs;
 
     tangent_cs = normalize(mat3(uVMatrix) * vTangent);
     bitangent_cs = normalize(mat3(uVMatrix) * vBitangent);
@@ -60,9 +64,10 @@ void calcTBN()
                 normal_cs
                 ));
 
+    invTBN = inverse(TBN);
     fLightDir1_ts = TBN * lightDir1_cs;
     fEyeDir_ts = TBN * eyeDir_cs;
-    test = vec4(pos_cs, 1.0);
+
 }
 
 void main()
@@ -87,62 +92,7 @@ void main()
 
     fPos = vec3(pos);
     wPos = vPosition;
-    //calcTBN();
-
-
-
-
-
-
-
-
-
-
-
-
-
-    vec4 light1_ws = vec4(uLightPos, 1.0f);
-    vec4 camera_ws = vec4(uCamPos, 1.0f);
-    vec3 pos_cs = (uVMatrix * vec4(vPosition, 1.0f)).xyz;
-
-    vec3 camera_cs = (uVMatrix * vec4(uCamPos, 1.0)).xyz;
-    vec3 eyeDir_cs = camera_cs - pos_cs;
-
-    tangent_cs = normalize(mat3(uVMatrix) * vTangent);
-    bitangent_cs = normalize(mat3(uVMatrix) * vBitangent);
-    normal_cs = normalize(mat3(uVMatrix) * vNormal);
-
-    vec3 light1_cs = (uVMatrix * light1_ws).xyz;
-    vec3 lightDir1_cs = light1_cs - pos_cs;
-
-    mat3 TBN = transpose(mat3(
-                tangent_cs,
-                bitangent_cs,
-                normal_cs
-                ));
-
-    fLightDir1_ts = TBN * lightDir1_cs;
-    fEyeDir_ts = TBN * eyeDir_cs;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    calcTBN();
 
     gl_Position = pos;
 
