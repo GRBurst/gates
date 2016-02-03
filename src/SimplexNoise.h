@@ -17,7 +17,6 @@
 #include <glm/glm.hpp>
 #include <math.h>
 #include <glm/gtx/string_cast.hpp>
-#include "Vect.h"
 
 class SimplexNoise : public PerlinNoise
 {

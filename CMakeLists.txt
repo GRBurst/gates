@@ -79,6 +79,7 @@ set(Game_HEAD   src/main.h
                 src/Camera.h
                 src/Clouds.h
                 src/Grass.h
+                src/ImprovedPerlinNoise.h
                 src/ModelLoader.h
                 src/Noise.h
                 src/Portal.h
@@ -97,6 +98,7 @@ set(Game_SRC    src/main.cpp
                 src/Camera.cpp
                 src/Clouds.cpp
                 src/Grass.cpp
+                src/ImprovedPerlinNoise.cpp
                 src/ModelLoader.cpp
                 src/Noise.cpp
                 src/Portal.cpp

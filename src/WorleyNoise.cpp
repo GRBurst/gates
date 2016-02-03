@@ -29,9 +29,9 @@ void WorleyNoise::generateNoiseImage()
                 /* mNoiseValues.at(index) = (cellNoise(glm::vec3( */
                 /* float value = static_cast<float>(cellNoise(static_cast<double>(x), static_cast<double>(y))); */
                 float value = cellNoise(glm::vec3(
-                            static_cast<float>(x) / 16.0f, 
-                            static_cast<float>(y) / 16.0f, 
-                            static_cast<float>(z) / 16.0f
+                            static_cast<float>(x) / mXDim, 
+                            static_cast<float>(y) / mYDim, 
+                            static_cast<float>(z) / 2.0f
                             ));
                 mNoiseValues[y * mXDim + x] = value;
                 if (value < min)
@@ -42,11 +42,11 @@ void WorleyNoise::generateNoiseImage()
         }
     }
 
-    std::cout << std::endl << "cellNoise: min = " << min << ", max = " << max << std::endl;
+    /* std::cout << std::endl << "cellNoise: min = " << min << ", max = " << max << std::endl; */
     max = max - min;
     for(int x = 0; x < mXDim; x++){
         for(int y = 0; y < mYDim; y++){
-            mNoiseValues[y * mXDim + x] = (mNoiseValues[y * mXDim + x] - min) / max;
+            mNoiseValues[y * mXDim + x] = 1.0f * ((mNoiseValues[y * mXDim + x] - min) / max);
             /* mNoiseValues[y * mXDim + x] = 2.5f*(mNoiseValues[y * mXDim + x]); */
         }
     }

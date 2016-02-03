@@ -23,7 +23,7 @@ ModelLoader::ModelLoader(const char* filePath, GLint shaderProgram) :
 	projection = mat4(1.0f);
 	/* textureCount = 0; */
 	this->shaderProgram = shaderProgram;
-	cout << "Successfully loaded" << endl;
+	/* cout << "Successfully loaded model" << endl; */
 }
 
 /* ModelLoader::ModelLoader(const char* filePath, const char* imagePath,  GLint shaderProgram) : */
@@ -70,110 +70,110 @@ ModelLoader::~ModelLoader()
 }
 
 void ModelLoader::loadFile(){
-	string line = "";
-	while (getline(*fileStream, line)){
-		if (line.at(0) == 'v' && line.at(1) == ' '){
-			/*
-			for (int i = 0; i < 4; i++)
-			{
-				int spacePos = lineValues.find(' ', oldSpacePos + 1);
-				lineFaces.push_back(lineValues.substr(oldSpacePos + 1, spacePos - oldSpacePos));
-				oldSpacePos = spacePos;
-			}*/
-			string lineValues = line.substr(2);
-			vec3 vector;
+    string line = "";
+    while (getline(*fileStream, line)){
+        if (line.at(0) == 'v' && line.at(1) == ' '){
+            /*
+               for (int i = 0; i < 4; i++)
+               {
+               int spacePos = lineValues.find(' ', oldSpacePos + 1);
+               lineFaces.push_back(lineValues.substr(oldSpacePos + 1, spacePos - oldSpacePos));
+               oldSpacePos = spacePos;
+               }*/
+            string lineValues = line.substr(2);
+            vec3 vector;
 
-			int spacePos = lineValues.find(' ');
-			string value = lineValues.substr(0, spacePos);
-			lineValues = lineValues.substr(spacePos + 1);
-			vector.x = (float)atof(value.c_str());
+            int spacePos = lineValues.find(' ');
+            string value = lineValues.substr(0, spacePos);
+            lineValues = lineValues.substr(spacePos + 1);
+            vector.x = (float)atof(value.c_str());
 
-			spacePos = lineValues.find(' ');
-			value = lineValues.substr(0, spacePos);
-			lineValues = lineValues.substr(spacePos + 1);
-			vector.y = (float)atof(value.c_str());
+            spacePos = lineValues.find(' ');
+            value = lineValues.substr(0, spacePos);
+            lineValues = lineValues.substr(spacePos + 1);
+            vector.y = (float)atof(value.c_str());
 
-			spacePos = lineValues.find(' ');
-			value = lineValues.substr(0, spacePos);
-			vector.z = (float)atof(value.c_str());
-			fileVertices.push_back(vector);
+            spacePos = lineValues.find(' ');
+            value = lineValues.substr(0, spacePos);
+            vector.z = (float)atof(value.c_str());
+            fileVertices.push_back(vector);
 
-			//cout << vector.x << ", " << vector.y << ", " << vector.z << endl;
-		}
+            //cout << vector.x << ", " << vector.y << ", " << vector.z << endl;
+        }
 
-		if (line.at(0) == 'v' && line.at(1) == 't' && line.at(2) == ' '){
-			string lineValues = line.substr(3);
-			vec2 vector;
+        if (line.at(0) == 'v' && line.at(1) == 't' && line.at(2) == ' '){
+            string lineValues = line.substr(3);
+            vec2 vector;
 
-			int spacePos = lineValues.find(' ');
-			string value = lineValues.substr(0, spacePos);
-			lineValues = lineValues.substr(spacePos + 1);
-			vector.x = (float)atof(value.c_str());
+            int spacePos = lineValues.find(' ');
+            string value = lineValues.substr(0, spacePos);
+            lineValues = lineValues.substr(spacePos + 1);
+            vector.x = (float)atof(value.c_str());
 
-			spacePos = lineValues.find(' ');
-			value = lineValues.substr(0, spacePos);
-			lineValues = lineValues.substr(spacePos + 1);
-			vector.y = (float)atof(value.c_str());
+            spacePos = lineValues.find(' ');
+            value = lineValues.substr(0, spacePos);
+            lineValues = lineValues.substr(spacePos + 1);
+            vector.y = (float)atof(value.c_str());
 
-			fileUvs.push_back(vector);
-		}
-		if (line.at(0) == 'v' && line.at(1) == 'n' && line.at(2) == ' '){
-			string lineValues = line.substr(3);
-			vec3 vector;
+            fileUvs.push_back(vector);
+        }
+        if (line.at(0) == 'v' && line.at(1) == 'n' && line.at(2) == ' '){
+            string lineValues = line.substr(3);
+            vec3 vector;
 
-			int spacePos = lineValues.find(' ');
-			string value = lineValues.substr(0, spacePos);
-			lineValues = lineValues.substr(spacePos + 1);
-			vector.x = (float)atof(value.c_str());
+            int spacePos = lineValues.find(' ');
+            string value = lineValues.substr(0, spacePos);
+            lineValues = lineValues.substr(spacePos + 1);
+            vector.x = (float)atof(value.c_str());
 
-			spacePos = lineValues.find(' ');
-			value = lineValues.substr(0, spacePos);
-			lineValues = lineValues.substr(spacePos + 1);
-			vector.y = (float)atof(value.c_str());
+            spacePos = lineValues.find(' ');
+            value = lineValues.substr(0, spacePos);
+            lineValues = lineValues.substr(spacePos + 1);
+            vector.y = (float)atof(value.c_str());
 
-			spacePos = lineValues.find(' ');
-			value = lineValues.substr(0, spacePos);
-			vector.z = (float)atof(value.c_str());
+            spacePos = lineValues.find(' ');
+            value = lineValues.substr(0, spacePos);
+            vector.z = (float)atof(value.c_str());
 
-			fileNormals.push_back(vector);
-		}
+            fileNormals.push_back(vector);
+        }
 
-		if (line.at(0) == 'f' && line.at(1) == ' '){
-			string lineValues = line.substr(2);
-			vector<string> lineFaces;
-			array<string, 3> faceVal;
-			int upperBound = 0;
-			for(unsigned int i = 0; i < line.size(); i++)
-			{
-				if (line[i] == ' ')
-					upperBound++;
-			}
+        if (line.at(0) == 'f' && line.at(1) == ' '){
+            string lineValues = line.substr(2);
+            vector<string> lineFaces;
+            array<string, 3> faceVal;
+            int upperBound = 0;
+            for(unsigned int i = 0; i < line.size(); i++)
+            {
+                if (line[i] == ' ')
+                    upperBound++;
+            }
 
-			string vertexIndex, uvIndex, normalIndex;
-			for (int i = 0; i < upperBound; i++){
-				int valPos = lineValues.find('/');
-				vertexIndex = lineValues.substr(0, valPos);
-				lineValues = lineValues.substr(valPos + 1);
-				valPos = lineValues.find('/');
-				uvIndex = lineValues.substr(0, valPos);
-				lineValues = lineValues.substr(valPos + 1);
-				valPos = lineValues.find(' ');
-				normalIndex = lineValues.substr(0, valPos);
-				lineValues = lineValues.substr(valPos + 1);
+            string vertexIndex, uvIndex, normalIndex;
+            for (int i = 0; i < upperBound; i++){
+                int valPos = lineValues.find('/');
+                vertexIndex = lineValues.substr(0, valPos);
+                lineValues = lineValues.substr(valPos + 1);
+                valPos = lineValues.find('/');
+                uvIndex = lineValues.substr(0, valPos);
+                lineValues = lineValues.substr(valPos + 1);
+                valPos = lineValues.find(' ');
+                normalIndex = lineValues.substr(0, valPos);
+                lineValues = lineValues.substr(valPos + 1);
 
-				vertexIndices.push_back(atoi(vertexIndex.c_str()));
-				uvIndices.push_back(atoi(uvIndex.c_str()));
-				normalIndices.push_back(atoi(normalIndex.c_str()));
+                vertexIndices.push_back(atoi(vertexIndex.c_str()));
+                uvIndices.push_back(atoi(uvIndex.c_str()));
+                normalIndices.push_back(atoi(normalIndex.c_str()));
 
-			}
-			faces++;
+            }
+            faces++;
 
-		}
-	}
-	std::cout << fileVertices.size() << std::endl;
-	std::cout << fileUvs.size() << std::endl;
-	std::cout << fileNormals.size() << std::endl;
-	fileStream->close();
+        }
+    }
+    /* std::cout << "Model vertices: " << fileVertices.size() << std::endl; */
+    /* std::cout << "Model uv coods: " << fileUvs.size() << std::endl; */
+    /* std::cout << "Model normals: " << fileNormals.size() << std::endl; */
+    fileStream->close();
 }
 vector<int> ModelLoader::getVertexIndices(){
 	return vertexIndices;
@@ -301,7 +301,7 @@ void ModelLoader::setVerticesAsArray(){
 }
 void ModelLoader::setBuffers(){
 	this->setStride();
-	cout << "Buffers for "<< shaderProgram << " set" << endl;
+	/* cout << "Buffers for "<< shaderProgram << " set" << endl; */
 
 	GLint posAttrib = glGetAttribLocation(shaderProgram, "vPosition");
 	GLint normAttrib = glGetAttribLocation(shaderProgram, "vNormal");
@@ -395,7 +395,7 @@ void ModelLoader::draw(){
 }
 
 void ModelLoader::setStandardUniformLocations(){
-	cout << "Uniform locations for "<< shaderProgram << " set" << endl;
+	/* cout << "Uniform locations for "<< shaderProgram << " set" << endl; */
 
 	modelLocation = glGetUniformLocation(shaderProgram, "M");
 	viewLocation = glGetUniformLocation(shaderProgram, "V");
@@ -406,7 +406,7 @@ void ModelLoader::setStandardUniformLocations(){
 	lightLoc = glGetUniformLocation(shaderProgram, "light_position");
 	cameraLoc = glGetUniformLocation(shaderProgram, "camera_position");
 
-	cout <<  MVPLocation << endl;
+	/* cout << "MVP location of model = " << MVPLocation << endl; */
 }
 
 void ModelLoader::changeShader(GLint &shaderProgram){

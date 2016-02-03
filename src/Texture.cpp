@@ -56,6 +56,7 @@ Texture::Texture(const char* imagePath)
 //	pImage = FreeImage_ConvertTo24Bits(pImage);
 	width = FreeImage_GetWidth(pImage);
 	height = FreeImage_GetHeight(pImage);
+    /* cout << "Texture width = " << width << ", height = " << height << std::endl; */
 
 	cdata = FreeImage_GetBits(pImage);
 
@@ -99,13 +100,41 @@ void Texture::setData(float* data, int width, int height, int depth)
 	this->depth		= depth;
 }
 
+
+void Texture::loadNormalMapOptions()
+{
+    /* glActiveTexture(GL_TEXTURE0 + this->location); */
+    /* glBindTexture(GL_TEXTURE_2D, this->texture); */
+
+
+    // Give the image to OpenGL
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->width, this->height, 0, GL_BGRA, GL_UNSIGNED_BYTE, cdata);
+
+    // build our texture mipmaps
+    //gluBuild2DMipmaps(GL_TEXTURE_2D, 4, width, height, GL_RGBA, GL_UNSIGNED_BYTE, cdata);
+
+    // select modulate to mix texture with color for shading
+    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+
+    // when texture area is small, bilinear filter the closest mipmap
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    // when texture area is large, bilinear filter the first mipmap
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // texture should tile
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,  GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,  GL_REPEAT);
+
+}
+
 void Texture::loadCommonOptions()
 {
-//	glActiveTexture(GL_TEXTURE0 + this->location);
-//	glBindTexture(GL_TEXTURE_2D, this->texture);
+    /* glActiveTexture(GL_TEXTURE0 + this->location); */
+    /* glBindTexture(GL_TEXTURE_2D, this->texture); */
 
-	// Give the image to OpenGL
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, this->width, this->height, 0, GL_BGRA, GL_UNSIGNED_BYTE, cdata);
+
+    // Give the image to OpenGL
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->width, this->height, 0, GL_BGRA, GL_UNSIGNED_BYTE, cdata);
 
     // build our texture mipmaps
     //gluBuild2DMipmaps(GL_TEXTURE_2D, 4, width, height, GL_RGBA, GL_UNSIGNED_BYTE, cdata);
@@ -232,10 +261,20 @@ void Texture::linkTexture(GLint shaderProgram, const char* texture_name)
 
     textureLocation = glGetUniformLocation(shaderProgram, texture_name);
     glUniform1i(textureLocation, location);
-    cout << textureLocation;
-    cout.flush();
+    /* std::cout << "texture location = " << this->location << std::endl; */
+    /* cout.flush(); */
 
     // free buffer
     /* free(data); */
+
+}
+
+void Texture::printCData()
+{
+    for(int i=0; i<width*height; i++)
+    {
+        if((i % width) == 0) std::cout << std::endl;
+        std::cout << (int)cdata[i] << " ";
+    }
 
 }

@@ -13,7 +13,6 @@
 #include "Terrain.h"
 #include "Texture.h"
 #include "Grass.h"
-#include "Vect.h"
 #include "WorleyNoise.h"
 #include "Skydome.h"
 #include "Clouds.h"
@@ -336,13 +335,13 @@ int main()
 
     // Setup initial terrain
     pActiveTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pActiveNoise);
-    pActiveTerrain->enableNormals();
+    /* pActiveTerrain->enableNormals(); */
+    pActiveTerrain->enableNormalMap();
     pActiveTerrain->computeTerrain();
     /* pActiveTerrain->addNoise(pActiveNoise2->getDataVector()); */
     pActiveTerrain->build();
     pActiveTerrain->genHeightMapTexture();
     pActiveTerrain->saveNoiseToFile("Terrain1.tga");
-    pActiveTerrain->linkHeightMapTexture(terrainShaderProgram);
     pActiveTerrain->linkHeightMapTexture(defaultShaderProgram);
     /* pActiveTerrain->debug(); */
 
@@ -385,7 +384,7 @@ int main()
     seed = 123, octaves = 8, frequency = 8.0, amplitude = 4;
 
     // Setup noise for clouds
-    SimplexNoise pNoise4D(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, noiseSkyDimU, seed);
+    SimplexNoise pNoise4D(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
     pNoise4D.setOctavesFreqAmp(octaves, frequency, amplitude);
     pNoise4D.setScale(false);
     pNoise4D.generateNoiseImage();

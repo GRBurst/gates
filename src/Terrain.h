@@ -106,6 +106,7 @@ class Terrain {
 
         Texture mHeightMapTexture;
         bool mUseHeightMapTexture;
+        Texture mNormalMapTexture;
 
         float mTerrainOffset;
         float mTerrainScale;
@@ -129,6 +130,8 @@ class Terrain {
         GLint mShaderProgram;
         GLuint muVPLocation;
         glm::mat4 mVPMatrix;
+        GLuint muVLocation;
+        glm::mat4 mVMatrix;
         GLuint muInvViewLocation;
         glm::mat3 mInvViewMatrix;
         GLint muHeightMapTerrainRatioLocation;
@@ -141,7 +144,9 @@ class Terrain {
         GLint muModifyRadius, muEditLocation;
         glm::ivec2 mIntersectionCoords;
         glm::vec3 mCamPos;
-        GLint muCamPos;
+        GLint muCamPosLocation;
+        glm::vec3 mLightPos;
+        GLint muLightPosLocation;
 
         /* float minPos, posRange; */
         typedef struct

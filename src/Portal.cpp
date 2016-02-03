@@ -56,8 +56,8 @@ void Portal::init( Camera *const cam, Terrain *const activeTerrain, Terrain *con
     mTrans2 = mPosition2 - mPosition1;
     mRot2 = glm::vec3(0.0, deg(gen), 0.0);
 
-    std::cout << "Portal " << mId << " coords 1: x = " << mPosition1.x << ", y = " << mPosition1.y << ", z = " << mPosition1.z << std::endl;
-    std::cout << "Portal " << mId << " coords 2: x = " << mPosition2.x << ", y = " << mPosition2.y << ", z = " << mPosition2.z << std::endl;
+    /* std::cout << "Portal " << mId << " coords 1: x = " << mPosition1.x << ", y = " << mPosition1.y << ", z = " << mPosition1.z << std::endl; */
+    /* std::cout << "Portal " << mId << " coords 2: x = " << mPosition2.x << ", y = " << mPosition2.y << ", z = " << mPosition2.z << std::endl; */
 
 }
 
@@ -179,7 +179,7 @@ void Portal::teleport()
     /* setRotation(mRot2); */
     setScale(mScale2);
     setTranslation(mTrans2);
-    std::cout << std::endl << "Portal " << mId << " teleportation" << std::endl;
+    /* std::cout << std::endl << "Portal " << mId << " teleportation" << std::endl; */
 }
 /* void Portal::draw(const ConstSharedShaderProgram& shaderProg, */
 /*                       const GenericCamera& camera, */

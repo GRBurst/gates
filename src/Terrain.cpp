@@ -5,6 +5,8 @@ Terrain::Terrain(GLint shaderProgram, unsigned int xDim, unsigned int zDim, Came
     , mZDim(zDim)
     , mTotalVertices(xDim * zDim)
     , mHeightMapTexture()
+    , mNormalMapTexture("../src/textures/normalmap.png")
+    , mLightPos(10.0f, 50.0f, 0.0f)
 {
     this->mShaderProgram = shaderProgram;
     this->mCamera = camera;
@@ -19,6 +21,7 @@ Terrain::Terrain(GLint shaderProgram, unsigned int xDim, unsigned int zDim, Came
     mElementsPerVertex = 1;
     mFloatsPerVertex = 3;
     mDrawGrid = 0;
+
 
     unsigned int numStripsRequired = mZDim - 1;
     unsigned int numDegensRequired = 2 * (numStripsRequired - 1);
@@ -67,6 +70,17 @@ void Terrain::build()
 {
     buildVBO();
     buildIBO();
+    if(mUseNormals)
+        computeTerrainNormals();
+
+    if(mUseNormalMap)
+    {
+        computeTerrainTangents();
+        mNormalMapTexture.bind();
+        mNormalMapTexture.loadNormalMapOptions();
+        mNormalMapTexture.linkTexture(mShaderProgram, "sNormalMap");
+        //normalMap.printCData();
+    }
     setBuffers();
     /* buildDebug(); */
 }
@@ -94,6 +108,7 @@ void Terrain::enableNormals()
 
 void Terrain::enableNormalMap()
 {
+    enableNormals();
     mUseNormalMap = true;
     mElementsPerVertex += 3;
     mFloatsPerVertex += (3+3+2); //Tangent(3), Bitangent(3), UV(2)
@@ -101,14 +116,19 @@ void Terrain::enableNormalMap()
 
 void Terrain::draw()
 {
+    mVMatrix = mCamera->getViewMatrix();
     mVPMatrix = mCamera->getVPMatrix();
     mInvViewMatrix = mCamera->getInvViewMatrix();
+    mCamPos = mCamera->getPosition();
     glUseProgram(mShaderProgram);
     glUniformMatrix4fv(muVPLocation, 1, GL_FALSE, value_ptr(mVPMatrix));
+    glUniformMatrix4fv(muVLocation, 1, GL_FALSE, value_ptr(mVMatrix));
     glUniformMatrix3fv(muInvViewLocation, 1, GL_FALSE, value_ptr(mInvViewMatrix));
     glUniform1i(muHeightMapTerrainRatioLocation, mHeightMapTerrainRatio);
     glUniform1i(muDrawGridLocation, mDrawGrid);
     glUniform3f(muRayTerrainIntersectionLocation, mRayTerrainIntersection.x, mRayTerrainIntersection.y, mRayTerrainIntersection.z);
+    glUniform3f(muCamPosLocation, mCamPos.x, mCamPos.y, mCamPos.z);
+    glUniform3f(muLightPosLocation, mLightPos.x, mLightPos.y, mLightPos.z);
     glUniform1f(muEditLocation, mEditMode);
     glUniform1f(muModifyRadius, mModifyRadius);
 
@@ -292,6 +312,12 @@ void Terrain::debug()
     /*     printf("noise value = %5.2f\n" , mNoiseValues.at(i)); */
     /* } */
 
+
+    std::cout << "vertex attributes(" << mVertices.size() << "):" << std::endl;
+    for(unsigned int i = 0; i < mVertices.size(); i += mFloatsPerVertex)
+    {
+        printf("x = %5.2f, y = %5.2f, z = %5.2f, nx = %5.2f, ny = %5.2f, nz = %5.2f, tx = %5.2f, ty = %5.2f, tz = %5.2f, bx = %5.2f, by = %5.2f, bz = %5.2f, uvx = %5.2f, uvz = %5.2f\n" , mVertices.at(i+0), mVertices.at(i+1), mVertices.at(i+2), mVertices.at(i+3), mVertices.at(i+4), mVertices.at(i+5), mVertices.at(i+6), mVertices.at(i+7), mVertices.at(i+8), mVertices.at(i+9), mVertices.at(i+10), mVertices.at(i+11), mVertices.at(i+12), mVertices.at(i+13) );
+    }
 }
 
 /*
@@ -457,8 +483,8 @@ void Terrain::computeTerrainTangents()
 
 void Terrain::computeTerrainTangents(unsigned int min, unsigned int max)
 {
-    float dUVx = 1.0f / mXDim;
-    float dUVz = 1.0f / mZDim;
+    float dUVx = 4.0f / mXDim;
+    float dUVz = 4.0f / mZDim;
     for(unsigned int z = 0; z < mZDim; z++)
     {
         for(unsigned int x = 0; x < mXDim; x++)
@@ -478,8 +504,9 @@ void Terrain::computeTerrainTangents(unsigned int min, unsigned int max)
     {
 
         i0 = mIndices.at(i);
-        i1 = mIndices.at(i+1);
-        i2 = mIndices.at(i+2);
+        i2 = mIndices.at(i+1);
+        i1 = mIndices.at(i+2);
+        /* std::cout << "Indices: i0 = " << i0 << ", i1 = " << i1 << ", i2 = " << i2 << ", mFloatsPerVertex = " << mFloatsPerVertex << std::endl; */
         v0 = glm::vec3(mVertices.at(i0 * mFloatsPerVertex), mVertices.at(i0 * mFloatsPerVertex + 1), mVertices.at(i0 * mFloatsPerVertex + 2));
         v1 = glm::vec3(mVertices.at(i1 * mFloatsPerVertex), mVertices.at(i1 * mFloatsPerVertex + 1), mVertices.at(i1 * mFloatsPerVertex + 2));
         v2 = glm::vec3(mVertices.at(i2 * mFloatsPerVertex), mVertices.at(i2 * mFloatsPerVertex + 1), mVertices.at(i2 * mFloatsPerVertex + 2));
@@ -487,30 +514,33 @@ void Terrain::computeTerrainTangents(unsigned int min, unsigned int max)
         deltaPos0 = glm::vec3(v1.x - v0.x, v1.y - v0.y, v1.z - v0.z);
         deltaPos1 = glm::vec3(v2.x - v0.x, v2.y - v0.y, v2.z - v0.z);
 
-        tangent = (deltaPos0 * dUVz - deltaPos1 * dUVx) * r;
+        tangent = (deltaPos0 * dUVz - deltaPos1 * dUVz) * r;
         bitangent = (deltaPos1 * dUVx - deltaPos0 * dUVx) * r;
         /* v1 = glm::vec3(mVertices.at(i), mVertices.at(i+1), mVertices(i+2)); */
-        mVertices.at(i0 + 6) = tangent.x;
-        mVertices.at(i0 + 7) = tangent.y;
-        mVertices.at(i0 + 8) = tangent.z;
-        mVertices.at(i1 + 6) = tangent.x;
-        mVertices.at(i1 + 7) = tangent.y;
-        mVertices.at(i1 + 8) = tangent.z;
-        mVertices.at(i2 + 6) = tangent.x;
-        mVertices.at(i2 + 7) = tangent.y;
-        mVertices.at(i2 + 8) = tangent.z;
+        mVertices.at(i0*mFloatsPerVertex + 6) = tangent.x;
+        mVertices.at(i0*mFloatsPerVertex + 7) = tangent.y;
+        mVertices.at(i0*mFloatsPerVertex + 8) = tangent.z;
+        mVertices.at(i1*mFloatsPerVertex + 6) = tangent.x;
+        mVertices.at(i1*mFloatsPerVertex + 7) = tangent.y;
+        mVertices.at(i1*mFloatsPerVertex + 8) = tangent.z;
+        mVertices.at(i2*mFloatsPerVertex + 6) = tangent.x;
+        mVertices.at(i2*mFloatsPerVertex + 7) = tangent.y;
+        mVertices.at(i2*mFloatsPerVertex + 8) = tangent.z;
 
-        mVertices.at(i0 + 9) = bitangent.x;
-        mVertices.at(i0 + 10) = bitangent.y;
-        mVertices.at(i0 + 11) = bitangent.z;
-        mVertices.at(i1 + 9) = bitangent.x;
-        mVertices.at(i1 + 10) = bitangent.y;
-        mVertices.at(i1 + 11) = bitangent.z;
-        mVertices.at(i2 + 9) = bitangent.x;
-        mVertices.at(i2 + 10) = bitangent.y;
-        mVertices.at(i2 + 11) = bitangent.z;
+        mVertices.at(i0*mFloatsPerVertex + 9) = bitangent.x;
+        mVertices.at(i0*mFloatsPerVertex + 10) = bitangent.y;
+        mVertices.at(i0*mFloatsPerVertex + 11) = bitangent.z;
+        mVertices.at(i1*mFloatsPerVertex + 9) = bitangent.x;
+        mVertices.at(i1*mFloatsPerVertex + 10) = bitangent.y;
+        mVertices.at(i1*mFloatsPerVertex + 11) = bitangent.z;
+        mVertices.at(i2*mFloatsPerVertex + 9) = bitangent.x;
+        mVertices.at(i2*mFloatsPerVertex + 10) = bitangent.y;
+        mVertices.at(i2*mFloatsPerVertex + 11) = bitangent.z;
 
+        /* std::cout << "tangent: x = " << tangent.x << ", y = " << tangent.y << ", z = " << tangent.z << std::endl; */
+        /* std::cout << "bitangent: x = " << bitangent.x << ", y = " << bitangent.y << ", z = " << bitangent.z << std::endl; */
     }
+
 }
 
 void Terrain::buildVBO()
@@ -520,11 +550,6 @@ void Terrain::buildVBO()
 
     mVertices.resize(mTotalVertices * mFloatsPerVertex);
     computeTerrainPositions();
-
-    if(mUseNormals)
-    {
-        computeTerrainNormals();
-    }
 
 }
 
@@ -666,8 +691,8 @@ void Terrain::updateArea( )
     if(offsetEnd >= mVertices.size()) offsetEnd = mVertices.size();
     unsigned int size = (mFloatsPerVertex + (offsetEnd - offset));
     /* std::cout << "buffer offset = " << offset << ", buffer end = " << offsetEnd << ", size = " << size << std::endl; */
+    if(mUseNormals) computeTerrainNormals(offset, offset + size);
     if(mUseNormalMap) computeTerrainTangents(offset, offset + size);
-    else if(mUseNormals) computeTerrainNormals(offset, offset + size);
 
 
     // Set new hights
@@ -739,12 +764,16 @@ void Terrain::setBuffers()
     GLint terrainBitangentAttrib = glGetAttribLocation(mShaderProgram, "vBitangent");
     GLint terrainUVAttrib = glGetAttribLocation(mShaderProgram, "vUV");
     muVPLocation = glGetUniformLocation(mShaderProgram, "uVPMatrix");
+    muVLocation = glGetUniformLocation(mShaderProgram, "uVMatrix");
     muInvViewLocation = glGetUniformLocation(mShaderProgram, "uInvViewMatrix");
     muHeightMapTerrainRatioLocation = glGetUniformLocation(mShaderProgram, "uHeightMapTerrainRatio");
     muDrawGridLocation = glGetUniformLocation(mShaderProgram, "uDrawGrid");
     muRayTerrainIntersectionLocation = glGetUniformLocation(mShaderProgram, "uRayTerrainIntersection");
     muEditLocation = glGetUniformLocation(mShaderProgram, "uEditMode");
     muModifyRadius = glGetUniformLocation(mShaderProgram, "uModifyRadius");
+    muCamPosLocation = glGetUniformLocation(mShaderProgram, "uCamPos");
+    muLightPosLocation = glGetUniformLocation(mShaderProgram, "uLightPos");
+
 
     //Generate & bind vao
     glGenVertexArrays(1, &mVao);
@@ -762,31 +791,27 @@ void Terrain::setBuffers()
     glEnableVertexAttribArray(terrainPosAttrib);
     glVertexAttribPointer(terrainPosAttrib, 3, GL_FLOAT, GL_FALSE, mFloatsPerVertex * sizeof(GLfloat), 0);
     /* glVertexAttribPointer(terrainPosAttrib, 3, GL_FLOAT, GL_FALSE, mElementsPerVertex * sizeof(glm::vec3), 0); */
-    if(mUseNormalMap)
-    {
-        // Normals
-        glEnableVertexAttribArray(terrainNormalAttrib);
-        glVertexAttribPointer(terrainNormalAttrib, 3, GL_FLOAT, GL_FALSE, mFloatsPerVertex * sizeof(GLfloat), reinterpret_cast<const GLvoid*>(3 * sizeof(GLfloat)));
-
-        // Tangents
-        glEnableVertexAttribArray(terrainTangentAttrib);
-        glVertexAttribPointer(terrainNormalAttrib, 3, GL_FLOAT, GL_FALSE, mFloatsPerVertex * sizeof(GLfloat), reinterpret_cast<const GLvoid*>(6 * sizeof(GLfloat)));
-
-        // Bitangents
-        glEnableVertexAttribArray(terrainBitangentAttrib);
-        glVertexAttribPointer(terrainNormalAttrib, 3, GL_FLOAT, GL_FALSE, mFloatsPerVertex * sizeof(GLfloat), reinterpret_cast<const GLvoid*>(9 * sizeof(GLfloat)));
-
-        // UV
-        glEnableVertexAttribArray(terrainUVAttrib);
-        glVertexAttribPointer(terrainNormalAttrib, 2, GL_FLOAT, GL_FALSE, mFloatsPerVertex * sizeof(GLfloat), reinterpret_cast<const GLvoid*>(12 * sizeof(GLfloat)));
-
-    }
-    else if(mUseNormals)
+    if(mUseNormals)
     {
         glEnableVertexAttribArray(terrainNormalAttrib);
         /* glVertexAttribPointer(terrainNormalAttrib, 3, GL_FLOAT, GL_FALSE, 12, reinterpret_cast<const GLvoid*>(mFloatsPerVertex/2 * mTotalVertices * sizeof(GLfloat))); */
         glVertexAttribPointer(terrainNormalAttrib, 3, GL_FLOAT, GL_FALSE, mFloatsPerVertex * sizeof(GLfloat), reinterpret_cast<const GLvoid*>(3 * sizeof(GLfloat)));
         /* glVertexAttribPointer(terrainNormalAttrib, 3, GL_FLOAT, GL_FALSE, mElementsPerVertex * sizeof(glm::vec3), reinterpret_cast<const GLvoid*>(sizeof(glm::vec3))); */
+    }
+    if(mUseNormalMap)
+    {
+        // Tangents
+        glEnableVertexAttribArray(terrainTangentAttrib);
+        glVertexAttribPointer(terrainTangentAttrib, 3, GL_FLOAT, GL_FALSE, mFloatsPerVertex * sizeof(GLfloat), reinterpret_cast<const GLvoid*>(6 * sizeof(GLfloat)));
+
+        // Bitangents
+        glEnableVertexAttribArray(terrainBitangentAttrib);
+        glVertexAttribPointer(terrainBitangentAttrib, 3, GL_FLOAT, GL_FALSE, mFloatsPerVertex * sizeof(GLfloat), reinterpret_cast<const GLvoid*>(9 * sizeof(GLfloat)));
+
+        // UV
+        glEnableVertexAttribArray(terrainUVAttrib);
+        glVertexAttribPointer(terrainUVAttrib, 2, GL_FLOAT, GL_FALSE, mFloatsPerVertex * sizeof(GLfloat), reinterpret_cast<const GLvoid*>(12 * sizeof(GLfloat)));
+
     }
 
     //Generate & bind ibo

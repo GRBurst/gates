@@ -133,7 +133,7 @@ void PerlinNoise::generateNoiseImage(){
 
 
 
-    std::cout << "perlinNoise: min = " << mMin << ", max = " << mMax << std::endl;
+    /* std::cout << "perlinNoise: min = " << mMin << ", max = " << mMax << std::endl; */
 }
 
 double PerlinNoise::fbm(double x, double y){
