@@ -20,22 +20,22 @@ SimplexNoise::~SimplexNoise()
 
 SimplexNoise::SimplexNoise(int x, int y, int seed) : PerlinNoise(x, y, seed)
 {
-
+	initPermutationTable();
 }
 
 SimplexNoise::SimplexNoise(int x, int y, int z, int seed) : PerlinNoise(x, y, z, seed)
 {
-
+	initPermutationTable();
 }
 
 SimplexNoise::SimplexNoise(int x, int y, int z, int u, int seed) : PerlinNoise(x, y, z, u, seed)
 {
-
+	initPermutationTable();
 }
 
 SimplexNoise::SimplexNoise(int x, int y, int z, int seed, int octaves, double frequency, double amplitude) : PerlinNoise(x, y, z, seed, octaves, frequency, amplitude)
 {
-
+	initPermutationTable();
 }
 
 double dot(std::vector<int> grad, double* x){
@@ -58,7 +58,6 @@ void SimplexNoise::initPermutationTable(){
 }
 
 void SimplexNoise::generateNoiseImage(){
-	initPermutationTable();
 	if (mUDim == 1){
 		for(int z = 0; z < mZDim; z++){
 			for(int y = 0; y < mYDim; y++){
@@ -120,6 +119,82 @@ void SimplexNoise::generateNoiseImage(){
 			}
 		}
 }
+
+void SimplexNoise::generateTileableNoiseImage(int dimensions){
+	switch (dimensions){
+	case 1:
+		mNoiseValues.resize(mXDim * mYDim * mZDim);
+		break;
+	case 2:
+		mNoiseValues.resize(mXDim * mYDim * mZDim);
+		break;
+	case 3:
+		mNoiseValues.resize(mXDim * mYDim * mZDim);
+		break;
+	}
+	if (mUDim > 1){
+		for(int z = 0; z < mZDim; z++){
+			for(int y = 0; y < mYDim; y++){
+				for(int x = 0; x < mXDim; x++){
+					float value = static_cast<float>(fbm(static_cast<double>(x), static_cast<double>(y), static_cast<double>(z)));
+					//value = value -floor(value);
+					mNoiseValues[z * mYDim * mXDim + y * mXDim + x] = value;
+	//				std::cout << value << std::endl;
+					if (value < mMin)
+						mMin = value;
+					if (value > mMax)
+						mMax = value;
+				}
+			}
+		}
+		if (mScaleZeroToOne){
+			mMax = mMax - mMin;
+			if (mMax != 0)
+			for(int z = 0; z < mZDim; z++){
+				for(int y = 0; y < mYDim; y++){
+					for(int x = 0; x < mXDim; x++){
+						mNoiseValues[z * mYDim * mXDim + y * mXDim + x] = (mNoiseValues[z * mYDim * mXDim + y * mXDim + x] - mMin) / mMax;
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		for(int z = 0; z < mZDim; z++){
+			for(int y = 0; y < mYDim; y++){
+				for(int x = 0; x < mXDim; x++){
+					float value = static_cast<float>(fbmTileableX(static_cast<double>(x), static_cast<double>(y), static_cast<double>(z)));
+					if (dimensions == 1)
+						mNoiseValues[z * mYDim * mXDim + y * mXDim + x] = value;
+					if (value < mMin)
+						mMin = value;
+					if (value > mMax)
+						mMax = value;
+
+				}
+			}
+		}
+
+
+		if (mScaleZeroToOne){
+			mMax = mMax - mMin;
+			if (mMax != 0)
+				for(int u = 0; u < mUDim; u++){
+					for(int z = 0; z < mZDim; z++){
+						for(int y = 0; y < mYDim; y++){
+							for(int x = 0; x < mXDim; x++){
+								mNoiseValues[u * mZDim * mYDim * mXDim + z * mYDim * mXDim + y * mXDim + x] = (mNoiseValues[u * mZDim * mYDim * mXDim + z * mYDim * mXDim + y * mXDim + x] - mMin) / mMax;
+
+							}
+						}
+					}
+				}
+			}
+		}
+
+}
+
 
 //void SimplexNoise::calculateNoiseValue(double x, double y){
 //
@@ -241,11 +316,17 @@ double SimplexNoise::calculateNoiseValue(double x, double y, double z, double u)
 	else ranks[3]++;
 	if(distances[0][2] > distances[0][3]) ranks[2]++;
 	else ranks[3]++;
-
+	int c1 = (distances[0][0] > distances[0][1]) ? 32 : 0;
+	int c2 = (distances[0][0] > distances[0][2]) ? 16 : 0;
+	int c3 = (distances[0][1] > distances[0][2]) ? 8 : 0;
+	int c4 = (distances[0][0] > distances[0][3]) ? 4 : 0;
+	int c5 = (distances[0][1] > distances[0][3]) ? 2 : 0;
+	int c6 = (distances[0][2] > distances[0][3]) ? 1 : 0;
+    int c = c1 + c2 + c3 + c4 + c5 + c6;
 	for (int i = 1; i < 4; i++){
 		for(int j = 0; j < 4; j++)
 		{
-			if (ranks[i] >= 4 - i)
+			if (simplex[c][j] >= 4 - i)
 				corners[i][j] = 1;
 			else
 				corners[i][j] = 0;
@@ -256,6 +337,7 @@ double SimplexNoise::calculateNoiseValue(double x, double y, double z, double u)
 	corners[4][1] = 1;
 	corners[4][2] = 1;
 	corners[4][3] = 1;
+
 
 	for (int i = 1; i < 5; i++){
 		for(int j = 0; j < 4; j++)
@@ -290,7 +372,24 @@ double SimplexNoise::calculateNoiseValue(double x, double y, double z, double u)
 	return 27.0 * final_sum;
 }
 
+double SimplexNoise::fbmTileableX(double x, double y, double z){
+	double result = 0.0;
+	double amp = mAmplitude;
+	x = x / (double)mXDim;
+	y = y / (double)mYDim;
+	z = z / (double)mZDim;
+	float frequency = mFrequency;
+	float multiplier = 1.0f / ( 2.0f * glm::pi<double>() );
+	for(int i = 0; i < mOctaves; i++){
+		result += calculateNoiseValue((std::cos(x * glm::pi<double>()))*frequency, (std::cos(y * 2.0 * glm::pi<double>()) * multiplier)*frequency, (std::sin(y * 2.0 * glm::pi<double>()) * multiplier) * frequency, z) * amp;
 
+
+		z *= 2.0;
+		frequency *= 2.0;
+		amp *= 0.5;
+	}
+	return result;
+}
 
 double SimplexNoise::fbm(double x, double y, double z, double u){
 	double result = 0.0;

@@ -33,8 +33,8 @@ void main()
 	vWindDirection = normalize(vWindDirection);
 	
 	
-	vec3 vec01 = gl_in[1].gl_Position.xyz - gl_in[0].gl_Position.xyz;
-	vec3 vec02 = gl_in[2].gl_Position.xyz - gl_in[0].gl_Position.xyz;
+	vec3 vec01 = gl_in[0].gl_Position.xyz - gl_in[1].gl_Position.xyz;
+	vec3 vec02 = gl_in[1].gl_Position.xyz - vec3(0, 1, 0);
 	vec3 normal = normalize(cross(vec01, vec02));
 	vec3 posBL = gl_in[0].gl_Position.xyz;
 	vec3 posBR = gl_in[1].gl_Position.xyz;
