@@ -30,6 +30,7 @@ out vec3 tangent_cs;
 out vec3 bitangent_cs;
 out vec3 normal_cs;
 out mat3 invTBN;
+out vec3 eyeDir_ws;
 
 float getHightScale()
 {
@@ -46,8 +47,9 @@ void calcTBN()
 
     vec4 light1_ws = vec4(uLightPos, 1.0f);
     vec4 camera_ws = vec4(uCamPos, 1.0f);
-    vec3 pos_cs = (uVMatrix * vec4(vPosition, 1.0f)).xyz;
+    eyeDir_ws = normalize(uCamPos - vPosition);
 
+    vec3 pos_cs = (uVMatrix * vec4(vPosition, 1.0f)).xyz;
     vec3 camera_cs = (uVMatrix * vec4(uCamPos, 1.0)).xyz;
     vec3 eyeDir_cs = camera_cs - pos_cs;
 
@@ -82,7 +84,7 @@ void main()
     //float height = 0.5;
     //fColor = vec3(height, height, height);
 
-    if (vHeight < 0.1) vHeight = 0.09;
+    if (vHeight/3.8 < 0.06) vHeight = 0.06*3.8;
     vec4 pos = uVPMatrix * vec4(vPosition.x, vHeight, vPosition.z, 1.0);
 
     fUV = vUV;

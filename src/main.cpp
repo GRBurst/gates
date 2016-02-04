@@ -415,7 +415,7 @@ int main()
     model.loadFile();
     model.setBuffers();
     model.setStandardUniformLocations();
-    vec3 sphereTranslation = vec3(0.0, 3.0, 0.0);
+    vec3 sphereTranslation = vec3(0.0, 10.0, 0.0);
     model.translate(sphereTranslation);
 
     // Main (frame) loop
