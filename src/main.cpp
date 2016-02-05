@@ -380,7 +380,7 @@ int main()
 
     // Skydome noise parameters
 
-    int noiseSkyDimX = 512, noiseSkyDimY = 512, noiseSkyDimZ = 32;
+    int noiseSkyDimX = 256, noiseSkyDimY = 256, noiseSkyDimZ = 32;
     seed = 123, octaves = 8, frequency = 6.0, amplitude = 2;
 
     // Setup noise for clouds
