@@ -196,6 +196,8 @@ void processInput()
     if(glfwGetKey(window, GLFW_KEY_A )  == GLFW_PRESS) camera.moveLeft( float(frameTime) );
     if(glfwGetKey(window, GLFW_KEY_D )  == GLFW_PRESS) camera.moveRight( float(frameTime) );
 
+    if(gEditMode > 1) camera.setHeight( pActiveTerrain->getHeightOfPosition(camera.getPosition()) + 0.5f );
+
 }
 
 glm::vec3 getWorldRayFromCursor(const double& screenPosX, const double& screenPosY)
@@ -500,11 +502,11 @@ int main()
 
         // Grass
         grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
-        grass.draw();
+        /* grass.draw(); */
 
         // Skydome
         glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         skydome.draw();
         skydome2.draw();
         skydome3.draw();
@@ -534,7 +536,7 @@ int main()
 
         // Grass
         grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
-        grass.draw();
+        /* grass.draw(); */
 
         // Skydome
         glEnable(GL_BLEND);
@@ -664,6 +666,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             {
                 gEditMode = (gEditMode + 1) % 3;
                 pActiveTerrain->unHighlightRay();
+                if(gEditMode == 2 ) camera.setCamSpeed( 0.1 );
+                else if(gEditMode == 0) camera.setCamSpeed( 10.1 );
             }
             break;
         case GLFW_KEY_I :

@@ -177,6 +177,27 @@ void Terrain::draw()
 /*
  * Public getters / setters
  */
+float Terrain::getHeightOfPosition(const glm::vec3& position) const
+{
+    glm::ivec2 indexCord0 = floor(getIndexCordFromTerrain(position));   // Bottom left
+    glm::ivec2 indexCord3 = ceil(getIndexCordFromTerrain(position));    // Top right
+    glm::ivec2 indexCord1 = glm::ivec2(indexCord0.x, indexCord3.y);     // Top left
+    glm::ivec2 indexCord2 = glm::ivec2(indexCord3.x, indexCord0.y);     // Bottom right
+
+    glm::vec3 cord0 = getTerrainPosition(indexCord0); // Bottom left
+    glm::vec3 cord1 = getTerrainPosition(indexCord1); // Top left
+    glm::vec3 cord2 = getTerrainPosition(indexCord2); // Bottom right
+    glm::vec3 cord3 = getTerrainPosition(indexCord3); // Top right
+
+    float dist0 = sqrt((position.x - cord0.x)*(position.x - cord0.x) + (position.z - cord0.z)*(position.z - cord0.z));
+    float dist1 = sqrt((position.x - cord1.x)*(position.x - cord1.x) + (position.z - cord1.z)*(position.z - cord1.z));
+    float dist2 = sqrt((position.x - cord2.x)*(position.x - cord2.x) + (position.z - cord2.z)*(position.z - cord2.z));
+    float dist3 = sqrt((position.x - cord3.x)*(position.x - cord3.x) + (position.z - cord3.z)*(position.z - cord3.z));
+
+    float interpolHeight = dist0 * cord0.y + dist1 * cord1.y + dist2 * cord2.y + dist3 * cord3.y;
+    return interpolHeight;
+}
+
 float Terrain::getHeightMapValue(const glm::ivec2& coordinate) const
 {
     return mNoiseValues.at((coordinate.y * (mNoise->getDimension()).x) + coordinate.x);

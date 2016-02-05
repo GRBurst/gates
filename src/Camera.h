@@ -36,6 +36,7 @@ class Camera
 
         void setCamSpeed(float multiplicator = 2.0) {this->mCamSpeed *= multiplicator; };
         void setPosition(glm::vec3 position) { this->mPos = position; };
+        void setHeight(float height) { this->mPos = glm::vec3(this->mPos.x, height, this->mPos.z); };
 
         // Calculatable matrizes from camera
         glm::mat3 getInvViewMatrix() const { return glm::inverse(glm::transpose(glm::mat3(getViewMatrix()))); };
