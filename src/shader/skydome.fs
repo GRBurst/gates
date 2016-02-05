@@ -15,22 +15,19 @@ void main()
  	float testVal = texture(textureSky, vec3(fUV, uTime / 64)).r;
  	/* color = mix(1.5*vec4(fUV.x * 0.71, 0.15 + fUV.x * 0.1 + fUV.x * 0.23, fUV.x * 0.23 + 0.66, 1.0), vec4(texture(textureSky, vec3(fUV, uTime / 64)).rrr, 1.0), 0.7); */
     if (uRadius > 82 ){
-    	color = mix(vec4(cos(fUV.x * 6.282) * 0.05 + 0.2314, cos(fUV.x * 6.282) * 0.12 + 0.4369, cos(fUV.x * 6.282) * 0.2666 + 0.7333, 1.0), vec4(texture(textureSky, vec3(fUV, uTime / 80)).rrr, 1.0), smoothstep(0.1, 0.8, testVal )); //*/color = vec4(c0s(fUV.x * 6.282) * 0.05 + 0.2314, cos(fUV.x * 6.282) * 0.12 + 0.4369, cos(fUV.x * 6.282) * 0.2666 + 0.7333, 1.0);
+    	color = mix(vec4(cos(fUV.x * 6.282) * 0.02 + 0.2314, cos(fUV.x * 6.282) * 0.08 + 0.4369, cos(fUV.x * 6.282) * 0.1666 + 0.8333, 1.0), vec4(texture(textureSky, vec3(fUV, uTime / 112)).rrr, 1.0), smoothstep(0.5, 0.9, testVal ));
+    	 //*/color = vec4(c0s(fUV.x * 6.282) * 0.05 + 0.2314, cos(fUV.x * 6.282) * 0.12 + 0.4369, cos(fUV.x * 6.282) * 0.2666 + 0.7333, 1.0);
     	
     //	color = mix(vec4(cos(fUV.x * 6.282) * 0.05 + 0.2314, cos(fUV.x * 6.282) * 0.12 + 0.4369, cos(fUV.x * 6.282) * 0.2666 + 0.7333, 1.0), vec4(texture(textureSky, vec3(fUV, uTime / 64)).rrr, 1), smoothstep(0.6, 0.9, texture(textureSky, vec3(fUV, uTime / 64)).r) );
     }
     else if (uRadius > 78)
     	{ 
-    		if (testVal < 0.5)
-    			discard;
-    		color = vec4(texture(textureSky, vec3(fUV, uTime / 96)).rrr, mix(0.5, 0.8, testVal));
+    		color = mix(vec4(cos(fUV.x * 6.282) * 0.02 + 0.2314, cos(fUV.x * 6.282) * 0.08 + 0.4369, cos(fUV.x * 6.282) * 0.1666 + 0.8333, 1.0), vec4(texture(textureSky, vec3(fUV, uTime / 128)).rrr, 0.8), smoothstep(0.6, 1.0, testVal ));
     		
     	}
     	else
     	{ 
-    		if (testVal < 0.3)
-    			discard;
-    		color = vec4(texture(textureSky, vec3(fUV, uTime / 64)).rrr, mix(0.3, 0.6, testVal));
+    		color = mix(vec4(cos(fUV.x * 6.282) * 0.02 + 0.2314, cos(fUV.x * 6.282) * 0.08 + 0.4369, cos(fUV.x * 6.282) * 0.1666 + 0.8333, 1.0), vec4(texture(textureSky, vec3(fUV, uTime / 96)).rrr, 0.5), smoothstep(0.5, 0.8, testVal ));
     		
     	}
     //color = mix(vec4(cos(fUV.x * 6.282) * 0.05 + 0.2314, cos(fUV.x * 6.282) * 0.12 + 0.4369, cos(fUV.x * 6.282) * 0.2666 + 0.7333, 1.0), vec4(0.8, 0.8, 0.8, 0.7), smoothstep(0.6, 0.9, texture(textureSky, vec3(fUV, uTime / 64)).r) );

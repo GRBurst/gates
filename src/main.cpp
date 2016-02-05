@@ -385,21 +385,13 @@ int main()
     // Skydome noise parameters
 
     int noiseSkyDimX = 256, noiseSkyDimY = 256, noiseSkyDimZ = 32;
-    seed = 123, octaves = 4, frequency = 4.0, amplitude = 4;
+    seed = 245, octaves = 4, frequency = 4.0, amplitude = 1;
 
     // Setup noise for clouds
     SimplexNoise pNoise3D(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
     pNoise3D.setOctavesFreqAmp(octaves, frequency, amplitude);
-    pNoise3D.setScale(false);
+    pNoise3D.setScale(true);
     pNoise3D.generateTileableNoiseImage(1);
-
-    noiseSkyDimZ = 16;
-    SimplexNoise pNoise3D2(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
-	pNoise3D2.setOctavesFreqAmp(octaves, frequency, amplitude);
-	pNoise3D2.setScale(false);
-	pNoise3D2.generateTileableNoiseImage(1);
-
-    pNoise3D.saveToFile("3DnoiseSimplex.tga");
 
     // Skydome initialization
     Skydome skydome(skydomeShaderProgram, &camera);
