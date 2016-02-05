@@ -129,6 +129,10 @@ void initOpenGL()
     glClearColor( 0.0, 0.0, 0.0, 1.0 );
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LESS );
+
+    glClearStencil(0x00);
+    glEnable(GL_STENCIL_TEST);
+
     glEnable(GL_CULL_FACE);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -452,29 +456,27 @@ int main()
         //update Frame
 
         // Clear buffers
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glStencilMask(0xFF);
+        glClearStencil(0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         glClearColor(0.0, 0.0, 0.0, 1.0);
 
         // Recalculate camera matrices
         camera.update();
 
+        /***************************************************
+         * Start rendering
+         ***************************************************/
 
-
-
-
-
-        // Enable stencil and automatically draw pattern
         pActivePortal->enableStencil();
 
-
-
-
-
-        // Draw around pattern (main scene, around portal)
+        /***************************************************
+         * Draw main scene
+         ***************************************************/
         pActivePortal->renderOutside();
 
-
         // Portal
+        pActivePortal->drawPortal();
         pInactivePortal->drawPortal();
 
         // Sphere
@@ -488,20 +490,20 @@ int main()
 
         // Grass
         grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
-        grass.draw();
+        /* grass.draw(); */
 
         // Skydome
         skydome.draw();
 
 
-
-
-        // Draw in stencil pattern (in portal)
+        /***************************************************
+         * Draw inside portal.
+         ***************************************************/
         pActivePortal->renderInside();
 
-
-
-
+        // Portal
+        pActivePortal->drawPortal();
+        pInactivePortal->drawPortal();
 
         // Sphere
         model.setProjection(camera.getProjectionMatrix());
@@ -514,16 +516,15 @@ int main()
 
         // Grass
         grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
-        grass.draw();
+        /* grass.draw(); */
 
         // Skydome
         skydome.draw();
 
 
-
-
-
-        // Disable stencil test
+        /***************************************************
+         * Disable stencil test and reset camera
+         ***************************************************/
         pActivePortal->disableStencil();
 
         // Do post rendering stuff (maybe shadowmaps etc. if enough spare time)

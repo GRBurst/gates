@@ -42,9 +42,9 @@ void Portal::init( Camera *const cam, Terrain *const activeTerrain, Terrain *con
     int x = hDim1(gen);
     int y = vDim1(gen);
     /* std::cout << "calc active terrain locations: x = " << x << ", y = " << y << std::endl; */
-    mPosition1 = glm::vec3(0.0, 1.0, 0.0) + activeTerrain->computePosition(x, y);
+    mPosition1 = glm::vec3(0.0, 0.0, 0.0) + activeTerrain->computePosition(x, y);
     /* setRotation(glm::vec3(0.0, deg(gen), 0.0)); */
-    setScale(glm::vec3(1.0, 2.0, 1.0));
+    setScale(glm::vec3(1.0, 1.0, 1.0));
     setTranslation(mPosition1);
 
     std::uniform_int_distribution<int> hDim2(0, inactiveTerrain->getWidth());
@@ -86,62 +86,42 @@ void Portal::setTransforms(glm::vec3 rot, glm::vec3 scale, glm::vec3 trans)
     setTranslation(trans);
 }
 
-void Portal::enableRenderStencilPattern()
-{
-    //Settings for init rendering coords for stencil buffer
-    glEnable(GL_STENCIL_TEST);
-    /* glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); */
-    /* glDepthMask(GL_FALSE); */
-    glStencilFunc(GL_NEVER, 1, 0xFF);
-    glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);  // draw 1s on test fail (always)
-
-    // draw stencil pattern
-    glStencilMask(0xFF);
-    glClear(GL_STENCIL_BUFFER_BIT);  // clear stencil buffer . needs mask=0xFF
-
-}
-
-void Portal::disableRenderStencilPattern()
-{
-    /* glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); */
-    /* glDepthMask(GL_TRUE); */
-    glStencilMask(0x00);
-}
-
-/* void Portal::substractStencil() */
-/* { */
-/*     glStencilFunc(GL_EQUAL, 1, 0xFF);   // drawing the scene . skip where stencil's value is 0 */
-/*     glStencilOp(GL_KEEP, GL_ZERO, GL_KEEP);  // draw 1s on test fail (always) */
-/*     glStencilMask(0xFF); */
-/* } */
-
-// Fist call: Renders stencil pattern
+// Fist call: Save masks
 void Portal::enableStencil()
 {
-    /* portal.draw( shaderProg , camera , glm::dvec3(pGame.portalPosition[pGame.portalIndicator]) ); */
-    enableRenderStencilPattern();
-    modelFill->setProjection(camera->getProjectionMatrix());
-    modelFill->setView(camera->getViewMatrix());
-    if(mStatus)  modelFill->draw();
-    /* modelFill->draw(); */
-    disableRenderStencilPattern();
+    glGetBooleanv(GL_COLOR_WRITEMASK, mColorMask);
+    glGetBooleanv(GL_DEPTH_WRITEMASK, &mDepthMask);
+
 }
 
-// Secound call: Render current scene/terrain around stencil
+// Secound call: Render current scene/terrain
 void Portal::renderOutside()
 {
-    /* disableRenderStencilPattern(); */
-    glStencilFunc(GL_EQUAL, 0, 0xFF);   // drawing the scene . skip where stencil's value is 0
-    drawPortal();
+    modelFill->setProjection(camera->getProjectionMatrix());
+    modelFill->setView(camera->getViewMatrix());
+
+    glStencilFunc(GL_ALWAYS, 0, 0xFF);
+    glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
+    glStencilMask(0xFF);
 }
 
 // Third call: Render next scene/terrain in the stencil
 void Portal::renderInside()
 {
-    // drawing the scene in coords where we filled the buffer . skip where stencil's value is != 0
-    glStencilFunc(GL_EQUAL, 1, 0xFF);
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+    glDepthMask(GL_FALSE);
+    glStencilFunc(GL_ALWAYS, 0, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+    glStencilMask(0xFF);
 
-    //viewMatrix = camera in current world
+    drawFill();
+
+    glColorMask(mColorMask[0], mColorMask[1], mColorMask[2], mColorMask[3]);
+    glDepthMask(mDepthMask);
+    glStencilFunc(GL_EQUAL, 1, 0xFF);
+    glStencilMask(0x00);
+    glClear( GL_DEPTH_BUFFER_BIT );
+
     mTmpCamPos = camera->getPosition();
     camera->setPosition(mPosition2-(mPosition1-mTmpCamPos));
     /* camera->rotate(glm::vec2(pActivePortal->getRotation2(), 0.0)); */
@@ -153,7 +133,7 @@ void Portal::disableStencil()
 {
     camera->setPosition(mTmpCamPos);
     camera->update();
-    glDisable(GL_STENCIL_TEST);
+    glStencilMask(0xFF);
 }
 
 
@@ -181,29 +161,4 @@ void Portal::teleport()
     setTranslation(mTrans2);
     /* std::cout << std::endl << "Portal " << mId << " teleportation" << std::endl; */
 }
-/* void Portal::draw(const ConstSharedShaderProgram& shaderProg, */
-/*                       const GenericCamera& camera, */
-/*                       const dvec3& translation, */
-/*                       const dvec3& rotation, */
-/*                       const dvec3& scaling) const { */
-        /* model.draw(shaderProg, camera, */
-        /*      translate( mat4(1.0f), vec3(translation) ) */
-        /*      * rotate( mat4(1.0f), static_cast<float>(rotation.z), vec3(0.0, 0.0, 1.0) ) */
-        /*      * rotate( mat4(1.0f), static_cast<float>(rotation.y), vec3(0.0, 1.0, 0.0) ) */
-        /*      * rotate( mat4(1.0f), static_cast<float>(rotation.x), vec3(1.0, 0.0, 0.0) ) */
-        /*      * scale( mat4(1.0f), vec3(scaling) )); */
-    /* } */
-
-/* void Portal::drawFill(const ConstSharedShaderProgram& shaderProg, */
-/*                       const GenericCamera& camera, */
-/*                       const dvec3& translation, */
-/*                       const dvec3& rotation, */
-/*                       const dvec3& scaling) const { */
-        /* model.drawFill(shaderProg, camera, */
-        /*      translate( mat4(1.0f), vec3(translation) ) */
-        /*      * rotate( mat4(1.0f), static_cast<float>(rotation.z), vec3(0.0, 0.0, 1.0) ) */
-        /*      * rotate( mat4(1.0f), static_cast<float>(rotation.y), vec3(0.0, 1.0, 0.0) ) */
-        /*      * rotate( mat4(1.0f), static_cast<float>(rotation.x), vec3(1.0, 0.0, 0.0) ) */
-        /*      * scale( mat4(1.0f), vec3(scaling) )); */
-    /* } */
 

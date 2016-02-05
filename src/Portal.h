@@ -68,6 +68,8 @@ private:
     ModelLoader *modelFill;
     Camera* camera;
     glm::vec3 mTmpCamPos;
+    GLboolean mColorMask[4];
+    GLboolean mDepthMask;
 
     /* void drawFill(); */
     /* void drawPortal(); */
