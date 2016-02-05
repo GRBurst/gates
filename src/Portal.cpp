@@ -13,6 +13,12 @@ Portal::Portal(const GLint& mShaderProgram)
 
 }
 
+Portal::~Portal()
+{
+    delete model;
+    delete modelFill;
+}
+
 void Portal::init( Camera *const cam, Terrain *const activeTerrain, Terrain *const inactiveTerrain )
 {
 

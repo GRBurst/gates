@@ -11,6 +11,7 @@ class Portal
 {
 public:
     Portal(const GLint& mShaderProgram);
+    ~Portal();
     void init( Camera *const cam, Terrain *const terrain1, Terrain *const terrain2);
     /* void loadPortal(); */
 

@@ -18,6 +18,9 @@ WorleyNoise::WorleyNoise()
     mNumDistF = 3;
 }
 
+WorleyNoise::~WorleyNoise()
+{}
+
 void WorleyNoise::generateNoiseImage()
 {
     float min = 10.0, max = 0.0;
@@ -88,12 +91,14 @@ bool WorleyNoise::saveToFile(const char* filename){
         file.write(bmp, sizeof(char)*mXDim*mYDim);
         file.close();
     }
-
-    else{
+    else
+    {
         std::cout << "Error TGA Save: File not found" << std::endl;
+        delete bmp;
         return false;
     }
 
+    delete bmp;
     return true;
 
 }

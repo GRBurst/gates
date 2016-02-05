@@ -586,7 +586,7 @@ bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pNextNoise
 
         delete pActiveNoise;
         pActiveNoise    = pNextNoise;
-        pNextNoise  = pNewNoise;
+        pNextNoise      = pNewNoise;
 
         std::cout << "Generate new terrain" << std::endl;
         Terrain* pNewTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pNextNoise);
@@ -595,7 +595,6 @@ bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pNextNoise
         pNewTerrain->build();
         pNewTerrain->genHeightMapTexture();
         pNewTerrain->saveNoiseToFile("newTerrain_noise.tga");
-        pNewTerrain->linkHeightMapTexture(terrainShaderProgram);
         pNewTerrain->linkHeightMapTexture(defaultShaderProgram);
         pNewTerrain->draw();
 

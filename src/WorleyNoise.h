@@ -23,6 +23,7 @@ class WorleyNoise : public Noise
             MANHATTEN,
         };
         WorleyNoise();
+        ~WorleyNoise();
         /* WorleyNoise(int xDim, int yDim, int zDim = 1); */
 
         /* void setParams() {}; */
@@ -36,7 +37,7 @@ class WorleyNoise : public Noise
         void setYDim(int yDim){ mYDim = yDim; };
         int getZDim();
         void setZDim(int zDim){ mZDim = zDim; };
-        
+
         float* getNoiseValues() {return mNoiseValues.data(); };
 
         /* void makeSomeNoise(Array_2D<float>& map, int zz); */
