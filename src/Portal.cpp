@@ -123,7 +123,9 @@ void Portal::renderInside()
     glClear( GL_DEPTH_BUFFER_BIT );
 
     mTmpCamPos = camera->getPosition();
+    mTmpNearPlane = camera->getNearPlane();
     camera->setPosition(mPosition2-(mPosition1-mTmpCamPos));
+    camera->setNearPlane(glm::length(mPosition1-mTmpCamPos));
     /* camera->rotate(glm::vec2(pActivePortal->getRotation2(), 0.0)); */
     camera->update();
 }
@@ -132,6 +134,7 @@ void Portal::renderInside()
 void Portal::disableStencil()
 {
     camera->setPosition(mTmpCamPos);
+    camera->setNearPlane(mTmpNearPlane);
     camera->update();
     glStencilMask(0xFF);
 }

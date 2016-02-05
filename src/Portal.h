@@ -68,6 +68,7 @@ private:
     ModelLoader *modelFill;
     Camera* camera;
     glm::vec3 mTmpCamPos;
+    float mTmpNearPlane;
     GLboolean mColorMask[4];
     GLboolean mDepthMask;
 
