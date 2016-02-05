@@ -28,6 +28,7 @@ class PerlinNoise : public Noise
 		~PerlinNoise();
         void printParams();
 		void generateNoiseImage();
+		void generateTileableNoiseImage(int dimensions);
 
 		double calculateNoiseValue(double x, double y);
 		double calculateNoiseValue(double x, double y, double z);

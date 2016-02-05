@@ -29,6 +29,7 @@ public:
 	SimplexNoise(int x, int y, int z, int u, int seed, int octaves, double frequency, double amplitude);
 	virtual ~SimplexNoise();
 	void generateNoiseImage();
+	void generateTileableNoiseImage(int dimensions);
 	double calculateNoiseValue(double x, double y);
 	double calculateNoiseValue(double x, double y, double z);
 	double calculateNoiseValue(double x, double y, double z, double w);
@@ -36,6 +37,7 @@ private:
 
 	double fbm(double x, double y, double z);
 	double fbm(double x, double y, double z, double u);
+	double fbmTileableX(double x, double y, double z);
 	void initPermutationTable();
 	int mSampleSize = 256;
 	int N = 4096;
@@ -50,6 +52,16 @@ private:
 		std::vector<int>{-1,1,0,1},std::vector<int>{-1,1,0,-1},std::vector<int>{-1,-1,0,1},std::vector<int>{-1,-1,0,-1},
 		std::vector<int>{1,1,1,0},std::vector<int>{1,1,-1,0},std::vector<int>{1,-1,1,0},std::vector<int>{1,-1,-1,0},
 		std::vector<int>{-1,1,1,0},std::vector<int>{-1,1,-1,0},std::vector<int>{-1,-1,1,0},std::vector<int>{-1,-1,-1,0}};
+	unsigned char simplex[64][4] = {
+	    {0,1,2,3},{0,1,3,2},{0,0,0,0},{0,2,3,1},{0,0,0,0},{0,0,0,0},{0,0,0,0},{1,2,3,0},
+	    {0,2,1,3},{0,0,0,0},{0,3,1,2},{0,3,2,1},{0,0,0,0},{0,0,0,0},{0,0,0,0},{1,3,2,0},
+	    {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
+	    {1,2,0,3},{0,0,0,0},{1,3,0,2},{0,0,0,0},{0,0,0,0},{0,0,0,0},{2,3,0,1},{2,3,1,0},
+	    {1,0,2,3},{1,0,3,2},{0,0,0,0},{0,0,0,0},{0,0,0,0},{2,0,3,1},{0,0,0,0},{2,1,3,0},
+	    {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
+	    {2,0,1,3},{0,0,0,0},{0,0,0,0},{0,0,0,0},{3,0,1,2},{3,0,2,1},{0,0,0,0},{3,1,2,0},
+	    {2,1,0,3},{0,0,0,0},{0,0,0,0},{0,0,0,0},{3,1,0,2},{0,0,0,0},{3,2,0,1},{3,2,1,0}};
+
 	//Skewing Factors
 	double F2 = (sqrt(3) - 1) / 2.0;
 	double G2 = (3 - sqrt(3))/ 6.0;

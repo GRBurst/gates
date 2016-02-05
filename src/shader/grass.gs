@@ -1,7 +1,7 @@
 #version 410 core
 
 layout (triangles) in;
-layout (triangle_strip, max_vertices = 12) out;
+layout (triangle_strip, max_vertices = 72) out;
 
 
 uniform mat4 gVP;
@@ -28,72 +28,348 @@ mat4 rotationMatrix(vec3 axis, float angle){
 
 void main()
 {
-	float fWindStrength = 0.15f;
+	float fWindStrength = 0.025f;
 	vec3 vWindDirection = vec3(1.0, 0.0, 1.0);
 	vWindDirection = normalize(vWindDirection);
 	
-	
-	vec3 vec01 = gl_in[1].gl_Position.xyz - gl_in[0].gl_Position.xyz;
-	vec3 vec02 = gl_in[2].gl_Position.xyz - gl_in[0].gl_Position.xyz;
-	vec3 normal = normalize(cross(vec01, vec02));
-	vec3 posBL = gl_in[0].gl_Position.xyz;
-	vec3 posBR = gl_in[1].gl_Position.xyz;
-	float heightDiff = abs(posBR.y - posBL.y);
-	if(posBL.y/3.8 > 0.06 && posBL.y/3.8 < 0.2)
+	float heightDiff = 0.0;//abs(gl_in[0].gl_Position.y - gl_in[1].gl_Position.y);
+	if(gl_in[0].gl_Position.y/3.8 > 0.06 && gl_in[0].gl_Position.y/3.8 < 0.2)
   	{
-  		for(int i = 0; i < gl_in.length(); i++){
-  			if(bool(gl_PrimitiveIDIn & 1)){
-	  			posBL = gl_in[int(mod(i, 3))].gl_Position.xyz;
-				posBR = gl_in[int(mod(i +1, 3))].gl_Position.xyz;
-		 		vec3 vBaseDirRotated = (rotationMatrix(vec3(0, 1, 0), sin(uTime*0.7f)*0.1f) * vec4(0.0, 1.0, 0.0, 1.0)).xyz;
-				float fWindPower = 0.5f+sin(posBL.x/30+posBL.z/30+uTime*(1.2f+fWindStrength/20.0f));
-				if(fWindPower < 0.0f)
-					fWindPower = fWindPower*0.2f;
-				else fWindPower = fWindPower*0.4f;
-		  		fWindPower *= fWindStrength;
-		
-		  		//BL
-				posBL.y += 0.3 * heightDiff;
-		  		//gl_Position = gVP * vec4(pos + vec3(0.01, 0.0, 0.01), 1.0);
-				gl_Position = gVP * vec4(posBL, 1.0);
-				texCoord = vec2(0.0, 0.0);
-				height = posBL.y; 
-				vec3 posTL = posBL + vWindDirection*fWindPower + vBaseDirRotated * 0.01f;
-		 		posTL.y = posBL.y + 0.25;
-		 		vNormal = posTL - posBL;
-		 		vPosition = vec3(gl_Position);
-		 		EmitVertex();
-		  		//TL
-		  		gl_Position = gVP * vec4(posTL, 1.0);
-				texCoord = vec2(0.0, 1.0);
-				height = posBL.y;
-				vPosition = vec3(gl_Position);
-				EmitVertex();
-				//BR
-				posBR.y += 0.3 * heightDiff;
-				vec3 posTR = posBR + vWindDirection*fWindPower + vBaseDirRotated * 0.01f;
-				//gl_Position = gVP * vec4(pos2 + vec3(0.01, 0.0, 0.01), 1.0);
-				texCoord = vec2(1.0, 0.0);
-				height = posBR.y;
-			    	
-			    posTR.y = posBR.y + 0.25;
-		  		gl_Position = gVP * vec4(posBR, 1.0);
-		  		vNormal = posTR - posBR;	  
-		  		vPosition = vec3(gl_Position);		
-				EmitVertex();
-				
-				//TR
-				
-				gl_Position = gVP * vec4(posTR, 1.0);
-				texCoord = vec2(1.0, 1.0);
-				height = posBR.y;
-				vPosition = vec3(gl_Position);
-				EmitVertex();
-		 		
-				EndPrimitive();
-		    }
+  		 	
+  		vec3 vBaseDirRotated = (rotationMatrix(vec3(0, 1, 0), sin(uTime*0.7f)*0.02f) * vec4(0.0, 1.0, 0.0, 1.0)).xyz;
+		vec3 pos = gl_in[0].gl_Position.xyz;		
+  		for(int i = 0; i < 3; i++){
+  		
+  			mat4 rot = rotationMatrix(vec3(0,1,0), 1.0471975512 * i);
+  			vec3 posBL = vec3(rot * vec4(-0.05, 0, 0, 1));
+			vec3 posBR =  vec3(rot * vec4(0.05, 0, 0, 1));
+  			posBL += pos;
+			posBR += pos;
+			float fWindPower = 0.5f+sin(posBL.x/30+posBL.z/30+uTime*(1.2f+fWindStrength/20.0f));
+			if(fWindPower < 0.0f)
+				fWindPower = fWindPower*0.2f;
+			else fWindPower = fWindPower*0.4f;
+	  		fWindPower *= fWindStrength;
+	
+	  		//BL
+			posBL.y += heightDiff;
+	  		//gl_Position = gVP * vec4(pos + vec3(0.01, 0.0, 0.01), 1.0);
+			gl_Position = gVP * vec4(posBL, 1.0);
+			texCoord = vec2(0.0, 0.0);
+			height = posBL.y; 
+			vec3 posTL = posBL + vWindDirection*fWindPower + vBaseDirRotated * 0.01f;
+	 		posTL.y = posBL.y + 0.1;
+	 		
+	 		vPosition = vec3(gl_Position);
+	 		EmitVertex();
+	  		//TL
+	  		gl_Position = gVP * vec4(posTL, 1.0);
+			texCoord = vec2(0.0, 1.0);
+			height = posBL.y;
+			vPosition = vec3(gl_Position);
+			EmitVertex();
+			//BR
+			posBR.y += heightDiff;
+			vec3 posTR = posBR + vWindDirection*fWindPower + vBaseDirRotated * 0.01f;
+			//gl_Position = gVP * vec4(pos2 + vec3(0.01, 0.0, 0.01), 1.0);
+			texCoord = vec2(1.0, 0.0);
+			height = posBR.y;
+		    	
+		    posTR.y = posBR.y + 0.1;
+	  		gl_Position = gVP * vec4(posBR, 1.0);
+	  			  
+	  		vPosition = vec3(gl_Position);		
+			EmitVertex();
+			
+			//TR
+			
+			gl_Position = gVP * vec4(posTR, 1.0);
+			texCoord = vec2(1.0, 1.0);
+			height = posBR.y;
+			vPosition = vec3(gl_Position);
+			EmitVertex();
+	 		
+			EndPrimitive();
+		    
+	    }
+	    pos = gl_in[1].gl_Position.xyz;
+	    for(int i = 0; i < 3; i++){
+  		
+  			mat4 rot = rotationMatrix(vec3(0,1,0), 1.0471975512 * i);
+  			vec3 posBL = vec3(rot * vec4(-0.05, 0, 0, 1));
+			vec3 posBR =  vec3(rot * vec4(0.05, 0, 0, 1));
+  			posBL += pos ;
+			posBR += pos ;
+			float fWindPower = 0.5f+sin(posBL.x/30+posBL.z/30+uTime*(1.2f+fWindStrength/20.0f));
+			if(fWindPower < 0.0f)
+				fWindPower = fWindPower*0.2f;
+			else fWindPower = fWindPower*0.4f;
+	  		fWindPower *= fWindStrength;
+	
+	  		//BL
+			posBL.y += heightDiff;
+	  		//gl_Position = gVP * vec4(pos + vec3(0.01, 0.0, 0.01), 1.0);
+			gl_Position = gVP * vec4(posBL, 1.0);
+			texCoord = vec2(0.0, 0.0);
+			height = posBL.y; 
+			vec3 posTL = posBL + vWindDirection*fWindPower + vBaseDirRotated * 0.01f;
+	 		posTL.y = posBL.y + 0.1;
+	 		
+	 		vPosition = vec3(gl_Position);
+	 		EmitVertex();
+	  		//TL
+	  		gl_Position = gVP * vec4(posTL, 1.0);
+			texCoord = vec2(0.0, 1.0);
+			height = posBL.y;
+			vPosition = vec3(gl_Position);
+			EmitVertex();
+			//BR
+			posBR.y += heightDiff;
+			vec3 posTR = posBR + vWindDirection*fWindPower + vBaseDirRotated * 0.01f;
+			//gl_Position = gVP * vec4(pos2 + vec3(0.01, 0.0, 0.01), 1.0);
+			texCoord = vec2(1.0, 0.0);
+			height = posBR.y;
+		    	
+		    posTR.y = posBR.y + 0.1;
+	  		gl_Position = gVP * vec4(posBR, 1.0);
+	  			  
+	  		vPosition = vec3(gl_Position);		
+			EmitVertex();
+			
+			//TR
+			
+			gl_Position = gVP * vec4(posTR, 1.0);
+			texCoord = vec2(1.0, 1.0);
+			height = posBR.y;
+			vPosition = vec3(gl_Position);
+			EmitVertex();
+	 		
+			EndPrimitive();
+		    
+	    }
+	    pos = gl_in[2].gl_Position.xyz;
+	    for(int i = 0; i < 3; i++){
+  		
+  			mat4 rot = rotationMatrix(vec3(0,1,0), 1.0471975512 * i);
+  			vec3 posBL = vec3(rot * vec4(-0.05, 0, 0, 1));
+			vec3 posBR =  vec3(rot * vec4(0.05, 0, 0, 1));
+  			posBL += pos ;
+			posBR += pos ;
+			float fWindPower = 0.5f+sin(posBL.x/30+posBL.z/30+uTime*(1.2f+fWindStrength/20.0f));
+			if(fWindPower < 0.0f)
+				fWindPower = fWindPower*0.2f;
+			else fWindPower = fWindPower*0.4f;
+	  		fWindPower *= fWindStrength;
+	
+	  		//BL
+			posBL.y += heightDiff;
+	  		//gl_Position = gVP * vec4(pos + vec3(0.01, 0.0, 0.01), 1.0);
+			gl_Position = gVP * vec4(posBL, 1.0);
+			texCoord = vec2(0.0, 0.0);
+			height = posBL.y; 
+			vec3 posTL = posBL + vWindDirection*fWindPower + vBaseDirRotated * 0.01f;
+	 		posTL.y = posBL.y + 0.1;
+	 		
+	 		vPosition = vec3(gl_Position);
+	 		EmitVertex();
+	  		//TL
+	  		gl_Position = gVP * vec4(posTL, 1.0);
+			texCoord = vec2(0.0, 1.0);
+			height = posBL.y;
+			vPosition = vec3(gl_Position);
+			EmitVertex();
+			//BR
+			posBR.y += heightDiff;
+			vec3 posTR = posBR + vWindDirection*fWindPower + vBaseDirRotated * 0.01f;
+			//gl_Position = gVP * vec4(pos2 + vec3(0.01, 0.0, 0.01), 1.0);
+			texCoord = vec2(1.0, 0.0);
+			height = posBR.y;
+		    	
+		    posTR.y = posBR.y + 0.1;
+	  		gl_Position = gVP * vec4(posBR, 1.0);
+	  			  
+	  		vPosition = vec3(gl_Position);		
+			EmitVertex();
+			
+			//TR
+			
+			gl_Position = gVP * vec4(posTR, 1.0);
+			texCoord = vec2(1.0, 1.0);
+			height = posBR.y;
+			vPosition = vec3(gl_Position);
+			EmitVertex();
+	 		
+			EndPrimitive();
+		    
 	    }
 
+		pos = ((gl_in[2].gl_Position.xyz - gl_in[1].gl_Position.xyz) + (gl_in[0].gl_Position.xyz - gl_in[1].gl_Position.xyz)) / 2  + gl_in[1].gl_Position.xyz;
+	    for(int i = 0; i < 3; i++){
+  		
+  			mat4 rot = rotationMatrix(vec3(0,1,0), 1.0471975512 * i);
+  			vec3 posBL = vec3(rot * vec4(-0.05, 0, 0, 1));
+			vec3 posBR =  vec3(rot * vec4(0.05, 0, 0, 1));
+  			posBL += pos ;
+			posBR += pos ;
+			float fWindPower = 0.5f+sin(posBL.x/30+posBL.z/30+uTime*(1.2f+fWindStrength/20.0f));
+			if(fWindPower < 0.0f)
+				fWindPower = fWindPower*0.2f;
+			else fWindPower = fWindPower*0.4f;
+	  		fWindPower *= fWindStrength;
+	
+	  		//BL
+			posBL.y += heightDiff;
+	  		//gl_Position = gVP * vec4(pos + vec3(0.01, 0.0, 0.01), 1.0);
+			gl_Position = gVP * vec4(posBL, 1.0);
+			texCoord = vec2(0.0, 0.0);
+			height = posBL.y; 
+			vec3 posTL = posBL + vWindDirection*fWindPower + vBaseDirRotated * 0.01f;
+	 		posTL.y = posBL.y + 0.1;
+	 		
+	 		vPosition = vec3(gl_Position);
+	 		EmitVertex();
+	  		//TL
+	  		gl_Position = gVP * vec4(posTL, 1.0);
+			texCoord = vec2(0.0, 1.0);
+			height = posBL.y;
+			vPosition = vec3(gl_Position);
+			EmitVertex();
+			//BR
+			posBR.y += heightDiff;
+			vec3 posTR = posBR + vWindDirection*fWindPower + vBaseDirRotated * 0.01f;
+			//gl_Position = gVP * vec4(pos2 + vec3(0.01, 0.0, 0.01), 1.0);
+			texCoord = vec2(1.0, 0.0);
+			height = posBR.y;
+		    	
+		    posTR.y = posBR.y + 0.1;
+	  		gl_Position = gVP * vec4(posBR, 1.0);
+	  			  
+	  		vPosition = vec3(gl_Position);		
+			EmitVertex();
+			
+			//TR
+			
+			gl_Position = gVP * vec4(posTR, 1.0);
+			texCoord = vec2(1.0, 1.0);
+			height = posBR.y;
+			vPosition = vec3(gl_Position);
+			EmitVertex();
+	 		
+			EndPrimitive();
+		    
+	    }
+	    pos = (gl_in[2].gl_Position.xyz - gl_in[1].gl_Position.xyz) / 2  + gl_in[1].gl_Position.xyz;
+	    for(int i = 0; i < 3; i++){
+  		
+  			mat4 rot = rotationMatrix(vec3(0,1,0), 1.0471975512 * i);
+  			vec3 posBL = vec3(rot * vec4(-0.05, 0, 0, 1));
+			vec3 posBR =  vec3(rot * vec4(0.05, 0, 0, 1));
+  			posBL += pos ;
+			posBR += pos ;
+			float fWindPower = 0.5f+sin(posBL.x/30+posBL.z/30+uTime*(1.2f+fWindStrength/20.0f));
+			if(fWindPower < 0.0f)
+				fWindPower = fWindPower*0.2f;
+			else fWindPower = fWindPower*0.4f;
+	  		fWindPower *= fWindStrength;
+	
+	  		//BL
+			posBL.y += heightDiff;
+	  		//gl_Position = gVP * vec4(pos + vec3(0.01, 0.0, 0.01), 1.0);
+			gl_Position = gVP * vec4(posBL, 1.0);
+			texCoord = vec2(0.0, 0.0);
+			height = posBL.y; 
+			vec3 posTL = posBL + vWindDirection*fWindPower + vBaseDirRotated * 0.01f;
+	 		posTL.y = posBL.y + 0.1;
+	 		
+	 		vPosition = vec3(gl_Position);
+	 		EmitVertex();
+	  		//TL
+	  		gl_Position = gVP * vec4(posTL, 1.0);
+			texCoord = vec2(0.0, 1.0);
+			height = posBL.y;
+			vPosition = vec3(gl_Position);
+			EmitVertex();
+			//BR
+			posBR.y += heightDiff;
+			vec3 posTR = posBR + vWindDirection*fWindPower + vBaseDirRotated * 0.01f;
+			//gl_Position = gVP * vec4(pos2 + vec3(0.01, 0.0, 0.01), 1.0);
+			texCoord = vec2(1.0, 0.0);
+			height = posBR.y;
+		    	
+		    posTR.y = posBR.y + 0.1;
+	  		gl_Position = gVP * vec4(posBR, 1.0);
+	  			  
+	  		vPosition = vec3(gl_Position);		
+			EmitVertex();
+			
+			//TR
+			
+			gl_Position = gVP * vec4(posTR, 1.0);
+			texCoord = vec2(1.0, 1.0);
+			height = posBR.y;
+			vPosition = vec3(gl_Position);
+			EmitVertex();
+	 		
+			EndPrimitive();
+		    
+	    }
+	    
+	    pos = (gl_in[0].gl_Position.xyz - gl_in[1].gl_Position.xyz) / 2  + gl_in[1].gl_Position.xyz;
+	    for(int i = 0; i < 3; i++){
+  		
+  			mat4 rot = rotationMatrix(vec3(0,1,0), 1.0471975512 * i);
+  			vec3 posBL = vec3(rot * vec4(-0.05, 0, 0, 1));
+			vec3 posBR =  vec3(rot * vec4(0.05, 0, 0, 1));
+  			posBL += pos ;
+			posBR += pos ;
+			float fWindPower = 0.5f+sin(posBL.x/30+posBL.z/30+uTime*(1.2f+fWindStrength/20.0f));
+			if(fWindPower < 0.0f)
+				fWindPower = fWindPower*0.2f;
+			else fWindPower = fWindPower*0.4f;
+	  		fWindPower *= fWindStrength;
+	
+	  		//BL
+			posBL.y += heightDiff;
+	  		//gl_Position = gVP * vec4(pos + vec3(0.01, 0.0, 0.01), 1.0);
+			gl_Position = gVP * vec4(posBL, 1.0);
+			texCoord = vec2(0.0, 0.0);
+			height = posBL.y; 
+			vec3 posTL = posBL + vWindDirection*fWindPower + vBaseDirRotated * 0.01f;
+	 		posTL.y = posBL.y + 0.1;
+	 		
+	 		vPosition = vec3(gl_Position);
+	 		EmitVertex();
+	  		//TL
+	  		gl_Position = gVP * vec4(posTL, 1.0);
+			texCoord = vec2(0.0, 1.0);
+			height = posBL.y;
+			vPosition = vec3(gl_Position);
+			EmitVertex();
+			//BR
+			posBR.y += heightDiff;
+			vec3 posTR = posBR + vWindDirection*fWindPower + vBaseDirRotated * 0.01f;
+			//gl_Position = gVP * vec4(pos2 + vec3(0.01, 0.0, 0.01), 1.0);
+			texCoord = vec2(1.0, 0.0);
+			height = posBR.y;
+		    	
+		    posTR.y = posBR.y + 0.1;
+	  		gl_Position = gVP * vec4(posBR, 1.0);
+	  			  
+	  		vPosition = vec3(gl_Position);		
+			EmitVertex();
+			
+			//TR
+			
+			gl_Position = gVP * vec4(posTR, 1.0);
+			texCoord = vec2(1.0, 1.0);
+			height = posBR.y;
+			vPosition = vec3(gl_Position);
+			EmitVertex();
+	 		
+			EndPrimitive();
+		    
+	    }
+	    
 	}
 	
 

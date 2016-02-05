@@ -41,8 +41,8 @@ void main()
 		discard;
 	if(fNewAlpha > 1.0f)
 		fNewAlpha = 1.0f;
-	float colorDeviation = 0.6f + ((height * 2) - 1) / 2.0f;	
-	vec3  mixedColor = vec3(texColor) * vec3(colorDeviation, colorDeviation, colorDeviation);
+	//float colorDeviation = 0.6f + ((height * 2) - 1) / 2.0f;	
+	vec3  mixedColor = mix(vec3(texColor), vec3(height, height, height), smoothstep(0.1, 0.4, texCoord.y));
     color = vec4(texColor.rgb, fNewAlpha);
     //color = vec4(texCoord, 1.0, 0.5);
 }
