@@ -14,7 +14,7 @@ void main()
  	//color = mix(vec4(texture(textureSky, f3DUV).r, texture(textureSky, f3DUV).r, texture(textureSky, f3DUV).r, 1.0), vec4(0.1, 0.22, 0.6, 1.0), 0.4 );
  	
  	/* color = mix(1.5*vec4(fUV.x * 0.71, 0.15 + fUV.x * 0.1 + fUV.x * 0.23, fUV.x * 0.23 + 0.66, 1.0), vec4(texture(textureSky, vec3(fUV, uTime / 64)).rrr, 1.0), 0.7); */
-    color = mix(vec4(0.2314, 0.5569, 0.7333, 1.0), vec4(0.8, 0.8, 0.8, 0.7), smoothstep(0.6, 0.9, texture(textureSky, vec3(fUV, uTime / 64)).r) );
+    color = mix(vec4(cos(fUV.x * 6.282) * 0.05 + 0.2314, cos(fUV.x * 6.282) * 0.12 + 0.4369, cos(fUV.x * 6.282) * 0.2666 + 0.7333, 1.0), vec4(0.8, 0.8, 0.8, 0.7), smoothstep(0.6, 0.9, texture(textureSky, vec3(fUV, uTime / 64)).r) );
     /* color = vec4(0.2314, 0.5569, 0.7333, 1.0); */
  	//color = vec4(fUV.x * 0.71, 0.15 + fUV.x * 0.3 + fUV.x * 0.23, fUV.x * 0.13 + 0.66, 1.0);
 }

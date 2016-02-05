@@ -13,7 +13,14 @@ out vec2 texCoord;
 out vec3 vColor;
 out vec3 vNormal;
 out vec3 vPosition;
+vec2 mod289(vec2 x)
+{
+    return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
 
+float rand(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
 mat4 rotationMatrix(vec3 axis, float angle){
 	axis = normalize(axis);
 	float sinVal = sin(angle);
@@ -31,11 +38,15 @@ void main()
 	float fWindStrength = 0.025f;
 	vec3 vWindDirection = vec3(1.0, 0.0, 1.0);
 	vWindDirection = normalize(vWindDirection);
-	
+	float rnd = rand(mod289(gl_in[0].gl_Position.xz));
+	float rnd1 = rand(mod289(gl_in[1].gl_Position.xz));
+	float rnd2 = rand(mod289(gl_in[2].gl_Position.xz));
 	float heightDiff = 0.0;//abs(gl_in[0].gl_Position.y - gl_in[1].gl_Position.y);
 	if(gl_in[0].gl_Position.y/3.8 > 0.06 && gl_in[0].gl_Position.y/3.8 < 0.2)
   	{
-  		 	
+		float rnd = rand(mod289(gl_in[0].gl_Position.xz));
+		float rnd1 = rand(mod289(gl_in[1].gl_Position.xz));
+		float rnd2 = rand(mod289(gl_in[2].gl_Position.xz));  		 	
   		vec3 vBaseDirRotated = (rotationMatrix(vec3(0, 1, 0), sin(uTime*0.7f)*0.02f) * vec4(0.0, 1.0, 0.0, 1.0)).xyz;
 		vec3 pos = gl_in[0].gl_Position.xyz;		
   		for(int i = 0; i < 3; i++){
@@ -203,7 +214,7 @@ void main()
 		    
 	    }
 
-		pos = ((gl_in[2].gl_Position.xyz - gl_in[1].gl_Position.xyz) + (gl_in[0].gl_Position.xyz - gl_in[1].gl_Position.xyz)) / 2  + gl_in[1].gl_Position.xyz;
+		pos = rnd*((gl_in[2].gl_Position.xyz - gl_in[1].gl_Position.xyz) + (gl_in[0].gl_Position.xyz - gl_in[1].gl_Position.xyz)) / 2  + gl_in[1].gl_Position.xyz;
 	    for(int i = 0; i < 3; i++){
   		
   			mat4 rot = rotationMatrix(vec3(0,1,0), 1.0471975512 * i);
@@ -258,7 +269,7 @@ void main()
 			EndPrimitive();
 		    
 	    }
-	    pos = (gl_in[2].gl_Position.xyz - gl_in[1].gl_Position.xyz) / 2  + gl_in[1].gl_Position.xyz;
+	    pos = rnd2*(gl_in[2].gl_Position.xyz - gl_in[1].gl_Position.xyz) / 2  + gl_in[1].gl_Position.xyz;
 	    for(int i = 0; i < 3; i++){
   		
   			mat4 rot = rotationMatrix(vec3(0,1,0), 1.0471975512 * i);
@@ -279,7 +290,7 @@ void main()
 			texCoord = vec2(0.0, 0.0);
 			height = posBL.y; 
 			vec3 posTL = posBL + vWindDirection*fWindPower + vBaseDirRotated * 0.01f;
-	 		posTL.y = posBL.y + 0.1;
+	 		posTL.y = posBL.y + 0.1  + 0.025 * rnd;
 	 		
 	 		vPosition = vec3(gl_Position);
 	 		EmitVertex();
@@ -296,7 +307,7 @@ void main()
 			texCoord = vec2(1.0, 0.0);
 			height = posBR.y;
 		    	
-		    posTR.y = posBR.y + 0.1;
+		    posTR.y = posBR.y + 0.1 + 0.025*rnd;
 	  		gl_Position = gVP * vec4(posBR, 1.0);
 	  			  
 	  		vPosition = vec3(gl_Position);		
@@ -314,7 +325,7 @@ void main()
 		    
 	    }
 	    
-	    pos = (gl_in[0].gl_Position.xyz - gl_in[1].gl_Position.xyz) / 2  + gl_in[1].gl_Position.xyz;
+	    pos = rnd1*(gl_in[0].gl_Position.xyz - gl_in[1].gl_Position.xyz) / 2  + gl_in[1].gl_Position.xyz;
 	    for(int i = 0; i < 3; i++){
   		
   			mat4 rot = rotationMatrix(vec3(0,1,0), 1.0471975512 * i);
