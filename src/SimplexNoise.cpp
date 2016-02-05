@@ -180,16 +180,15 @@ void SimplexNoise::generateTileableNoiseImage(int dimensions){
 		if (mScaleZeroToOne){
 			mMax = mMax - mMin;
 			if (mMax != 0)
-				for(int u = 0; u < mUDim; u++){
-					for(int z = 0; z < mZDim; z++){
-						for(int y = 0; y < mYDim; y++){
-							for(int x = 0; x < mXDim; x++){
-								mNoiseValues[u * mZDim * mYDim * mXDim + z * mYDim * mXDim + y * mXDim + x] = (mNoiseValues[u * mZDim * mYDim * mXDim + z * mYDim * mXDim + y * mXDim + x] - mMin) / mMax;
+				for(int z = 0; z < mZDim; z++){
+					for(int y = 0; y < mYDim; y++){
+						for(int x = 0; x < mXDim; x++){
+							mNoiseValues[z * mYDim * mXDim + y * mXDim + x] = (mNoiseValues[z * mYDim * mXDim + y * mXDim + x] - mMin) / mMax;
 
-							}
 						}
 					}
 				}
+
 			}
 		}
 

@@ -381,7 +381,7 @@ int main()
     // Skydome noise parameters
 
     int noiseSkyDimX = 256, noiseSkyDimY = 256, noiseSkyDimZ = 32;
-    seed = 123, octaves = 8, frequency = 6.0, amplitude = 2;
+    seed = 123, octaves = 8, frequency = 4.0, amplitude = 1;
 
     // Setup noise for clouds
     SimplexNoise pNoise3D(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
@@ -389,13 +389,31 @@ int main()
     pNoise3D.setScale(false);
     pNoise3D.generateTileableNoiseImage(1);
 
-    //pNoise3D.saveToFile("3DnoiseSimplex.tga");
+    noiseSkyDimZ = 16;
+    SimplexNoise pNoise3D2(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
+	pNoise3D2.setOctavesFreqAmp(octaves, frequency, amplitude);
+	pNoise3D2.setScale(true);
+	pNoise3D2.generateTileableNoiseImage(1);
+
+    pNoise3D.saveToFile("3DnoiseSimplex.tga");
 
     // Skydome initialization
     Skydome skydome(skydomeShaderProgram, &camera);
     skydome.generateGeometry(noiseDimX / 3, 32, 32);
     skydome.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
     skydome.setBuffers();
+
+    // Skydome 2 initialization
+	Skydome skydome2(skydomeShaderProgram, &camera);
+	skydome2.generateGeometry(noiseDimX / 3 - 5, 32, 32);
+	skydome2.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
+	skydome2.setBuffers();
+
+	// Skydome 3 initialization
+	Skydome skydome3(skydomeShaderProgram, &camera);
+	skydome3.generateGeometry(noiseDimX / 3 - 10, 32, 32);
+	skydome3.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
+	skydome3.setBuffers();
 
     // Clouds initialization
     Clouds clouds(cloudsShaderProgram, skydome.getCloudNumber(), skydome.getCloudAttributes(), &camera);
@@ -491,9 +509,12 @@ int main()
         grass.draw();
 
         // Skydome
+        glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         skydome.draw();
-
-
+        skydome2.draw();
+        skydome3.draw();
+        glDisable(GL_BLEND);
 
 
         // Draw in stencil pattern (in portal)
@@ -517,10 +538,12 @@ int main()
         grass.draw();
 
         // Skydome
-        skydome.draw();
-
-
-
+        glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		skydome.draw();
+		skydome2.draw();
+		skydome3.draw();
+		glDisable(GL_BLEND);
 
 
         // Disable stencil test
