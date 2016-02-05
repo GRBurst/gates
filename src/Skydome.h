@@ -45,8 +45,9 @@ private:
 	GLint mShaderProgram;
 	GLuint muVPLocation;
 	GLuint muInvViewLocation;
-	GLuint muTime;
+	GLuint muTime, muRadius;
 	Camera* camera;
+	float mRadius;
 	int verticesNumber, cloudNumber;
 	int mCloudSeed;
 	double mCloudProbability;

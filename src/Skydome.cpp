@@ -8,8 +8,8 @@
 #include "Skydome.h"
 
 Skydome::Skydome(GLint shaderProgram, Camera* camera) : mClouds(0), meshAttributes(0), cloudAttributes(0), mVao(0), mVbo(0), mShaderProgram(0),
-														muVPLocation(0), muInvViewLocation(0), muTime(0),
-														camera(0), verticesNumber(0), cloudNumber(0), mCloudSeed(212), mCloudProbability(0.35)
+														muVPLocation(0), muInvViewLocation(0), muTime(0), muRadius(0),
+														camera(0), mRadius(10), verticesNumber(0), cloudNumber(0), mCloudSeed(212), mCloudProbability(0.35)
 {
 	// TODO Auto-generated constructor stub
 	mShaderProgram = shaderProgram;
@@ -45,6 +45,7 @@ void Skydome::draw()
 
 	glUniformMatrix4fv(muVPLocation, 1, GL_FALSE, value_ptr(camera->getVPMatrix()));
 	glUniform1f(muTime, glfwGetTime());
+	glUniform1f(muRadius, mRadius);
 	glBindVertexArray(mVao);
 	glDrawArrays(GL_TRIANGLES, 0, verticesNumber );
 	glBindVertexArray(0);
@@ -56,6 +57,7 @@ void Skydome::generateGeometry(float r, int azimuths, int meridians)
 	float cloudHeightMin = 0.5f;
 	float cloudHeightMax = 0.75f * r;
 	//UV Generation is spherical
+	mRadius = r;
 	std::default_random_engine generator(mCloudSeed);
 	std::uniform_real_distribution<float> distribution (0.0, r / 5);
 	//meshAttributes.resize(azimuths * 30 + (meridians + 1) * azimuths * 30); //azimuths * 2 * 3 * ( 3+ 2) + (meridians - 2) * azimuths * 6 * (3 + 2)
@@ -186,7 +188,7 @@ void Skydome::setBuffers()
 	muVPLocation = glGetUniformLocation(mShaderProgram, "uVPMatrix");
 	muInvViewLocation = glGetUniformLocation(mShaderProgram, "uInvViewMatrix");
 	muTime = glGetUniformLocation(mShaderProgram, "uTime");
-
+	muRadius = glGetUniformLocation(mShaderProgram, "uRadius");
 	glGenVertexArrays(1, &mVao);
 	glBindVertexArray(mVao);
 
