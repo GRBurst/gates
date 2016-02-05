@@ -129,6 +129,10 @@ void initOpenGL()
     glClearColor( 0.0, 0.0, 0.0, 1.0 );
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LESS );
+
+    glClearStencil(0x00);
+    glEnable(GL_STENCIL_TEST);
+
     glEnable(GL_CULL_FACE);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -381,7 +385,7 @@ int main()
     // Skydome noise parameters
 
     int noiseSkyDimX = 256, noiseSkyDimY = 256, noiseSkyDimZ = 32;
-    seed = 123, octaves = 8, frequency = 4.0, amplitude = 1;
+    seed = 123, octaves = 4, frequency = 4.0, amplitude = 4;
 
     // Setup noise for clouds
     SimplexNoise pNoise3D(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
@@ -392,7 +396,7 @@ int main()
     noiseSkyDimZ = 16;
     SimplexNoise pNoise3D2(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
 	pNoise3D2.setOctavesFreqAmp(octaves, frequency, amplitude);
-	pNoise3D2.setScale(true);
+	pNoise3D2.setScale(false);
 	pNoise3D2.generateTileableNoiseImage(1);
 
     pNoise3D.saveToFile("3DnoiseSimplex.tga");
@@ -470,29 +474,27 @@ int main()
         //update Frame
 
         // Clear buffers
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glStencilMask(0xFF);
+        glClearStencil(0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         glClearColor(0.0, 0.0, 0.0, 1.0);
 
         // Recalculate camera matrices
         camera.update();
 
+        /***************************************************
+         * Start rendering
+         ***************************************************/
 
-
-
-
-
-        // Enable stencil and automatically draw pattern
         pActivePortal->enableStencil();
 
-
-
-
-
-        // Draw around pattern (main scene, around portal)
+        /***************************************************
+         * Draw main scene
+         ***************************************************/
         pActivePortal->renderOutside();
 
-
         // Portal
+        pActivePortal->drawPortal();
         pInactivePortal->drawPortal();
 
         // Sphere
@@ -518,11 +520,16 @@ int main()
 
 
         // Draw in stencil pattern (in portal)
+
+
+        /***************************************************
+         * Draw inside portal.
+         ***************************************************/
         pActivePortal->renderInside();
 
-
-
-
+        // Portal
+        pActivePortal->drawPortal();
+        pInactivePortal->drawPortal();
 
         // Sphere
         model.setProjection(camera.getProjectionMatrix());
@@ -547,6 +554,11 @@ int main()
 
 
         // Disable stencil test
+
+
+        /***************************************************
+         * Disable stencil test and reset camera
+         ***************************************************/
         pActivePortal->disableStencil();
 
         // Do post rendering stuff (maybe shadowmaps etc. if enough spare time)
