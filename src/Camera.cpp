@@ -11,7 +11,7 @@ Camera::Camera() :
     , mVerticalAngle(0.0f)
     /* , mDeltaTime(0.0) */
     , mMouseSpeed(0.001f)
-    , mCamSpeed(0.1f)
+    , mCamSpeed(1.0f)
 {
 }
 
