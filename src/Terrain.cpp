@@ -39,6 +39,10 @@ Terrain::Terrain(GLint shaderProgram, unsigned int xDim, unsigned int zDim, Came
 
 Terrain::~Terrain()
 {
+    glBindVertexArray(mVao);
+    glDeleteBuffers(1, &mVbo);
+    glDeleteBuffers(1, &mIbo);
+    glDeleteVertexArrays(1, &mVao);
 }
 
 /*
