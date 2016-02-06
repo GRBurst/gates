@@ -49,6 +49,7 @@ class Terrain {
         float getTerrainHeight(const glm::ivec2& coordinate) const;
         glm::vec3 getTerrainPosition(const glm::ivec2& coordinate) const;
         glm::vec2 getIndexCordFromTerrain(const glm::vec3& position) const;
+        float getHeightOfPosition(const glm::vec3& position) const;
 
         glm::vec3 computePosition(unsigned int x, unsigned int y) const;
         void modifyHeight();
