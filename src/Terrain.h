@@ -37,6 +37,8 @@ class Terrain {
         void enableNormals();
         void enableNormalMap();
         void draw();
+        void draw(const GLint& shader);
+        void loadGBufferMaps(const GLint& shader);
 
         // Getters / setters
         unsigned int getWidth() const { return mXDim; };

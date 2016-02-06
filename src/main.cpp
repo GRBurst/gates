@@ -292,6 +292,12 @@ int main()
     terrainShader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT);
     GLint terrainShaderProgram = terrainShader.linkShaders();
 
+    // gBuffer
+    Shader gBufferShader;
+    gBufferShader.loadShader("../src/shader/gBuffer.vs", Shader::VERTEX);
+    gBufferShader.loadShader("../src/shader/gBuffer.fs", Shader::FRAGMENT);
+    GLint gBufferShaderProgram = gBufferShader.linkShaders();
+
     // Skydom
     Shader skydomeShader;
     skydomeShader.loadShader("../src/shader/skydome.vs", Shader::VERTEX);
@@ -402,16 +408,16 @@ int main()
     skydome.setBuffers();
 
     // Skydome 2 initialization
-	Skydome skydome2(skydomeShaderProgram, &camera);
-	skydome2.generateGeometry(noiseDimX / 3 - 5, 32, 32);
-	skydome2.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
-	skydome2.setBuffers();
+    Skydome skydome2(skydomeShaderProgram, &camera);
+    skydome2.generateGeometry(noiseDimX / 3 - 5, 32, 32);
+    skydome2.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
+    skydome2.setBuffers();
 
-	// Skydome 3 initialization
-	Skydome skydome3(skydomeShaderProgram, &camera);
-	skydome3.generateGeometry(noiseDimX / 3 - 10, 32, 32);
-	skydome3.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
-	skydome3.setBuffers();
+    // Skydome 3 initialization
+    Skydome skydome3(skydomeShaderProgram, &camera);
+    skydome3.generateGeometry(noiseDimX / 3 - 10, 32, 32);
+    skydome3.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
+    skydome3.setBuffers();
 
     // Clouds initialization
     Clouds clouds(cloudsShaderProgram, skydome.getCloudNumber(), skydome.getCloudAttributes(), &camera);
@@ -433,6 +439,100 @@ int main()
     model.setStandardUniformLocations();
     vec3 sphereTranslation = vec3(0.0, 10.0, 0.0);
     model.translate(sphereTranslation);
+
+    /*
+     * MRT for deferred shading
+     */
+    // Properties
+    const GLuint SCR_WIDTH = 800, SCR_HEIGHT = 600;
+
+    GLuint gBuffer;
+    glGenFramebuffers(1, &gBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+    GLuint gPosition, gNormal, gAlbedo;//gAlbedoSpec;
+
+    // G-Buffer
+    pActiveTerrain->loadGBufferMaps(gBufferShaderProgram);
+
+    // - Position color buffer
+    glGenTextures(1, &gPosition);
+    glBindTexture(GL_TEXTURE_2D, gPosition);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
+
+    // - Normal color buffer
+    glGenTextures(1, &gNormal);
+    glBindTexture(GL_TEXTURE_2D, gNormal);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
+
+    // - Color buffer
+    glGenTextures(1, &gAlbedo);
+    glBindTexture(GL_TEXTURE_2D, gAlbedo);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedo, 0);
+
+    /* // - Specular color buffer */
+    /* glGenTextures(1, &gAlbedoSpec); */
+    /* glBindTexture(GL_TEXTURE_2D, gAlbedoSpec); */
+    /* glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL); */
+    /* glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); */
+    /* glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); */
+    /* glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, gAlbedoSpec, 0); */
+
+
+    // - Tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
+    GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+    glDrawBuffers(3, attachments);
+
+    // - Create and attach depth buffer (renderbuffer)
+    GLuint gDepth;
+    glGenRenderbuffers(1, &gDepth);
+    glBindRenderbuffer(GL_RENDERBUFFER, gDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, gDepth);
+    // - Finally check if framebuffer is complete
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "Framebuffer not complete!" << std::endl;
+
+
+    // Bind normal / output framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // Test Textures
+    static const GLfloat g_quad_vertex_buffer_data[] = {
+        -1.0f, -1.0f, 0.0f,
+        1.0f, -1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f,
+        1.0f, -1.0f, 0.0f,
+        1.0f,  1.0f, 0.0f,
+    };
+
+    GLuint quad_vertexbuffer;
+    glGenBuffers(1, &quad_vertexbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+
+    // Test shader: quad
+    Shader quadShader;
+    quadShader.loadShader("../src/shader/quad.vs", Shader::VERTEX);
+    quadShader.loadShader("../src/shader/quad.fs", Shader::FRAGMENT);
+    GLint quadShaderProgram = quadShader.linkShaders();
+    glUseProgram(quadShaderProgram);
+
+    GLuint texID = glGetUniformLocation(quadShaderProgram, "renderedTexture");
+    GLuint timeID = glGetUniformLocation(quadShaderProgram, "time");
+
+
+
+
 
     // Main (frame) loop
     float oldTime, newTime;
@@ -468,10 +568,10 @@ int main()
         //update Frame
 
         // Clear buffers
-        glStencilMask(0xFF);
-        glClearStencil(0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        glClearColor(0.0, 0.0, 0.0, 1.0);
+        /* glStencilMask(0xFF); */
+        /* glClearStencil(0); */
+        /* glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); */
+        /* glClearColor(0.0, 0.0, 0.0, 1.0); */
 
         // Recalculate camera matrices
         camera.update();
@@ -480,80 +580,190 @@ int main()
          * Start rendering
          ***************************************************/
 
-        pActivePortal->enableStencil();
+        /***************************************************
+         * Deferred shading preparitions
+         ***************************************************/
+        glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+        glViewport(0,0,wWidth,wHeight);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Portal
+        /* pActivePortal->drawPortal(); */
+        /* pInactivePortal->drawPortal(); */
+
+        // Sphere
+        /* model.setProjection(camera.getProjectionMatrix()); */
+        /* model.setView(camera.getViewMatrix()); */
+        /* model.draw(); */
+        glUseProgram(gBufferShaderProgram);
+
+        // Active terrain
+        pActiveTerrain->setGrid(gDrawGrid);
+        pActiveTerrain->draw(gBufferShaderProgram);
+
+        // Grass
+        /* grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix()); */
+        /* grass.draw(); */
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        //glDisable(GL_DEPTH_TEST);
+        glViewport(0,0,wWidth,wHeight);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glUseProgram(quadShaderProgram);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, gAlbedo);
+        glUniform1i(texID, 0);
+        glUniform1f(timeID, (float)(glfwGetTime()*10.0f) );
+        glUniformMatrix4fv(glGetUniformLocation(quadShaderProgram, "uVPMatrix"), 1, GL_FALSE, value_ptr(camera.getVPMatrix()));
+
+
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+        glVertexAttribPointer(
+                0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+                3,                  // size
+                GL_FLOAT,           // type
+                GL_FALSE,           // normalized?
+                0,                  // stride
+                (void*)0            // array buffer offset
+                );
+
+        // Draw the triangles !
+        glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
+
+        glDisableVertexAttribArray(0);
+        //glEnable(GL_DEPTH_TEST);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         /***************************************************
          * Draw main scene
          ***************************************************/
-        pActivePortal->renderOutside();
+        /* glBindFramebuffer(GL_FRAMEBUFFER, 0); */
+        /* glStencilMask(0xFF); */
+        /* glClearStencil(0); */
+        /* glClearColor(0.0, 0.0, 0.0, 1.0); */
+        /* glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); */
 
-        // Portal
-        pActivePortal->drawPortal();
-        pInactivePortal->drawPortal();
+        /* pActivePortal->enableStencil(); */
+        /* pActivePortal->renderOutside(); */
 
-        // Sphere
-        model.setProjection(camera.getProjectionMatrix());
-        model.setView(camera.getViewMatrix());
-        model.draw();
+        /* // Portal */
+        /* pActivePortal->drawPortal(); */
+        /* pInactivePortal->drawPortal(); */
 
-        // Active terrain
-        pActiveTerrain->setGrid(gDrawGrid);
-        pActiveTerrain->draw();
+        /* // Sphere */
+        /* model.setProjection(camera.getProjectionMatrix()); */
+        /* model.setView(camera.getViewMatrix()); */
+        /* model.draw(); */
 
-        // Grass
-        grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
-        grass.draw();
+        /* // Active terrain */
+        /* pActiveTerrain->setGrid(gDrawGrid); */
+        /* pActiveTerrain->draw(); */
 
-        // Skydome
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        skydome.draw();
-        skydome2.draw();
-        skydome3.draw();
-        glDisable(GL_BLEND);
+        /* // Grass */
+        /* grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix()); */
+        /* /1* grass.draw(); *1/ */
+
+        /* // Skydome */
+        /* glEnable(GL_BLEND); */
+        /* glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); */
+        /* skydome.draw(); */
+        /* skydome2.draw(); */
+        /* skydome3.draw(); */
+        /* glDisable(GL_BLEND); */
 
 
-        // Draw in stencil pattern (in portal)
+        /* // Draw in stencil pattern (in portal) */
 
 
         /***************************************************
          * Draw inside portal.
          ***************************************************/
-        pActivePortal->renderInside();
+        /* pActivePortal->renderInside(); */
 
-        // Portal
-        pActivePortal->drawPortal();
-        pInactivePortal->drawPortal();
+        /* // Portal */
+        /* pActivePortal->drawPortal(); */
+        /* pInactivePortal->drawPortal(); */
 
-        // Sphere
-        model.setProjection(camera.getProjectionMatrix());
-        model.setView(camera.getViewMatrix());
-        model.draw();
+        /* // Sphere */
+        /* model.setProjection(camera.getProjectionMatrix()); */
+        /* model.setView(camera.getViewMatrix()); */
+        /* model.draw(); */
 
-        // Inactive or next terrain
-        pNextTerrain->setGrid(gDrawGrid);
-        pNextTerrain->draw();
+        /* // Inactive or next terrain */
+        /* pNextTerrain->setGrid(gDrawGrid); */
+        /* pNextTerrain->draw(); */
 
-        // Grass
-        grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
-        grass.draw();
+        /* // Grass */
+        /* grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix()); */
+        /* /1* grass.draw(); *1/ */
 
-        // Skydome
-        glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		skydome.draw();
-		skydome2.draw();
-		skydome3.draw();
-		glDisable(GL_BLEND);
+        /* // Skydome */
+        /* glEnable(GL_BLEND); */
+        /* glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); */
+        /* skydome.draw(); */
+        /* skydome2.draw(); */
+        /* skydome3.draw(); */
+        /* glDisable(GL_BLEND); */
 
 
-        // Disable stencil test
+        /* // Disable stencil test */
 
 
         /***************************************************
          * Disable stencil test and reset camera
          ***************************************************/
-        pActivePortal->disableStencil();
+        /* pActivePortal->disableStencil(); */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         // Do post rendering stuff (maybe shadowmaps etc. if enough spare time)
 

@@ -3,6 +3,7 @@
 
 Camera::Camera() :
     mPos(glm::vec3(0.0f, 1.0f, 0.0f))
+    , mViewDir(glm::vec3(0.0f, 0.0f, -1.0f))
     , mNearPlane(0.1f)
     , mFarPlane(1000.0f)
     , mHFoV(45.0f)
@@ -36,10 +37,11 @@ void Camera::calcViewMatrix()
         );
 }
 
-void Camera::update()
+void Camera::update(int mode)
 {
-    calcViewMatrix();
-    calcProjectionMatrix();
+    if(mode < 1) calcViewDirection();
+    if(mode < 2) calcViewMatrix();
+    if(mode < 3) calcProjectionMatrix();
     mViewProjectionMatrix = mProjectionMatrix * mViewMatrix;
 }
 
@@ -62,13 +64,18 @@ glm::vec3 Camera::getRight() const
         ));
 }
 
-glm::vec3 Camera::getViewDirection() const
+void Camera::calcViewDirection()
 {
-    return glm::normalize(glm::vec3(
+    mViewDir = glm::normalize(glm::vec3(
             cos(this->mVerticalAngle) * sin(this->mHorizontalAngle),
             sin(this->mVerticalAngle),
             cos(this->mVerticalAngle) * cos(this->mHorizontalAngle)
         ));
+}
+
+glm::vec3 Camera::getViewDirection() const
+{
+    return mViewDir;
 }
 
 glm::vec3 Camera::getUp() const
