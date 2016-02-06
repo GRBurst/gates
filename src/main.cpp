@@ -502,7 +502,7 @@ int main()
 
         // Grass
         grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
-        /* grass.draw(); */
+        grass.draw();
 
         // Skydome
         glEnable(GL_BLEND);
@@ -536,7 +536,7 @@ int main()
 
         // Grass
         grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
-        /* grass.draw(); */
+        grass.draw();
 
         // Skydome
         glEnable(GL_BLEND);

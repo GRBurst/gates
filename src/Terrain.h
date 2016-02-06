@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <GLFW/glfw3.h>
 #include "Camera.h"
 #include "Noise.h"
 #include "Texture.h"
@@ -149,7 +150,7 @@ class Terrain {
         GLint muCamPosLocation;
         glm::vec3 mLightPos;
         GLint muLightPosLocation;
-
+        GLint muTimeLocation;
         /* float minPos, posRange; */
         typedef struct
         {

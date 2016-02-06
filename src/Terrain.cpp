@@ -141,7 +141,7 @@ void Terrain::draw()
     glUniform3f(muLightPosLocation, mLightPos.x, mLightPos.y, mLightPos.z);
     glUniform1f(muEditLocation, mEditMode);
     glUniform1f(muModifyRadius, mModifyRadius);
-
+    glUniform1f(muTimeLocation, glfwGetTime());
     // Bind Attributes
     glBindVertexArray(mVao);
 
@@ -804,7 +804,7 @@ void Terrain::setBuffers()
     muModifyRadius = glGetUniformLocation(mShaderProgram, "uModifyRadius");
     muCamPosLocation = glGetUniformLocation(mShaderProgram, "uCamPos");
     muLightPosLocation = glGetUniformLocation(mShaderProgram, "uLightPos");
-
+    muTimeLocation = glGetUniformLocation(mShaderProgram, "uTime");
 
     //Generate & bind vao
     glGenVertexArrays(1, &mVao);
