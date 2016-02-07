@@ -6,6 +6,7 @@ layout (location = 3) in vec3 vBitangent;
 layout (location = 4) in vec2 vUV;
 
 out vec3 wPos;
+out vec3 fPos;
 out vec2 fUV;
 out vec3 fNormal;
 out mat3 fTBN;
@@ -41,9 +42,11 @@ mat3 calcTBN()
 void main()
 {
     wPos = vPosition;
+    fPos = mat3(uVMatrix) * vPosition;
     fUV = vUV;
     fNormal = vNormal;
     gl_Position = uVPMatrix * vec4(vPosition, 1.0);
 
+    fTBN = mat3(1.0);
     //mat3 fTBN = calcTBN();
 }

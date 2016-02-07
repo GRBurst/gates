@@ -5,6 +5,7 @@
 #include <chrono>
 
 /* #include "inputCallback.h" */
+#include "AmbientOcclusion.h"
 #include "Camera.h"
 #include "Clouds.h"
 #include "DeferredShading.h"
@@ -13,6 +14,7 @@
 #include "ModelLoader.h"
 #include "PerlinNoise.h"
 #include "Portal.h"
+#include "Quad.h"
 #include "Shader.h"
 #include "SimplexNoise.h"
 #include "Skydome.h"
@@ -42,7 +44,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_callback(GLFWwindow* window, double mouseXPosition, double mouseYPosition);
 bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pNextNoise, Terrain*& pActiveTerrain, Terrain*& pNextTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, Grass& grass, const GLint& terrainShaderProgram, const GLint& defaultShaderProgram);
-void RenderQuad();
 
 void debugCallback(GLenum source, GLenum type, GLuint id,
                    GLenum severity, GLsizei length,
@@ -308,6 +309,18 @@ int main()
     deferredShadingShader.loadShader("../src/shader/deferredShading.fs", Shader::FRAGMENT);
     GLint deferredShadingShaderProgram = deferredShadingShader.linkShaders();
 
+    // ambient occlusion
+    Shader ambientOcclusionShader;
+    ambientOcclusionShader.loadShader("../src/shader/ambientOcclusion.vs", Shader::VERTEX);
+    ambientOcclusionShader.loadShader("../src/shader/ambientOcclusion.fs", Shader::FRAGMENT);
+    GLint ambientOcclusionShaderProgram = ambientOcclusionShader.linkShaders();
+
+    // ambient blur
+    /* Shader ambientBlurShader; */
+    /* ambientBlurShader.loadShader("../src/shader/ambientBlur.vs", Shader::VERTEX); */
+    /* ambientBlurShader.loadShader("../src/shader/ambientBlur.fs", Shader::FRAGMENT); */
+    /* GLint ambientBlurShaderProgram = ambientBlurShader.linkShaders(); */
+
     // Skydom
     Shader skydomeShader;
     skydomeShader.loadShader("../src/shader/skydome.vs", Shader::VERTEX);
@@ -454,14 +467,25 @@ int main()
     /*
      * MRT for deferred shading
      */
-    DeferredShading deferredShading(gBufferShaderProgram, deferredShadingShaderProgram, &camera);
+    DeferredShading deferredShading(gBufferShaderProgram, deferredShadingShaderProgram, &camera );
     deferredShading.linkTextures();
     deferredShading.initRandomLights();
     deferredShading.bindFBO();
-    pActiveTerrain->loadGBufferMaps(gBufferShaderProgram);
     deferredShading.init();
+    deferredShading.loadUniforms(pActiveTerrain);
+
+    /* AmbientOcclusion ambientOcclusion(ambientOcclusionShaderProgram, ambientBlurShaderProgram, &camera); */
+    /* deferredShading.linkTextures(ambientOcclusionShaderProgram); */
+    /* ambientOcclusion.linkTextures(); */
+    /* ambientOcclusion.linkBlurredTexture(deferredShadingShaderProgram); */
+    /* ambientOcclusion.init(); */
+    /* ambientOcclusion.initRandomSamples(); */
+
+    /* deferredShading.linkTextures(ambientOcclusionShaderProgram); */
 
 
+    Quad quad;
+    quad.init();
 
 
 
@@ -575,12 +599,50 @@ int main()
         /* glUseProgram(gBufferShaderProgram); */
 
         /* // Active terrain */
+        deferredShading.loadUniforms(pActiveTerrain);
         pActiveTerrain->setGrid(gDrawGrid);
         pActiveTerrain->draw(gBufferShaderProgram);
 
         // Grass
         /* grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix()); */
         /* grass.draw(); */
+
+
+        /* // Ambient occlusion */
+        /* ambientOcclusion.bindFBO(); */
+        /* glUseProgram(ambientOcclusionShaderProgram); */
+        /* deferredShading.bindTextures(); */
+        /* ambientOcclusion.bindNoiseTexture(); */
+        /* ambientOcclusion.loadUniforms(); */
+        /* quad.render(); */
+
+        /* // Ambient blur */
+        /* ambientOcclusion.bindBlurFBO(); */
+        /* glClear(GL_COLOR_BUFFER_BIT); */
+        /* glUseProgram(ambientBlurShaderProgram); */
+        /* ambientOcclusion.bindColorTexture(); */
+        /* quad.render(); */
+
+
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        /* glUseProgram(deferredShadingShaderProgram); */
+        /* deferredShading.bindTextures(); */
+        /* deferredShading.loadUniforms(deferredShadingShaderProgram); */
+
+        quad.render(deferredShading.getPositionTexture());
+
+
+
+
+
+
+
+
+
 
 
 
@@ -604,26 +666,28 @@ int main()
 
 
         // 2. Lighting Pass: calculate lighting by iterating over a screen filled quad pixel-by-pixel using the gbuffer's content.
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        /* glBindFramebuffer(GL_FRAMEBUFFER, 0); */
+        /* //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); */
+        /* glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); */
 
-        glUseProgram(deferredShadingShaderProgram);
-        deferredShading.bindTextures();
-        deferredShading.loadUniforms(deferredShadingShaderProgram);
+        /* glUseProgram(deferredShadingShaderProgram); */
+        /* deferredShading.bindTextures(); */
+        /* ambientOcclusion.bindBlurredTexture(); */
+        /* deferredShading.loadUniforms(deferredShadingShaderProgram); */
 
-        RenderQuad();
+        /* /1* quad.render(deferredShading.getAlbedoTexture()); *1/ */
+        /* quad.render(); */
 
 
-        deferredShading.copyDepthBuffer();
+        /* deferredShading.copyDepthBuffer(); */
         // 2.5. Copy content of geometry's depth buffer to default framebuffer's depth buffer
         /* glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer); */
         /* glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // Write to default framebuffer */
         /* glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST); */
+
+
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-
         // 3. Render lights on top of scene, by blitting
         /* shaderLightBox.Use(); */
         /* glUniformMatrix4fv(glGetUniformLocation(shaderLightBox.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection)); */
@@ -789,35 +853,6 @@ int main()
     glDeleteProgram(skydomeShaderProgram);
     glDeleteProgram(cloudsShaderProgram);
 
-}
-
-GLuint quadVAO = 0;
-GLuint quadVBO;
-void RenderQuad()
-{
-    if (quadVAO == 0)
-    {
-        GLfloat quadVertices[] = {
-            // Positions        // Texture Coords
-            -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-            1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-            1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-        };
-        // Setup plane VAO
-        glGenVertexArrays(1, &quadVAO);
-        glGenBuffers(1, &quadVBO);
-        glBindVertexArray(quadVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    }
-    glBindVertexArray(quadVAO);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glBindVertexArray(0);
 }
 
 bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pNextNoise, Terrain*& pActiveTerrain, Terrain*& pNextTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, Grass& grass, const GLint& terrainShaderProgram, const GLint& defaultShaderProgram)

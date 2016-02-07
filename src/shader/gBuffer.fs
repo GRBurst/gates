@@ -1,5 +1,5 @@
 #version 410 core
-layout (location = 0) out vec3 gPosition;
+layout (location = 0) out vec4 gPosition;
 layout (location = 1) out vec3 gNormal;
 layout (location = 2) out vec3 gAlbedo;
 /* layout (location = 3) out vec3 gAlbedoSpec; */
@@ -7,10 +7,13 @@ layout (location = 2) out vec3 gAlbedo;
 in vec2 fUV;
 in vec3 fNormal;
 in vec3 wPos;
+in vec3 fPos;
 in mat3 fTBN;
 
 uniform sampler2D sNormalMap;
 uniform sampler2D sWhiteNoise;
+uniform float uNearPlane;
+uniform float uFarPlane;
 
 /* bool doHighLight() */
 /* { */
@@ -22,12 +25,17 @@ uniform sampler2D sWhiteNoise;
 
 /*     return false; */
 /* } */
+float LinearizeDepth(float depth)
+{
+    float z = depth * 2.0 - 1.0; // Back to NDC 
+    return (2.0 * uNearPlane * uFarPlane) / (uFarPlane + uNearPlane - z * (uFarPlane - uNearPlane));	
+}
 
 void main()
 {
-    gPosition   = wPos;
-    gNormal     = normalize(fNormal);
-    gAlbedo = vec3(0.0, 1.0, 1.0);
+    gPosition.xyz   = fPos;
+    gPosition.w     = LinearizeDepth(gl_FragCoord.z);
+    gNormal         = normalize(fNormal);
 
     /* if(doHighLight()) gAlbedo = vec3(uEditMode, 1.0-uEditMode, 1.0-uEditMode); */
     /* else */

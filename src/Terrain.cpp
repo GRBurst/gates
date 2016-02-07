@@ -104,7 +104,7 @@ void Terrain::genHeightMapTexture()
     mHeightMapTexture.linkTexture(mShaderProgram, "sHeightMap");
 }
 
-void Terrain::loadGBufferMaps(const GLint& shader)
+void Terrain::loadGBufferMaps(const GLint& shader) const
 {
     mWhiteNoiseTexture.linkTexture(shader, "sWhiteNoise");
     mNormalMapTexture.linkTexture(shader, "sNormalMap");

@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 #include <vector>
 #include "Camera.h"
+#include "Terrain.h"
 #include "Texture.h"
 
 /*
@@ -29,7 +30,8 @@ class DeferredShading {
         void linkTextures(const GLint& shader);
         void bindFBO();
         void bindTextures();
-        void loadUniforms(const GLint& shader);
+        void loadUniforms(Terrain *const terrain);
+        void loadUniforms(const GLint& shader, Terrain *const terrain);
         void copyDepthBuffer(const GLuint& destinationFBO = 0);
 
         void addLight();
@@ -38,6 +40,10 @@ class DeferredShading {
 
         void renderToTexture();
         void renderLights();
+
+        Texture& getPositionTexture() { return mGPosition; };
+        Texture& getNormalTexture() { return mGNormal; };
+        Texture& getAlbedoTexture() { return mGAlbedo; };
 
     private:
         GLint mGBufferProgram, mDeferredShadingProgram;

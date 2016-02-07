@@ -3,7 +3,6 @@ int Texture::idGenerator = 0;
 
 Texture::Texture()
     : texture(0)
-    , textureLocation(0)
     , location(0)
     , width(0)
     , height(0)
@@ -18,7 +17,6 @@ Texture::Texture()
 
 Texture::Texture(const char* imagePath)
     : texture(0)
-    , textureLocation(0)
     , location(0)
     , width(0)
     , height(0)
@@ -92,15 +90,41 @@ void Texture::setData(unsigned char* data, int width, int height)
 
 void Texture::setData(float* data, int width, int height, int depth)
 {
-	this->ddata     = data;
-	this->cdata		= new unsigned char[width * height * depth];
-//	for(int i = 0; i < width * height * depth; i++)
-//	{
-//		this->cdata[i] = (int)(data[i] * 255);
-//	}
-	this->width     = width;
-	this->height    = height;
-	this->depth		= depth;
+    this->ddata     = data;
+    this->cdata		= new unsigned char[width * height * depth];
+    //	for(int i = 0; i < width * height * depth; i++)
+    //	{
+    //		this->cdata[i] = (int)(data[i] * 255);
+    //	}
+    this->width     = width;
+    this->height    = height;
+    this->depth		= depth;
+}
+
+void Texture::loadAmbientOptions()
+{
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, this->width, this->height, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+}
+
+void Texture::loadAmbientNoiseOptions(std::vector<glm::vec3>& noiseSamples)
+{
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 4, 4, 0, GL_RGB, GL_FLOAT, &noiseSamples[0]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+}
+
+void Texture::loadGDepthPositionOptions()
+{
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->width, this->height, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 void Texture::loadGPositionOptions()
@@ -267,22 +291,16 @@ void Texture::unbind()
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-GLuint Texture::getTextureLoc()
-{
-    return textureLocation;
-}
-
 GLuint Texture::getTexture()
 {
     return texture;
 }
 
-void Texture::linkTexture(GLint shaderProgram, const char* texture_name)
+void Texture::linkTexture(GLint shaderProgram, const char* texture_name) const
 {
 
     glUseProgram(shaderProgram);
 
-    /* textureLocation = glGetUniformLocation(shaderProgram, texture_name); */
     glUniform1i(glGetUniformLocation(shaderProgram, texture_name), location);
     /* std::cout << "texture location = " << this->location << std::endl; */
     /* cout.flush(); */
