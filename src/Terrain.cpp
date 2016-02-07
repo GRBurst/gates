@@ -104,6 +104,13 @@ void Terrain::genHeightMapTexture()
     mHeightMapTexture.linkTexture(mShaderProgram, "sHeightMap");
 }
 
+void Terrain::loadGBufferMaps(const GLint& shader)
+{
+    mWhiteNoiseTexture.linkTexture(shader, "sWhiteNoise");
+    mNormalMapTexture.linkTexture(shader, "sNormalMap");
+    /* mHeightMapTexture.linkTexture(shader, "sHeightMap"); */
+}
+
 void Terrain::linkHeightMapTexture(GLint shader)
 {
     mHeightMapTexture.linkTexture(shader, "heightMap");
@@ -122,6 +129,26 @@ void Terrain::enableNormalMap()
     mUseNormalMap = true;
     mElementsPerVertex += 3;
     mFloatsPerVertex += (3+3+2); //Tangent(3), Bitangent(3), UV(2)
+}
+
+void Terrain::draw(const GLint& shader)
+{
+
+    mVMatrix = mCamera->getViewMatrix();
+    mVPMatrix = mCamera->getVPMatrix();
+    mInvViewMatrix = mCamera->getInvViewMatrix();
+
+    glUseProgram(shader);
+
+    glUniformMatrix4fv(glGetUniformLocation(shader, "uVPMatrix"), 1, GL_FALSE, value_ptr(mVPMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(shader, "uVMatrix"), 1, GL_FALSE, value_ptr(mVMatrix));
+    glUniform1i(glGetUniformLocation(shader, "uHeightMapTerrainRatio"), mHeightMapTerrainRatio);
+
+    glBindVertexArray(mVao);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glDrawElements(GL_TRIANGLES, mTotalIndices, GL_UNSIGNED_INT, 0);
+
+    glBindVertexArray(0);
 }
 
 void Terrain::draw()

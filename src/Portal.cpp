@@ -128,18 +128,21 @@ void Portal::renderInside()
     glStencilMask(0x00);
     glClear( GL_DEPTH_BUFFER_BIT );
 
-    mTmpCamPos = camera->getPosition();
-    mTmpNearPlane = camera->getNearPlane();
+    mTmpCamPos      = camera->getPosition();
+    mTmpViewDir     = camera->getViewDirection();
+    mTmpNearPlane   = camera->getNearPlane();
     camera->setPosition(mPosition2-(mPosition1-mTmpCamPos));
+    /* camera->setViewDirection(mPosition1-mTmpCamPos); */
     camera->setNearPlane(glm::length(mPosition1-mTmpCamPos));
     /* camera->rotate(glm::vec2(pActivePortal->getRotation2(), 0.0)); */
-    camera->update();
+    camera->update(1);
 }
 
 // Fourth call: Disable stencil rendering. Continue with post rendering (shadow maps or something like this
 void Portal::disableStencil()
 {
     camera->setPosition(mTmpCamPos);
+    camera->setViewDirection(mTmpViewDir);
     camera->setNearPlane(mTmpNearPlane);
     camera->update();
     glStencilMask(0xFF);

@@ -13,6 +13,7 @@ Texture::Texture()
 {
     this->location = idGenerator++;
     glGenTextures(1, &texture);
+    std::cout << "texture location = " << this->location << std::endl;
 }
 
 Texture::Texture(const char* imagePath)
@@ -27,6 +28,7 @@ Texture::Texture(const char* imagePath)
 	FreeImage_Initialise();
 	glGenTextures(1, &texture);
 	this->location = idGenerator++;
+    std::cout << "texture location = " << this->location << std::endl;
 
 	FREE_IMAGE_FORMAT fif = FreeImage_GetFileType(imagePath, 0);
 
@@ -57,6 +59,7 @@ Texture::Texture(const char* imagePath)
 	width = FreeImage_GetWidth(pImage);
 	height = FreeImage_GetHeight(pImage);
     /* cout << "Texture width = " << width << ", height = " << height << std::endl; */
+    
 
 	cdata = FreeImage_GetBits(pImage);
 
@@ -100,6 +103,26 @@ void Texture::setData(float* data, int width, int height, int depth)
 	this->depth		= depth;
 }
 
+void Texture::loadGPositionOptions()
+{
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->width, this->height, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+}
+
+void Texture::loadGNormalOptions()
+{
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, this->width, this->height, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+}
+
+void Texture::loadGAlbedoOptions()
+{
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width, this->height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+}
 
 void Texture::loadNormalMapOptions()
 {

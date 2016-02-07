@@ -37,6 +37,7 @@ class Camera
         void setCamSpeed(float multiplicator = 2.0) {this->mCamSpeed *= multiplicator; };
         void setPosition(glm::vec3 position) { this->mPos = position; };
         void setHeight(float height) { this->mPos = glm::vec3(this->mPos.x, height, this->mPos.z); };
+        void setViewDirection(glm::vec3 direction) { this->mViewDir = glm::normalize(direction); };
 
         // Calculatable matrizes from camera
         glm::mat3 getInvViewMatrix() const { return glm::inverse(glm::transpose(glm::mat3(getViewMatrix()))); };
@@ -45,9 +46,10 @@ class Camera
         glm::mat4 getVPMatrix() const {return mViewProjectionMatrix; };
         glm::vec3 getPosition() const {return mPos;};
 
+        void calcViewDirection();
         void calcViewMatrix();
         void calcProjectionMatrix();
-        void update();
+        void update(int mode = 0);
 
         void setMVPMatrix(const glm::mat4 &mvp) {mViewProjectionMatrix = mvp; };
 
@@ -82,6 +84,7 @@ class Camera
 
     private:
         glm::vec3   mPos;
+        glm::vec3   mViewDir;
         glm::mat4   mViewMatrix;
         glm::mat4   mProjectionMatrix;
         glm::mat4   mViewProjectionMatrix;

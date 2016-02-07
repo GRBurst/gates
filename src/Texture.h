@@ -29,6 +29,10 @@ class Texture
         void linkTexture(GLint shaderProgram, const char *texture_name);
         void setData(unsigned char* data, int width, int height);
         void setData(float* data, int width, int height, int depth = 1);
+        void setResolution(int width, int height) { this->width = width; this->height = height; };
+        void loadGPositionOptions();
+        void loadGNormalOptions();
+        void loadGAlbedoOptions();
         void loadCommonOptions();
         void loadSkydomeOptions();
         void loadSkydome3DOptions();
