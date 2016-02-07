@@ -41,6 +41,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_callback(GLFWwindow* window, double mouseXPosition, double mouseYPosition);
 bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pNextNoise, Terrain*& pActiveTerrain, Terrain*& pNextTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, Grass& grass, const GLint& terrainShaderProgram, const GLint& defaultShaderProgram);
+void RenderQuad();
 
 void debugCallback(GLenum source, GLenum type, GLuint id,
                    GLenum severity, GLsizei length,
@@ -298,6 +299,12 @@ int main()
     gBufferShader.loadShader("../src/shader/gBuffer.fs", Shader::FRAGMENT);
     GLint gBufferShaderProgram = gBufferShader.linkShaders();
 
+    // deferredShading
+    Shader deferredShadingShader;
+    deferredShadingShader.loadShader("../src/shader/deferredShading.vs", Shader::VERTEX);
+    deferredShadingShader.loadShader("../src/shader/deferredShading.fs", Shader::FRAGMENT);
+    GLint deferredShadingShaderProgram = deferredShadingShader.linkShaders();
+
     // Skydom
     Shader skydomeShader;
     skydomeShader.loadShader("../src/shader/skydome.vs", Shader::VERTEX);
@@ -443,6 +450,32 @@ int main()
     /*
      * MRT for deferred shading
      */
+    glUseProgram(deferredShadingShaderProgram);
+    glUniform1i(glGetUniformLocation(deferredShadingShaderProgram, "gPosition"), 10);
+    glUniform1i(glGetUniformLocation(deferredShadingShaderProgram, "gNormal"), 11);
+    glUniform1i(glGetUniformLocation(deferredShadingShaderProgram, "gAlbedo"), 12);
+
+// - Colors
+    const GLuint NR_LIGHTS = 32;
+    std::vector<glm::vec3> lightPositions;
+    std::vector<glm::vec3> lightColors;
+    srand(13);
+    for (GLuint i = 0; i < NR_LIGHTS; i++)
+    {
+        // Calculate slightly random offsets
+        GLfloat xPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
+        GLfloat yPos = ((rand() % 100) / 100.0) * 6.0 - 4.0;
+        GLfloat zPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
+        lightPositions.push_back(glm::vec3(xPos, yPos, zPos));
+        // Also calculate random color
+        GLfloat rColor = ((rand() % 100) / 200.0f) + 0.5; // Between 0.5 and 1.0
+        GLfloat gColor = ((rand() % 100) / 200.0f) + 0.5; // Between 0.5 and 1.0
+        GLfloat bColor = ((rand() % 100) / 200.0f) + 0.5; // Between 0.5 and 1.0
+        lightColors.push_back(glm::vec3(rColor, gColor, bColor));
+    }
+
+
+
     // Properties
     const GLuint SCR_WIDTH = 800, SCR_HEIGHT = 600;
 
@@ -507,42 +540,42 @@ int main()
 
 
 
-    // Bind normal / output framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    /* // Bind normal / output framebuffer */
+    /* glBindFramebuffer(GL_FRAMEBUFFER, 0); */
 
-    // Test Textures
-    GLfloat quadVertices[] = {   // Vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-        // Positions   // TexCoords
-        -1.0f,  1.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f,  0.0f, 0.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
+    /* // Test Textures */
+    /* GLfloat quadVertices[] = {   // Vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates. */
+    /*     // Positions   // TexCoords */
+    /*     -1.0f,  1.0f,  0.0f, 1.0f, */
+    /*     -1.0f, -1.0f,  0.0f, 0.0f, */
+    /*      1.0f, -1.0f,  1.0f, 0.0f, */
 
-        -1.0f,  1.0f,  0.0f, 1.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-         1.0f,  1.0f,  1.0f, 1.0f
-    };
-    // Setup screen VAO
-    GLuint quadVAO, quadVBO;
-    glGenVertexArrays(1, &quadVAO);
-    glGenBuffers(1, &quadVBO);
-    glBindVertexArray(quadVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
-    glBindVertexArray(0);
+    /*     -1.0f,  1.0f,  0.0f, 1.0f, */
+    /*      1.0f, -1.0f,  1.0f, 0.0f, */
+    /*      1.0f,  1.0f,  1.0f, 1.0f */
+    /* }; */
+    /* // Setup screen VAO */
+    /* GLuint quadVAO, quadVBO; */
+    /* glGenVertexArrays(1, &quadVAO); */
+    /* glGenBuffers(1, &quadVBO); */
+    /* glBindVertexArray(quadVAO); */
+    /* glBindBuffer(GL_ARRAY_BUFFER, quadVBO); */
+    /* glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW); */
+    /* glEnableVertexAttribArray(0); */
+    /* glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0); */
+    /* glEnableVertexAttribArray(1); */
+    /* glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat))); */
+    /* glBindVertexArray(0); */
 
-    // Test shader: quad
-    Shader quadShader;
-    quadShader.loadShader("../src/shader/quad.vs", Shader::VERTEX);
-    quadShader.loadShader("../src/shader/quad.fs", Shader::FRAGMENT);
-    GLint quadShaderProgram = quadShader.linkShaders();
-    glUseProgram(quadShaderProgram);
+    /* // Test shader: quad */
+    /* Shader quadShader; */
+    /* quadShader.loadShader("../src/shader/quad.vs", Shader::VERTEX); */
+    /* quadShader.loadShader("../src/shader/quad.fs", Shader::FRAGMENT); */
+    /* GLint quadShaderProgram = quadShader.linkShaders(); */
+    /* glUseProgram(quadShaderProgram); */
 
-    GLuint texID = glGetUniformLocation(quadShaderProgram, "renderedTexture");
-    GLuint timeID = glGetUniformLocation(quadShaderProgram, "time");
+    /* GLuint texID = glGetUniformLocation(quadShaderProgram, "renderedTexture"); */
+    /* GLuint timeID = glGetUniformLocation(quadShaderProgram, "time"); */
 
 
 
@@ -622,29 +655,64 @@ int main()
 
 
 
+        // Working quad rendering
+        /* glBindFramebuffer(GL_FRAMEBUFFER, 0); */
+        /* // Clear all relevant buffers */
+        /* glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // Set clear color to white (not really necessery actually, since we won't be able to see behind the quad anyways) */
+        /* glClear(GL_COLOR_BUFFER_BIT); */
+        /* glDisable(GL_DEPTH_TEST); // We don't care about depth information when rendering a single quad */
+
+        /* // Draw Screen */
+        /* glUseProgram(quadShaderProgram); */
+        /* /1* screenShader.Use(); *1/ */
+        /* glBindVertexArray(quadVAO); */
+        /* //GLuint gPosition, gNormal, gAlbedo;//gAlbedoSpec; */
+        /* glBindTexture(GL_TEXTURE_2D, gAlbedo); */
+        /* glUniform1i(glGetUniformLocation(quadShaderProgram, "renderedTexture"), 10); */
+        /* glDrawArrays(GL_TRIANGLES, 0, 6); */
+        /* glBindVertexArray(0); */
+        /* glEnable(GL_DEPTH_TEST); // We don't care about depth information when rendering a single quad */
+
+
+        // 2. Lighting Pass: calculate lighting by iterating over a screen filled quad pixel-by-pixel using the gbuffer's content.
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        // Clear all relevant buffers
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // Set clear color to white (not really necessery actually, since we won't be able to see behind the quad anyways)
-        glClear(GL_COLOR_BUFFER_BIT);
-        glDisable(GL_DEPTH_TEST); // We don't care about depth information when rendering a single quad
-
-        // Draw Screen
-        glUseProgram(quadShaderProgram);
-        /* screenShader.Use(); */
-        glBindVertexArray(quadVAO);
-        //GLuint gPosition, gNormal, gAlbedo;//gAlbedoSpec;
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glUseProgram(deferredShadingShaderProgram);
+        glActiveTexture(GL_TEXTURE0+10);
+        glBindTexture(GL_TEXTURE_2D, gPosition);
+        glActiveTexture(GL_TEXTURE1+10);
+        glBindTexture(GL_TEXTURE_2D, gNormal);
+        glActiveTexture(GL_TEXTURE2+10);
         glBindTexture(GL_TEXTURE_2D, gAlbedo);
-        glUniform1i(glGetUniformLocation(quadShaderProgram, "renderedTexture"), 10);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
+
+        // Also send light relevant uniforms
+        for (GLuint i = 0; i < lightPositions.size(); i++)
+        {
+            glUniform3fv(glGetUniformLocation(deferredShadingShaderProgram, ("lights[" + std::to_string(i) + "].Position").c_str()), 1, &lightPositions[i][0]);
+            glUniform3fv(glGetUniformLocation(deferredShadingShaderProgram, ("lights[" + std::to_string(i) + "].Color").c_str()), 1, &lightColors[i][0]);
+            // Update attenuation parameters and calculate radius
+            const GLfloat constant = 1.0; // Note that we don't send this to the shader, we assume it is always 1.0 (in our case)
+            const GLfloat linear = 0.7;
+            const GLfloat quadratic = 1.8;
+            glUniform1f(glGetUniformLocation(deferredShadingShaderProgram, ("lights[" + std::to_string(i) + "].Linear").c_str()), linear);
+            glUniform1f(glGetUniformLocation(deferredShadingShaderProgram, ("lights[" + std::to_string(i) + "].Quadratic").c_str()), quadratic);
+            // Then calculate radius of light volume/sphere
+            const GLfloat lightThreshold = 5.0; // 5 / 256
+            const GLfloat maxBrightness = std::fmaxf(std::fmaxf(lightColors[i].r, lightColors[i].g), lightColors[i].b);
+            GLfloat radius = (-linear + static_cast<float>(std::sqrt(linear * linear - 4 * quadratic * (constant - (256.0 / lightThreshold) * maxBrightness)))) / (2 * quadratic);
+            glUniform1f(glGetUniformLocation(deferredShadingShaderProgram, ("lights[" + std::to_string(i) + "].Radius").c_str()), radius);
+        }
+
+        glUniform3fv(glGetUniformLocation(deferredShadingShaderProgram, "uCamPos"), 1, &camera.getPosition()[0]);
+        RenderQuad();
 
 
-
-        glEnable(GL_DEPTH_TEST); // We don't care about depth information when rendering a single quad
-
-
-
-
+        // 2.5. Copy content of geometry's depth buffer to default framebuffer's depth buffer
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // Write to default framebuffer
+        glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
 
@@ -800,6 +868,35 @@ int main()
     glDeleteProgram(skydomeShaderProgram);
     glDeleteProgram(cloudsShaderProgram);
 
+}
+
+GLuint quadVAO = 0;
+GLuint quadVBO;
+void RenderQuad()
+{
+	if (quadVAO == 0)
+	{
+		GLfloat quadVertices[] = {
+			// Positions        // Texture Coords
+			-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+			1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+			1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		};
+		// Setup plane VAO
+		glGenVertexArrays(1, &quadVAO);
+		glGenBuffers(1, &quadVBO);
+		glBindVertexArray(quadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	}
+	glBindVertexArray(quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
 }
 
 bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pNextNoise, Terrain*& pActiveTerrain, Terrain*& pNextTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, Grass& grass, const GLint& terrainShaderProgram, const GLint& defaultShaderProgram)
