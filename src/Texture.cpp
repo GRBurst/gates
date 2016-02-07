@@ -282,8 +282,8 @@ void Texture::linkTexture(GLint shaderProgram, const char* texture_name)
 
     glUseProgram(shaderProgram);
 
-    textureLocation = glGetUniformLocation(shaderProgram, texture_name);
-    glUniform1i(textureLocation, location);
+    /* textureLocation = glGetUniformLocation(shaderProgram, texture_name); */
+    glUniform1i(glGetUniformLocation(shaderProgram, texture_name), location);
     /* std::cout << "texture location = " << this->location << std::endl; */
     /* cout.flush(); */
 

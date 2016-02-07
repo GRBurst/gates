@@ -1,13 +1,9 @@
 #version 410 core
-
-in vec2 UV;
-
 out vec4 color;
+in vec2 fUV;
 
-uniform sampler2D renderedTexture;
-uniform float time;
-
-void main(){
-    color = vec4(texture( renderedTexture, UV ).rgb, 1.0) ;
-    //color = vec4(1.0, 0.0, 0.0, 1.0);
+uniform sampler2D sTexture;
+void main()
+{
+    color = vec4(texture(sTexture, fUV).rgb, 1.0);
 }
