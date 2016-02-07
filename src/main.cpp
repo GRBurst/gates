@@ -340,8 +340,11 @@ int main()
     pActiveNoise2->generateNoiseImage();
     pActiveNoise2->saveToFile("WorleyNoise.tga");
 
+    SimplexNoise* noiseWater3D = new SimplexNoise(noiseDimX/4, noiseDimX/4, 64, seed);
+    noiseWater3D->setOctavesFreqAmp(4, 2, 1);
+	noiseWater3D->setScale(true);
+	noiseWater3D->generateTileableNoiseImage(1);
 
-    // Setup initial terrain
     pActiveTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pActiveNoise);
     /* pActiveTerrain->enableNormals(); */
     pActiveTerrain->enableNormalMap();
@@ -351,6 +354,9 @@ int main()
     pActiveTerrain->genHeightMapTexture();
     pActiveTerrain->saveNoiseToFile("Terrain1.tga");
     pActiveTerrain->linkHeightMapTexture(defaultShaderProgram);
+    //Setup Water Noise in Terrain
+	pActiveTerrain->loadWater3DNoise(noiseWater3D);
+	// Setup initial terrain
     /* pActiveTerrain->debug(); */
 
     // Setup worled (cell) noise for second terrain
@@ -393,33 +399,33 @@ int main()
     seed = 245, octaves = 4, frequency = 4.0, amplitude = 1;
 
     // Setup noise for clouds
-    SimplexNoise pNoise3D(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
-    pNoise3D.setOctavesFreqAmp(octaves, frequency, amplitude);
-    pNoise3D.setScale(true);
-    pNoise3D.generateTileableNoiseImage(1);
+    SimplexNoise* noise3D = new SimplexNoise(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
+    noise3D->setOctavesFreqAmp(octaves, frequency, amplitude);
+    noise3D->setScale(true);
+    noise3D->generateTileableNoiseImage(1);
 
     // Skydome initialization
     Skydome skydome(skydomeShaderProgram, &camera);
     skydome.generateGeometry(noiseDimX / 3, 32, 32);
-    skydome.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
+    skydome.loadTexture(noise3D->getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
     skydome.setBuffers();
 
     // Skydome 2 initialization
 	Skydome skydome2(skydomeShaderProgram, &camera);
 	skydome2.generateGeometry(noiseDimX / 3 - 5, 32, 32);
-	skydome2.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
+	skydome2.loadTexture(noise3D->getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
 	skydome2.setBuffers();
 
 	// Skydome 3 initialization
 	Skydome skydome3(skydomeShaderProgram, &camera);
 	skydome3.generateGeometry(noiseDimX / 3 - 10, 32, 32);
-	skydome3.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
+	skydome3.loadTexture(noise3D->getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
 	skydome3.setBuffers();
 
     // Clouds initialization
     Clouds clouds(cloudsShaderProgram, skydome.getCloudNumber(), skydome.getCloudAttributes(), &camera);
     clouds.setBuffers();
-    clouds.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
+    clouds.loadTexture(noise3D->getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
     skydome.setClouds(&clouds);
 
     // Grass
@@ -436,7 +442,34 @@ int main()
     model.setStandardUniformLocations();
     vec3 sphereTranslation = vec3(0.0, 10.0, 0.0);
     model.translate(sphereTranslation);
+    GLuint waterFrameBufferLoc;
+    glGenFramebuffers(1, &waterFrameBufferLoc);
+    glBindFramebuffer(GL_FRAMEBUFFER, waterFrameBufferLoc);
 
+    GLuint waterReflectionTextureLoc;
+    glGenTextures(1, &waterReflectionTextureLoc);
+    glBindTexture(GL_TEXTURE_2D, waterReflectionTextureLoc);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, 512, 512,0,GL_RGB, GL_UNSIGNED_BYTE, 0);
+    glActiveTexture(GL_TEXTURE0 + 8);
+    glBindTexture(GL_TEXTURE_2D, 8);
+
+    GLuint depthRenderBufferLoc;
+    glGenRenderbuffers(1, &depthRenderBufferLoc);
+    glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBufferLoc);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 512, 512);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,waterReflectionTextureLoc, 0);
+
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBufferLoc);
+    GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+    glDrawBuffers(1, DrawBuffers);
+
+    glBindRenderbuffer(GL_RENDERBUFFER,0);
+    glBindFramebuffer(GL_FRAMEBUFFER,0);
     // Main (frame) loop
     float oldTime, newTime;
     int loops;
@@ -527,6 +560,8 @@ int main()
         // Portal
         pActivePortal->drawPortal();
         pInactivePortal->drawPortal();
+
+        //
 
         // Sphere
         model.setProjection(camera.getProjectionMatrix());

@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <glm/glm.hpp>
 #include <math.h>
-//Factory Class
+
 class Noise
 {
 	public:

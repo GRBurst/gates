@@ -3,9 +3,11 @@ layout (triangles, equal_spacing, ccw) in;
 
 uniform sampler2D sHeightMap;
 uniform sampler2D sWhiteNoise;
+uniform sampler3D sTextureWaterDisp;
 uniform float gDispFactor;
 uniform mat4 uVMatrix;
 uniform mat4 uVPMatrix;
+uniform mat4 uMMatrix;
 uniform mat3 uInvViewMatrix;
 uniform int uHeightMapTerrainRatio;
 uniform int uDrawGrid;
@@ -14,7 +16,7 @@ uniform float uEditMode;
 uniform float uModifyRadius;
 uniform vec3 uCamPos;
 uniform vec3 uLightPos;
-
+uniform float uTime;
 in vec3 vPositionES[];
 in vec2 vUVES[];
 in vec3 vNormalES[];
@@ -78,7 +80,13 @@ void main()
 	fPos = interpolate3D(vPositionES[0], vPositionES[1], vPositionES[2]);
 	float displacement = texture(sWhiteNoise, 4*fUV).r;
 	calcTBN();
-    fPos += fNormal * displacement*0.02;
+    if (fPos.y > 0.06*3.9)
+    	fPos += fNormal * displacement*0.02;
+	else {
+		displacement = 2*texture(sTextureWaterDisp, vec3(fUV * 16, uTime/10)).r-1;
+		displacement += 2*texture(sTextureWaterDisp, vec3(fUV * 2, uTime/10)).r-1;
+		fPos += fNormal * displacement*0.015;
+	}
 	wPos = fPos;
-    gl_Position = uVPMatrix * vec4(fPos, 1.0);
+    gl_Position = uVPMatrix * uMMatrix * vec4(fPos, 1.0);
 }
