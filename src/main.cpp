@@ -473,7 +473,7 @@ int main()
     // - Color buffer
     glGenTextures(1, &gAlbedo);
     glBindTexture(GL_TEXTURE_2D, gAlbedo);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedo, 0);
@@ -502,23 +502,37 @@ int main()
         std::cout << "Framebuffer not complete!" << std::endl;
 
 
+
+
+
+
+
     // Bind normal / output framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // Test Textures
-    static const GLfloat g_quad_vertex_buffer_data[] = {
-        -1.0f, -1.0f, 0.0f,
-        1.0f, -1.0f, 0.0f,
-        -1.0f,  1.0f, 0.0f,
-        -1.0f,  1.0f, 0.0f,
-        1.0f, -1.0f, 0.0f,
-        1.0f,  1.0f, 0.0f,
-    };
+    GLfloat quadVertices[] = {   // Vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+        // Positions   // TexCoords
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
 
-    GLuint quad_vertexbuffer;
-    glGenBuffers(1, &quad_vertexbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+    };
+    // Setup screen VAO
+    GLuint quadVAO, quadVBO;
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
+    glBindVertexArray(0);
 
     // Test shader: quad
     Shader quadShader;
@@ -583,6 +597,7 @@ int main()
         /***************************************************
          * Deferred shading preparitions
          ***************************************************/
+        /* glBindFramebuffer(GL_FRAMEBUFFER, 0); */
         glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
         glViewport(0,0,wWidth,wHeight);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -595,9 +610,9 @@ int main()
         /* model.setProjection(camera.getProjectionMatrix()); */
         /* model.setView(camera.getViewMatrix()); */
         /* model.draw(); */
-        glUseProgram(gBufferShaderProgram);
+        /* glUseProgram(gBufferShaderProgram); */
 
-        // Active terrain
+        /* // Active terrain */
         pActiveTerrain->setGrid(gDrawGrid);
         pActiveTerrain->draw(gBufferShaderProgram);
 
@@ -605,36 +620,27 @@ int main()
         /* grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix()); */
         /* grass.draw(); */
 
+
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        //glDisable(GL_DEPTH_TEST);
-        glViewport(0,0,wWidth,wHeight);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // Clear all relevant buffers
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // Set clear color to white (not really necessery actually, since we won't be able to see behind the quad anyways)
+        glClear(GL_COLOR_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST); // We don't care about depth information when rendering a single quad
+
+        // Draw Screen
         glUseProgram(quadShaderProgram);
-        glActiveTexture(GL_TEXTURE0);
+        /* screenShader.Use(); */
+        glBindVertexArray(quadVAO);
+        //GLuint gPosition, gNormal, gAlbedo;//gAlbedoSpec;
         glBindTexture(GL_TEXTURE_2D, gAlbedo);
-        glUniform1i(texID, 0);
-        glUniform1f(timeID, (float)(glfwGetTime()*10.0f) );
-        glUniformMatrix4fv(glGetUniformLocation(quadShaderProgram, "uVPMatrix"), 1, GL_FALSE, value_ptr(camera.getVPMatrix()));
+        glUniform1i(glGetUniformLocation(quadShaderProgram, "renderedTexture"), 10);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
 
 
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-        glVertexAttribPointer(
-                0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-                3,                  // size
-                GL_FLOAT,           // type
-                GL_FALSE,           // normalized?
-                0,                  // stride
-                (void*)0            // array buffer offset
-                );
 
-        // Draw the triangles !
-        glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
-
-        glDisableVertexAttribArray(0);
-        //glEnable(GL_DEPTH_TEST);
-
-
+        glEnable(GL_DEPTH_TEST); // We don't care about depth information when rendering a single quad
 
 
 

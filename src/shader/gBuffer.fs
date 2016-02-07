@@ -27,54 +27,54 @@ void main()
 {
     gPosition   = wPos;
     gNormal     = normalize(fNormal);
-    gAlbedo = vec3(1.0, 1.0, 1.0);
+    gAlbedo = vec3(0.0, 1.0, 1.0);
 
     /* if(doHighLight()) gAlbedo = vec3(uEditMode, 1.0-uEditMode, 1.0-uEditMode); */
     /* else */
-    /* if(true) */
-    /* { */
+    if(true)
+    {
 
-    /*     vec3 normal_ts      = texture2D(sNormalMap, 2*fUV).rgb * 2.0f - 1.0f; */
-    /*     float terrainHeight = wPos.y/3.8; */
-    /*     vec3 terrainNormal  = gNormal; */
-    /*     float normalHeight  = gNormal.y; */
+        vec3 normal_ts      = texture2D(sNormalMap, 2*fUV).rgb * 2.0f - 1.0f;
+        float terrainHeight = wPos.y/3.8;
+        vec3 terrainNormal  = gNormal;
+        float normalHeight  = gNormal.y;
 
-    /*     // Base colors */
-    /*     vec3 waterBaseColor1    = vec3( 0.18824, 0.39216, 0.58039 ); */
-    /*     vec3 waterBaseColor2    = vec3( 0.33725, 0.53725, 0.72157 ); */
-    /*     vec3 grassBaseColor1    = vec3( 0.32, 0.58, 0.27 ); */
-    /*     vec3 grassBaseColor2    = vec3( 0.57, 0.80, 0.49 ); */
-    /*     vec3 rockBaseColor1     = vec3( 0.59, 0.39, 0.12 ); */
-    /*     vec3 rockBaseColor2     = vec3( 0.69, 0.49, 0.22 ); */
-    /*     vec3 snowBaseColor      = vec3( 0.85, 0.85, 0.90 ); */
+        // Base colors
+        vec3 waterBaseColor1    = vec3( 0.18824, 0.39216, 0.58039 );
+        vec3 waterBaseColor2    = vec3( 0.33725, 0.53725, 0.72157 );
+        vec3 grassBaseColor1    = vec3( 0.32, 0.58, 0.27 );
+        vec3 grassBaseColor2    = vec3( 0.57, 0.80, 0.49 );
+        vec3 rockBaseColor1     = vec3( 0.59, 0.39, 0.12 );
+        vec3 rockBaseColor2     = vec3( 0.69, 0.49, 0.22 );
+        vec3 snowBaseColor      = vec3( 0.85, 0.85, 0.90 );
 
-    /*     // water */
-    /*     vec3 waterColor1        = ( mix( waterBaseColor2, waterBaseColor1, smoothstep( 0.01, 0.08, ( terrainHeight ) ))); */
-    /*     vec3 waterColor2        = ( mix( waterColor1, waterBaseColor1*texture2D(sWhiteNoise, vec2(fUV.x*0.17, fUV.y)).r, smoothstep( 0.05, 0.12, ( terrainHeight ) ))); */
+        // water
+        vec3 waterColor1        = ( mix( waterBaseColor2, waterBaseColor1, smoothstep( 0.01, 0.08, ( terrainHeight ) )));
+        vec3 waterColor2        = ( mix( waterColor1, waterBaseColor1*texture2D(sWhiteNoise, vec2(fUV.x*0.17, fUV.y)).r, smoothstep( 0.05, 0.12, ( terrainHeight ) )));
 
-    /*     // grass */
-    /*     vec3 grassColor1        = ( mix( grassBaseColor1, grassBaseColor1*(0.5*texture2D(sWhiteNoise, fUV*0.1).r+0.5), smoothstep( 0.0, 0.4, normalHeight))); */
-    /*     vec3 grassColor2        = ( mix( grassBaseColor2, grassBaseColor2*(0.5*texture2D(sWhiteNoise, vec2(fUV.x*2.1, fUV.y)).r+0.5), smoothstep( 0.0, 0.4, normalHeight))); */
+        // grass
+        vec3 grassColor1        = ( mix( grassBaseColor1, grassBaseColor1*(0.5*texture2D(sWhiteNoise, fUV*0.1).r+0.5), smoothstep( 0.0, 0.4, normalHeight)));
+        vec3 grassColor2        = ( mix( grassBaseColor2, grassBaseColor2*(0.5*texture2D(sWhiteNoise, vec2(fUV.x*2.1, fUV.y)).r+0.5), smoothstep( 0.0, 0.4, normalHeight)));
 
-    /*     // rock */
-    /*     vec3 rockColor1      = ( mix( rockBaseColor1, rockBaseColor1*texture2D(sWhiteNoise, fUV*0.04).r, smoothstep( 0.1, 0.9, normalHeight))); */
-    /*     vec3 rockColor2      = ( mix( rockBaseColor2, rockBaseColor2*texture2D(sWhiteNoise, fUV*2.00).r, smoothstep( 0.1, 0.9, normalHeight))); */
+        // rock
+        vec3 rockColor1      = ( mix( rockBaseColor1, rockBaseColor1*texture2D(sWhiteNoise, fUV*0.04).r, smoothstep( 0.1, 0.9, normalHeight)));
+        vec3 rockColor2      = ( mix( rockBaseColor2, rockBaseColor2*texture2D(sWhiteNoise, fUV*2.00).r, smoothstep( 0.1, 0.9, normalHeight)));
 
-    /*     // snow */
-    /*     float yNormal       = terrainNormal.y + (normal_ts).y; */
-    /*     float snowIntensity = clamp(1.5*terrainHeight, 0.5, 1.0); */
-    /*     vec3 snowColor1     = ( snowIntensity * mix( snowBaseColor, snowBaseColor*1.1, smoothstep( 0.9, 1.0, (1.0-normalHeight)))); */
-    /*     vec3 snowColor2     = ( snowIntensity * mix( snowColor1, snowColor1*texture2D(sWhiteNoise, fUV*0.14).r, smoothstep( 0.3, 0.7, (1.0-normalHeight)))); */
+        // snow
+        float yNormal       = terrainNormal.y + (normal_ts).y;
+        float snowIntensity = clamp(1.5*terrainHeight, 0.5, 1.0);
+        vec3 snowColor1     = ( snowIntensity * mix( snowBaseColor, snowBaseColor*1.1, smoothstep( 0.9, 1.0, (1.0-normalHeight))));
+        vec3 snowColor2     = ( snowIntensity * mix( snowColor1, snowColor1*texture2D(sWhiteNoise, fUV*0.14).r, smoothstep( 0.3, 0.7, (1.0-normalHeight))));
 
-    /*     /1* vec3 resColor   = mix( waterColor, grassColor, step( 1.1 - waterIntensity, terrainHeight )); *1/ */
-    /*     vec3 resColor   = mix( waterColor1, waterColor2,    smoothstep( 0.00,   0.06,   terrainHeight           )); */
-    /*     resColor        = mix( resColor,    grassColor1,    smoothstep( 0.04,   0.08,   terrainHeight  )); */
-    /*     resColor        = mix( resColor,    grassColor2,    smoothstep( 0.08,   0.12,    terrainHeight*yNormal           )); */
-    /*     resColor        = mix( resColor,    rockColor2,     smoothstep( 0.25,   0.35,    terrainHeight           )); */
-    /*     resColor        = mix( resColor,    rockColor1,     smoothstep( 0.10,   0.12,    (terrainHeight*1.1)*(1-yNormal)           )); */
-    /*     resColor        = mix( resColor,    snowColor1,     smoothstep( 0.4,    0.7,    terrainHeight*yNormal   )); */
-    /*     resColor        = mix( resColor,    snowColor2,     smoothstep( 0.7,    1.0,    terrainHeight*yNormal   )); */
+        /* vec3 resColor   = mix( waterColor, grassColor, step( 1.1 - waterIntensity, terrainHeight )); */
+        vec3 resColor   = mix( waterColor1, waterColor2,    smoothstep( 0.00,   0.06,   terrainHeight           ));
+        resColor        = mix( resColor,    grassColor1,    smoothstep( 0.04,   0.08,   terrainHeight  ));
+        resColor        = mix( resColor,    grassColor2,    smoothstep( 0.08,   0.12,    terrainHeight*yNormal           ));
+        resColor        = mix( resColor,    rockColor2,     smoothstep( 0.25,   0.35,    terrainHeight           ));
+        resColor        = mix( resColor,    rockColor1,     smoothstep( 0.10,   0.12,    (terrainHeight*1.1)*(1-yNormal)           ));
+        resColor        = mix( resColor,    snowColor1,     smoothstep( 0.4,    0.7,    terrainHeight*yNormal   ));
+        resColor        = mix( resColor,    snowColor2,     smoothstep( 0.7,    1.0,    terrainHeight*yNormal   ));
 
-    /*     gAlbedo = resColor; */
-    /* } */
+        gAlbedo = resColor;
+    }
 }
