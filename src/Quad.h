@@ -19,14 +19,16 @@ class Quad {
         ~Quad();
 
         void init();
+        void setDim(int dim) {mDim = dim;};
         void render();
         void render(Texture& texture);
         void render(const GLint& shader, Texture& texture);
 
     private:
-        GLuint quadVAO = 0;
+        GLuint quadVAO;
         GLuint quadVBO;
         GLint mQuadProgram;
-        bool mFirstCall = 1;
+        bool mFirstCall;
+        int mDim;
 };
 #endif /* QUAD_H_ */

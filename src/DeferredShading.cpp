@@ -11,6 +11,7 @@ DeferredShading::DeferredShading(const GLint& gBufferProgram, const GLint& defer
     , mGAlbedo()
     , mResolutionX(1278)
     , mResolutionY(986)
+    , mNumLights(32)
 {
     this->mCamera = camera;
     /* std::vector<glm::vec3> lightPositions; */

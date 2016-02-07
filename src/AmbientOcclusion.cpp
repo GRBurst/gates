@@ -1,6 +1,6 @@
 #include "AmbientOcclusion.h"
 
-AmbientOcclusion::AmbientOcclusion(const GLint& occlusionProgram, const GLint& blurProgram, Camera* const camera)
+AmbientOcclusion::AmbientOcclusion(const GLint& occlusionProgram, const GLint& blurProgram, DeferredShading *const deferredShading, Camera *const camera)
     : mOcclusionProgram(occlusionProgram)
     , mBlurProgram(blurProgram)
     , mColorTexture()
@@ -8,6 +8,7 @@ AmbientOcclusion::AmbientOcclusion(const GLint& occlusionProgram, const GLint& b
     , mResolutionX(1278)
     , mResolutionY(986)
 {
+    this->mDeferredShading = deferredShading;
     this->mCamera = camera;
     /* std::vector<glm::vec3> lightPositions; */
     /* std::vector<glm::vec3> lightColors; */
@@ -50,8 +51,9 @@ void AmbientOcclusion::linkTextures()
 
 void AmbientOcclusion::linkTextures(const GLint& shader)
 {
-
-    glUseProgram(shader);
+    mDeferredShading->linkTextures(mOcclusionProgram);
+    mColorTexture.linkTexture(mBlurProgram, "sAmbientColor");
+    /* mBlurTexture.linkTexture(mBlurProgram, "sAmbientBlur"); */
     mNoiseTexture.linkTexture(shader, "sNoiseSamples");
 }
 
@@ -97,7 +99,7 @@ void AmbientOcclusion::bindBlurFBO()
     glBindFramebuffer(GL_FRAMEBUFFER, mBlurFBO);
 }
 
-void AmbientOcclusion::bindFBO()
+void AmbientOcclusion::bindColorFBO()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, mColorFBO);
 }
@@ -126,6 +128,11 @@ void AmbientOcclusion::bindTextures()
     mColorTexture.bind();
     mBlurTexture.bind();
     mNoiseTexture.bind();
+}
+
+void AmbientOcclusion::bindDeferredTextures()
+{
+    mDeferredShading->bindTextures();
 }
 
 void AmbientOcclusion::loadUniforms()

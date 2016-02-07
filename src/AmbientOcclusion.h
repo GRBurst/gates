@@ -10,6 +10,7 @@
 #include <random>
 #include "Camera.h"
 #include "Texture.h"
+#include "DeferredShading.h"
 
 /*
  * Usage:
@@ -21,19 +22,20 @@
 class AmbientOcclusion {
 
     public:
-        AmbientOcclusion(const GLint& occlusionProgram, const GLint& blurProgram, Camera *const camera);
+        AmbientOcclusion(const GLint& occlusionProgram, const GLint& blurProgram, DeferredShading *const deferredShading, Camera *const camera);
         ~AmbientOcclusion();
 
         void init();
         void linkTextures();
         void linkTextures(const GLint& shader);
         void linkBlurredTexture(const GLint& shader);
-        void bindFBO();
+        void bindColorFBO();
         void bindBlurFBO();
         void bindTextures();
         void bindNoiseTexture();
         void bindColorTexture();
         void bindBlurredTexture();
+        void bindDeferredTextures();
         void loadUniforms();
         void loadUniforms(const GLint& shader);
 
@@ -45,6 +47,7 @@ class AmbientOcclusion {
 
     private:
         Camera* mCamera;
+        DeferredShading* mDeferredShading;
         GLint mOcclusionProgram, mBlurProgram;
         GLuint mColorFBO, mBlurFBO;
         Texture mColorTexture, mBlurTexture, mNoiseTexture;

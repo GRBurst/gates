@@ -316,10 +316,10 @@ int main()
     GLint ambientOcclusionShaderProgram = ambientOcclusionShader.linkShaders();
 
     // ambient blur
-    /* Shader ambientBlurShader; */
-    /* ambientBlurShader.loadShader("../src/shader/ambientBlur.vs", Shader::VERTEX); */
-    /* ambientBlurShader.loadShader("../src/shader/ambientBlur.fs", Shader::FRAGMENT); */
-    /* GLint ambientBlurShaderProgram = ambientBlurShader.linkShaders(); */
+    Shader ambientBlurShader;
+    ambientBlurShader.loadShader("../src/shader/ambientBlur.vs", Shader::VERTEX);
+    ambientBlurShader.loadShader("../src/shader/ambientBlur.fs", Shader::FRAGMENT);
+    GLint ambientBlurShaderProgram = ambientBlurShader.linkShaders();
 
     // Skydom
     Shader skydomeShader;
@@ -474,14 +474,11 @@ int main()
     deferredShading.init();
     deferredShading.loadUniforms(pActiveTerrain);
 
-    /* AmbientOcclusion ambientOcclusion(ambientOcclusionShaderProgram, ambientBlurShaderProgram, &camera); */
-    /* deferredShading.linkTextures(ambientOcclusionShaderProgram); */
-    /* ambientOcclusion.linkTextures(); */
-    /* ambientOcclusion.linkBlurredTexture(deferredShadingShaderProgram); */
-    /* ambientOcclusion.init(); */
-    /* ambientOcclusion.initRandomSamples(); */
-
-    /* deferredShading.linkTextures(ambientOcclusionShaderProgram); */
+    AmbientOcclusion ambientOcclusion(ambientOcclusionShaderProgram, ambientBlurShaderProgram, &deferredShading, &camera);
+    ambientOcclusion.linkTextures();
+    ambientOcclusion.init();
+    ambientOcclusion.initRandomSamples();
+    ambientOcclusion.loadUniforms();
 
 
     Quad quad;
@@ -608,20 +605,20 @@ int main()
         /* grass.draw(); */
 
 
-        /* // Ambient occlusion */
-        /* ambientOcclusion.bindFBO(); */
-        /* glUseProgram(ambientOcclusionShaderProgram); */
-        /* deferredShading.bindTextures(); */
-        /* ambientOcclusion.bindNoiseTexture(); */
-        /* ambientOcclusion.loadUniforms(); */
-        /* quad.render(); */
+        // Ambient occlusion
+        ambientOcclusion.bindColorFBO();
+        glUseProgram(ambientOcclusionShaderProgram);
+        ambientOcclusion.bindNoiseTexture();
+        ambientOcclusion.bindDeferredTextures();
+        ambientOcclusion.loadUniforms();
+        quad.render();
 
-        /* // Ambient blur */
-        /* ambientOcclusion.bindBlurFBO(); */
-        /* glClear(GL_COLOR_BUFFER_BIT); */
-        /* glUseProgram(ambientBlurShaderProgram); */
-        /* ambientOcclusion.bindColorTexture(); */
-        /* quad.render(); */
+        // Ambient blur
+        ambientOcclusion.bindBlurFBO();
+        glClear(GL_COLOR_BUFFER_BIT);
+        glUseProgram(ambientBlurShaderProgram);
+        ambientOcclusion.bindColorTexture();
+        quad.render();
 
 
 
@@ -633,7 +630,9 @@ int main()
         /* deferredShading.bindTextures(); */
         /* deferredShading.loadUniforms(deferredShadingShaderProgram); */
 
-        quad.render(deferredShading.getPositionTexture());
+        /* quad.render(deferredShading.getPositionTexture()); */
+        quad.setDim(1);
+        quad.render(ambientOcclusion.getBlurTexture());
 
 
 
