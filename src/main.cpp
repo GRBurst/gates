@@ -6,18 +6,19 @@
 
 /* #include "inputCallback.h" */
 #include "Camera.h"
+#include "Clouds.h"
+#include "DeferredShading.h"
+#include "Grass.h"
+#include "ImprovedPerlinNoise.h"
 #include "ModelLoader.h"
 #include "PerlinNoise.h"
 #include "Portal.h"
 #include "Shader.h"
+#include "SimplexNoise.h"
+#include "Skydome.h"
 #include "Terrain.h"
 #include "Texture.h"
-#include "Grass.h"
 #include "WorleyNoise.h"
-#include "Skydome.h"
-#include "Clouds.h"
-#include "ImprovedPerlinNoise.h"
-#include "SimplexNoise.h"
 
 
 using namespace glm;
@@ -450,89 +451,13 @@ int main()
     /*
      * MRT for deferred shading
      */
-    glUseProgram(deferredShadingShaderProgram);
-    glUniform1i(glGetUniformLocation(deferredShadingShaderProgram, "gPosition"), 10);
-    glUniform1i(glGetUniformLocation(deferredShadingShaderProgram, "gNormal"), 11);
-    glUniform1i(glGetUniformLocation(deferredShadingShaderProgram, "gAlbedo"), 12);
-
-// - Colors
-    const GLuint NR_LIGHTS = 32;
-    std::vector<glm::vec3> lightPositions;
-    std::vector<glm::vec3> lightColors;
-    srand(13);
-    for (GLuint i = 0; i < NR_LIGHTS; i++)
-    {
-        // Calculate slightly random offsets
-        GLfloat xPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
-        GLfloat yPos = ((rand() % 100) / 100.0) * 6.0 - 4.0;
-        GLfloat zPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
-        lightPositions.push_back(glm::vec3(xPos, yPos, zPos));
-        // Also calculate random color
-        GLfloat rColor = ((rand() % 100) / 200.0f) + 0.5; // Between 0.5 and 1.0
-        GLfloat gColor = ((rand() % 100) / 200.0f) + 0.5; // Between 0.5 and 1.0
-        GLfloat bColor = ((rand() % 100) / 200.0f) + 0.5; // Between 0.5 and 1.0
-        lightColors.push_back(glm::vec3(rColor, gColor, bColor));
-    }
-
-
-
-    // Properties
-    const GLuint SCR_WIDTH = 800, SCR_HEIGHT = 600;
-
-    GLuint gBuffer;
-    glGenFramebuffers(1, &gBuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-    GLuint gPosition, gNormal, gAlbedo;//gAlbedoSpec;
-
-    // G-Buffer
+    DeferredShading deferredShading(gBufferShaderProgram, deferredShadingShaderProgram, &camera);
+    deferredShading.linkTextures();
+    deferredShading.initRandomLights();
+    deferredShading.bindFBO();
     pActiveTerrain->loadGBufferMaps(gBufferShaderProgram);
+    deferredShading.init();
 
-    // - Position color buffer
-    glGenTextures(1, &gPosition);
-    glBindTexture(GL_TEXTURE_2D, gPosition);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
-
-    // - Normal color buffer
-    glGenTextures(1, &gNormal);
-    glBindTexture(GL_TEXTURE_2D, gNormal);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
-
-    // - Color buffer
-    glGenTextures(1, &gAlbedo);
-    glBindTexture(GL_TEXTURE_2D, gAlbedo);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedo, 0);
-
-    /* // - Specular color buffer */
-    /* glGenTextures(1, &gAlbedoSpec); */
-    /* glBindTexture(GL_TEXTURE_2D, gAlbedoSpec); */
-    /* glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL); */
-    /* glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); */
-    /* glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); */
-    /* glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, gAlbedoSpec, 0); */
-
-
-    // - Tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
-    GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-    glDrawBuffers(3, attachments);
-
-    // - Create and attach depth buffer (renderbuffer)
-    GLuint gDepth;
-    glGenRenderbuffers(1, &gDepth);
-    glBindRenderbuffer(GL_RENDERBUFFER, gDepth);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, gDepth);
-    // - Finally check if framebuffer is complete
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "Framebuffer not complete!" << std::endl;
 
 
 
@@ -631,7 +556,8 @@ int main()
          * Deferred shading preparitions
          ***************************************************/
         /* glBindFramebuffer(GL_FRAMEBUFFER, 0); */
-        glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+        /* glBindFramebuffer(GL_FRAMEBUFFER, gBuffer); */
+        deferredShading.bindFBO();
         glViewport(0,0,wWidth,wHeight);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -678,44 +604,36 @@ int main()
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         glUseProgram(deferredShadingShaderProgram);
-        glActiveTexture(GL_TEXTURE0+10);
-        glBindTexture(GL_TEXTURE_2D, gPosition);
-        glActiveTexture(GL_TEXTURE1+10);
-        glBindTexture(GL_TEXTURE_2D, gNormal);
-        glActiveTexture(GL_TEXTURE2+10);
-        glBindTexture(GL_TEXTURE_2D, gAlbedo);
+        deferredShading.bindTextures();
+        deferredShading.loadUniforms(deferredShadingShaderProgram);
 
-        // Also send light relevant uniforms
-        for (GLuint i = 0; i < lightPositions.size(); i++)
-        {
-            glUniform3fv(glGetUniformLocation(deferredShadingShaderProgram, ("lights[" + std::to_string(i) + "].Position").c_str()), 1, &lightPositions[i][0]);
-            glUniform3fv(glGetUniformLocation(deferredShadingShaderProgram, ("lights[" + std::to_string(i) + "].Color").c_str()), 1, &lightColors[i][0]);
-            // Update attenuation parameters and calculate radius
-            const GLfloat constant = 1.0; // Note that we don't send this to the shader, we assume it is always 1.0 (in our case)
-            const GLfloat linear = 0.7;
-            const GLfloat quadratic = 1.8;
-            glUniform1f(glGetUniformLocation(deferredShadingShaderProgram, ("lights[" + std::to_string(i) + "].Linear").c_str()), linear);
-            glUniform1f(glGetUniformLocation(deferredShadingShaderProgram, ("lights[" + std::to_string(i) + "].Quadratic").c_str()), quadratic);
-            // Then calculate radius of light volume/sphere
-            const GLfloat lightThreshold = 5.0; // 5 / 256
-            const GLfloat maxBrightness = std::fmaxf(std::fmaxf(lightColors[i].r, lightColors[i].g), lightColors[i].b);
-            GLfloat radius = (-linear + static_cast<float>(std::sqrt(linear * linear - 4 * quadratic * (constant - (256.0 / lightThreshold) * maxBrightness)))) / (2 * quadratic);
-            glUniform1f(glGetUniformLocation(deferredShadingShaderProgram, ("lights[" + std::to_string(i) + "].Radius").c_str()), radius);
-        }
-
-        glUniform3fv(glGetUniformLocation(deferredShadingShaderProgram, "uCamPos"), 1, &camera.getPosition()[0]);
         RenderQuad();
 
 
+        deferredShading.copyDepthBuffer();
         // 2.5. Copy content of geometry's depth buffer to default framebuffer's depth buffer
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // Write to default framebuffer
-        glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        /* glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer); */
+        /* glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // Write to default framebuffer */
+        /* glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST); */
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
 
+        // 3. Render lights on top of scene, by blitting
+        /* shaderLightBox.Use(); */
+        /* glUniformMatrix4fv(glGetUniformLocation(shaderLightBox.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection)); */
+        /* glUniformMatrix4fv(glGetUniformLocation(shaderLightBox.Program, "view"), 1, GL_FALSE, glm::value_ptr(view)); */
+        /* for (GLuint i = 0; i < lightPositions.size(); i++) */
+        /* { */
+        /*     model = glm::mat4(); */
+        /*     model = glm::translate(model, lightPositions[i]); */
+        /*     model = glm::scale(model, glm::vec3(0.25f)); */
+        /*     glUniformMatrix4fv(glGetUniformLocation(shaderLightBox.Program, "model"), 1, GL_FALSE, glm::value_ptr(model)); */
+        /*     glUniform3fv(glGetUniformLocation(shaderLightBox.Program, "lightColor"), 1, &lightColors[i][0]); */
+        /*     RenderCube(); */
+        /* } */
 
 
 
@@ -874,29 +792,29 @@ GLuint quadVAO = 0;
 GLuint quadVBO;
 void RenderQuad()
 {
-	if (quadVAO == 0)
-	{
-		GLfloat quadVertices[] = {
-			// Positions        // Texture Coords
-			-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-			1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-			1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-		};
-		// Setup plane VAO
-		glGenVertexArrays(1, &quadVAO);
-		glGenBuffers(1, &quadVBO);
-		glBindVertexArray(quadVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	}
-	glBindVertexArray(quadVAO);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glBindVertexArray(0);
+    if (quadVAO == 0)
+    {
+        GLfloat quadVertices[] = {
+            // Positions        // Texture Coords
+            -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+            1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+            1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        };
+        // Setup plane VAO
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+    }
+    glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
 }
 
 bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pNextNoise, Terrain*& pActiveTerrain, Terrain*& pNextTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, Grass& grass, const GLint& terrainShaderProgram, const GLint& defaultShaderProgram)
