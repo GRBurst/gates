@@ -5,105 +5,38 @@ layout (location = 2) in vec3 vTangent;
 layout (location = 3) in vec3 vBitangent;
 layout (location = 4) in vec2 vUV;
 
+
 uniform sampler2D sHeightMap;
 uniform sampler2D sNormalMap;
 uniform sampler2D sWhiteNoise;
-uniform mat4 uVMatrix;
-uniform mat4 uVPMatrix;
-uniform mat3 uInvViewMatrix;
-uniform int uHeightMapTerrainRatio;
-uniform int uDrawGrid;
-uniform vec3 uRayTerrainIntersection;
-uniform float uEditMode;
-uniform float uModifyRadius;
-uniform vec3 uCamPos;
-uniform vec3 uLightPos;
 
-out float fHeight;
-out vec2 fUV;
-out vec3 fNormal;
-out vec3 fPos;
-out vec3 wPos;
-out vec3 fLightDir1_ts;
-out vec3 fEyeDir_ts;
-out vec3 tangent_cs;
-out vec3 bitangent_cs;
-out vec3 normal_cs;
-out mat3 invTBN;
-out vec3 eyeDir_ws;
+out vec3 vPositionCS;
+out vec2 vUVCS;
+out vec3 vNormalCS;
+out vec3 vTangentCS;
+out vec3 vBitangentCS;
 
-float getHightScale()
-{
 
-    vec2 ray = vec2(uRayTerrainIntersection.x - vPosition.x, uRayTerrainIntersection.z - vPosition.z);
-    float diff = length(ray);
-    if(diff < uModifyRadius) return (uModifyRadius - diff);
-
-    return 1.0;
-}
-
-void calcTBN()
-{
-
-    vec4 light1_ws = vec4(uLightPos, 1.0f);
-    vec4 camera_ws = vec4(uCamPos, 1.0f);
-    eyeDir_ws = normalize(uCamPos - vPosition);
-
-    vec3 pos_cs = (uVMatrix * vec4(vPosition, 1.0f)).xyz;
-    vec3 camera_cs = (uVMatrix * vec4(uCamPos, 1.0)).xyz;
-    vec3 eyeDir_cs = camera_cs - pos_cs;
-
-    tangent_cs = normalize(mat3(uVMatrix) * vTangent);
-    bitangent_cs = normalize(mat3(uVMatrix) * vBitangent);
-    normal_cs = normalize(mat3(uVMatrix) * vNormal);
-
-    vec3 light1_cs = (uVMatrix * light1_ws).xyz;
-    vec3 lightDir1_cs = light1_cs - pos_cs;
-
-    mat3 TBN = transpose(mat3(
-                tangent_cs,
-                bitangent_cs,
-                normal_cs
-                ));
-
-    invTBN = inverse(TBN);
-    fLightDir1_ts = TBN * lightDir1_cs;
-    fEyeDir_ts = TBN * eyeDir_cs;
-
-}
 
 void main()
 {
 
-    float x         = (5.0 + vPosition.x) / 10.0;
-    float z         = (5.0 + vPosition.z) / 10.0;
 
-    //float height    = texture2D(heightMap, vec2(x, y)).r;
-    float vHeight = vPosition.y;
-
-    //float height = 0.5;
-    //fColor = vec3(height, height, height);
-
-    if (vHeight/3.8 < 0.06) vHeight = 0.06*3.8;
-    vec4 pos = uVPMatrix * vec4(vPosition.x, vHeight, vPosition.z, 1.0);
-
-    fUV = vUV;
-    fNormal = vNormal;
+    vUVCS = vUV;
+    vNormalCS = vNormal;
     //fHeight = getHightScale() * vPosition.y;
-    fHeight = vPosition.y;
 
-    fPos = vec3(pos);
-    wPos = vPosition;
-    calcTBN();
 
-    gl_Position = pos;
-
+    vPositionCS = vPosition;
+    vTangentCS = vTangent;
+    vBitangentCS = vBitangent;
+    
     //fColor = vec3(y, y, y);
     //fColor = vec3(calculateUV(), height);
     //fColor = vec3(calculateUV(), 0.0);
     //fColor = vec3(0.0, 0.0, texture(heightMap, calculateUV()).r);
     //pos.y = texture(heightMap, vec2(0.5, 0.7)).r;
-    //gl_Position = uVPMatrix * vec4(vPosition, 0.0, 1.0);
+//    gl_Position = uVPMatrix * vec4(vPosition, 1.0);
     //gl_Position = uVPMatrix * vec4(vPosition.x, 0.0, -vPosition.y, 1.0);
 }
 

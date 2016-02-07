@@ -289,6 +289,8 @@ int main()
     // Terrain
     Shader terrainShader;
     terrainShader.loadShader("../src/shader/terrain.vs", Shader::VERTEX);
+    terrainShader.loadShader("../src/shader/terrain.tcs", Shader::TESS_CONTROL);
+	terrainShader.loadShader("../src/shader/terrain.tes", Shader::TESS_EVAL);
     terrainShader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT);
     GLint terrainShaderProgram = terrainShader.linkShaders();
 
@@ -358,7 +360,8 @@ int main()
 
     // Setup initial inactive terrain (in portal)
     pNextTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pNextNoise);
-    pNextTerrain->enableNormals();
+//    pNextTerrain->enableNormals();
+    pNextTerrain->enableNormalMap();
     pNextTerrain->computeTerrain();
     pNextTerrain->build();
     pNextTerrain->genHeightMapTexture();
@@ -618,7 +621,8 @@ bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pNextNoise
 
         std::cout << "Generate new terrain" << std::endl;
         Terrain* pNewTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pNextNoise);
-        pNewTerrain->enableNormals();
+        //pNewTerrain->enableNormals();
+        pNewTerrain->enableNormalMap();
         pNewTerrain->computeTerrain();
         pNewTerrain->build();
         pNewTerrain->genHeightMapTexture();

@@ -145,18 +145,19 @@ void Terrain::draw()
     // Bind Attributes
     glBindVertexArray(mVao);
 
+
     if(mDrawGrid == 0)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glUniform1i(muDrawGridLocation, mDrawGrid);
         /* glDrawElements(GL_TRIANGLE_STRIP, mTotalIndices, GL_UNSIGNED_INT, 0); */
-        glDrawElements(GL_TRIANGLES, mTotalIndices, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_PATCHES, mTotalIndices, GL_UNSIGNED_INT, 0);
     }
     else if(mDrawGrid == 1)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glUniform1i(muDrawGridLocation, mDrawGrid);
-        glDrawElements(GL_TRIANGLES, mTotalIndices, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_PATCHES, mTotalIndices, GL_UNSIGNED_INT, 0);
         /* glDrawElements(GL_LINE_STRIP, mTotalIndices, GL_UNSIGNED_INT, 0); */
     }
     else
@@ -167,12 +168,12 @@ void Terrain::draw()
         mDrawGrid = 2;
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glUniform1i(muDrawGridLocation, mDrawGrid);
-        glDrawElements(GL_TRIANGLES, mTotalIndices, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_PATCHES, mTotalIndices, GL_UNSIGNED_INT, 0);
 
         mDrawGrid = 3;
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glUniform1i(muDrawGridLocation, mDrawGrid);
-        glDrawElements(GL_TRIANGLES, mTotalIndices, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_PATCHES, mTotalIndices, GL_UNSIGNED_INT, 0);
     }
 
     glBindVertexArray(0);
@@ -821,6 +822,7 @@ void Terrain::setBuffers()
     // First all positions, then all normals
     glEnableVertexAttribArray(terrainPosAttrib);
     glVertexAttribPointer(terrainPosAttrib, 3, GL_FLOAT, GL_FALSE, mFloatsPerVertex * sizeof(GLfloat), 0);
+    glPatchParameteri(GL_PATCH_VERTICES, 3);
     /* glVertexAttribPointer(terrainPosAttrib, 3, GL_FLOAT, GL_FALSE, mElementsPerVertex * sizeof(glm::vec3), 0); */
     if(mUseNormals)
     {
