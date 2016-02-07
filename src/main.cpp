@@ -442,33 +442,28 @@ int main()
     model.setStandardUniformLocations();
     vec3 sphereTranslation = vec3(0.0, 10.0, 0.0);
     model.translate(sphereTranslation);
+
     GLuint waterFrameBufferLoc;
     glGenFramebuffers(1, &waterFrameBufferLoc);
     glBindFramebuffer(GL_FRAMEBUFFER, waterFrameBufferLoc);
 
-    GLuint waterReflectionTextureLoc;
-    glGenTextures(1, &waterReflectionTextureLoc);
-    glBindTexture(GL_TEXTURE_2D, waterReflectionTextureLoc);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, 512, 512,0,GL_RGB, GL_UNSIGNED_BYTE, 0);
-    glActiveTexture(GL_TEXTURE0 + 8);
-    glBindTexture(GL_TEXTURE_2D, 8);
+    Texture waterReflectionTexture;
+    waterReflectionTexture.bind();
+    waterReflectionTexture.setResolution(512, 512);
+    waterReflectionTexture.loadWaterOptions();
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, waterReflectionTexture.getTexture(), 0);
+
+    GLuint DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+    glDrawBuffers(1, DrawBuffers);
 
     GLuint depthRenderBufferLoc;
     glGenRenderbuffers(1, &depthRenderBufferLoc);
     glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBufferLoc);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 512, 512);
-
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,waterReflectionTextureLoc, 0);
-
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBufferLoc);
-    GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-    glDrawBuffers(1, DrawBuffers);
 
-    glBindRenderbuffer(GL_RENDERBUFFER,0);
+    /* glBindRenderbuffer(GL_RENDERBUFFER,0); */
     glBindFramebuffer(GL_FRAMEBUFFER,0);
     // Main (frame) loop
     float oldTime, newTime;
