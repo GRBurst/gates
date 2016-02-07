@@ -1,0 +1,47 @@
+#version 410 core
+layout (vertices = 3) out;
+in vec3 vPositionCS[];
+in vec2 vUVCS[];
+in vec3 vNormalCS[];
+in vec3 vTangentCS[];
+in vec3 vBitangentCS[];
+
+out vec3 vPositionES[];
+out vec2 vUVES[];
+out vec3 vNormalES[];
+out vec3 vTangentES[];
+out vec3 vBitangentES[];
+
+uniform vec3 uCamPos;
+
+
+float setTessLevel(float dist0, float dist1)
+{
+    float avg = (dist0 + dist1) / 2.0;
+
+    if (avg <= 2.0) {
+        return 8.0;
+    }
+    else if (avg <= 5.0) {
+        return 5.0;
+    }
+    else {
+        return 3.0;
+    }
+}
+void main(){
+	vPositionES[gl_InvocationID] = vPositionCS[gl_InvocationID];
+	vUVES[gl_InvocationID] = vUVCS[gl_InvocationID];
+	vNormalES[gl_InvocationID] = vNormalCS[gl_InvocationID];
+	vTangentES[gl_InvocationID] = vTangentCS[gl_InvocationID];
+	vBitangentES[gl_InvocationID] = vBitangentCS[gl_InvocationID];
+	float EyeToVertexDistance0 = distance(uCamPos, vPositionES[0]);
+    float EyeToVertexDistance1 = distance(uCamPos, vPositionES[1]);
+    float EyeToVertexDistance2 = distance(uCamPos, vPositionES[2]);
+
+    // Calculate the tessellation levels
+    gl_TessLevelOuter[0] = setTessLevel(EyeToVertexDistance1, EyeToVertexDistance2);
+    gl_TessLevelOuter[1] = setTessLevel(EyeToVertexDistance2, EyeToVertexDistance0);
+    gl_TessLevelOuter[2] = setTessLevel(EyeToVertexDistance0, EyeToVertexDistance1);
+    gl_TessLevelInner[0] = gl_TessLevelOuter[2];
+}

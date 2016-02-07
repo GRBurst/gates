@@ -1,0 +1,84 @@
+#version 410 core
+layout (triangles, equal_spacing, ccw) in;
+
+uniform sampler2D sHeightMap;
+uniform sampler2D sWhiteNoise;
+uniform float gDispFactor;
+uniform mat4 uVMatrix;
+uniform mat4 uVPMatrix;
+uniform mat3 uInvViewMatrix;
+uniform int uHeightMapTerrainRatio;
+uniform int uDrawGrid;
+uniform vec3 uRayTerrainIntersection;
+uniform float uEditMode;
+uniform float uModifyRadius;
+uniform vec3 uCamPos;
+uniform vec3 uLightPos;
+
+in vec3 vPositionES[];
+in vec2 vUVES[];
+in vec3 vNormalES[];
+in vec3 vTangentES[];
+in vec3 vBitangentES[];
+
+out vec2 fUV;
+out vec3 fNormal;
+out vec3 fPos;
+out vec3 wPos;
+out vec3 fLightDir1_ts;
+out vec3 fEyeDir_ts;
+out vec3 tangent_cs;
+out vec3 bitangent_cs;
+out vec3 normal_cs;
+out mat3 invTBN;
+out vec3 eyeDir_ws;
+
+vec2 interpolate2D(vec2 v0, vec2 v1, vec2 v2)
+{
+    return vec2(gl_TessCoord.x) * v0 + vec2(gl_TessCoord.y) * v1 + vec2(gl_TessCoord.z) * v2;
+}
+vec3 interpolate3D(vec3 v0, vec3 v1, vec3 v2)
+{
+    return vec3(gl_TessCoord.x) * v0 + vec3(gl_TessCoord.y) * v1 + vec3(gl_TessCoord.z) * v2;
+} 
+void calcTBN()
+{
+
+    vec4 light1_ws = vec4(uLightPos, 1.0f);
+    vec4 camera_ws = vec4(uCamPos, 1.0f);
+    eyeDir_ws = normalize(uCamPos - fPos);
+
+    vec3 pos_cs = (uVMatrix * vec4(fPos, 1.0f)).xyz;
+    vec3 camera_cs = (uVMatrix * vec4(uCamPos, 1.0)).xyz;
+    vec3 eyeDir_cs = camera_cs - pos_cs;
+
+    vec3 tangent_cs = normalize(mat3(uVMatrix) * interpolate3D(vTangentES[0], vTangentES[1], vTangentES[2]));
+    vec3 bitangent_cs = normalize(mat3(uVMatrix) * interpolate3D(vBitangentES[0], vBitangentES[1], vBitangentES[2]));
+    vec3 normal_cs = normalize(mat3(uVMatrix) * fNormal);
+
+    vec3 light1_cs = (uVMatrix * light1_ws).xyz;
+    vec3 lightDir1_cs = light1_cs - pos_cs;
+
+    mat3 TBN = transpose(mat3(
+                tangent_cs,
+                bitangent_cs,
+                normal_cs
+                ));
+
+    fLightDir1_ts = TBN * lightDir1_cs;
+    fEyeDir_ts = TBN * eyeDir_cs;
+
+}
+void main()
+{
+	
+	fUV = interpolate2D(vUVES[0], vUVES[1], vUVES[2]);
+	fNormal = interpolate3D(vNormalES[0], vNormalES[1], vNormalES[2]);
+	fNormal = normalize(fNormal);
+	fPos = interpolate3D(vPositionES[0], vPositionES[1], vPositionES[2]);
+	float displacement = texture(sWhiteNoise, 4*fUV).r;
+	calcTBN();
+    fPos += fNormal * displacement*0.02;
+	wPos = fPos;
+    gl_Position = uVPMatrix * vec4(fPos, 1.0);
+}
