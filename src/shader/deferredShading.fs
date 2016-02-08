@@ -5,6 +5,7 @@ in vec2 fUV;
 uniform sampler2D uGPosition;
 uniform sampler2D uGNormal;
 uniform sampler2D uGAlbedo;
+uniform sampler2D uAmbientBlur;
 
 struct Light {
     vec3 Position;
@@ -22,42 +23,58 @@ uniform int draw_mode;
 
 void main()
 {
-    vec2 TexCoords = fUV;
-    vec3 viewPos = uCamPos;
     // Retrieve data from gbuffer
-    vec3 FragPos = texture(uGPosition, TexCoords).rgb;
-    vec3 Normal = texture(uGNormal, TexCoords).rgb;
-    vec3 Diffuse = texture(uGAlbedo, TexCoords).rgb;
-    float Specular = 0.3;//texture(gAlbedoSpec, TexCoords).a;
+    vec3 screenPos_cs  = texture(uGPosition, fUV).rgb;     // camera coords
+    vec3 normal     = texture(uGNormal, fUV).rgb;       // world space?!
+    float depth     = texture(uGPosition, fUV).a;       // depth
+
+    vec3 diffBase          = texture(uGAlbedo, fUV).rgb;
+    float occlusionFactor   = texture(uAmbientBlur, fUV).r;
+    float specularFactor    = 0.3;//texture(gAlbedoSpec, fUV).a;
 
     // Then calculate lighting as usual
-    vec3 lighting  = Diffuse * 0.3; // hard-coded ambient component
-    vec3 viewDir  = normalize(viewPos - FragPos);
+    /* vec3 resColor   = vec3(occlusionFactor * 0.3); */
+    /* vec3 resColor   = occlusionFactor * diffLight; */
+    vec3 diffLight   = occlusionFactor * diffBase;
+    vec3 viewDir    = normalize(-screenPos_cs);
+
+    // Compute lights
     for(int i = 0; i < NR_LIGHTS; ++i)
     {
-        // Calculate distance between light source and current fragment
-        float distance = length(lights[i].Position - FragPos);
+        float distance = length(lights[i].Position - screenPos_cs);
+
         if(distance < lights[i].Radius)
         {
-            // Diffuse
-            vec3 lightDir = normalize(lights[i].Position - FragPos);
-            vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * lights[i].Color;
-            // Specular
-            vec3 halfwayDir = normalize(lightDir + viewDir);
-            float spec = pow(max(dot(Normal, halfwayDir), 0.0), 16.0);
-            vec3 specular = lights[i].Color * spec * Specular;
-            // Attenuation
-            float attenuation = 1.0 / (1.0 + lights[i].Linear * distance + lights[i].Quadratic * distance * distance);
-            diffuse *= attenuation;
-            specular *= attenuation;
-            lighting += diffuse + specular;
+            // diffuse
+            /* vec3 lightDir       = normalize(lights[i].Position - screenPos_cs); */
+            /* float intDiff       = max(dot(normalize(normal), lightDir), 0.0); */
+            /* diffLight           = intDiff * diffLight;// * lights[i].Color; */
+            /* vec3 reflectDir     = reflect(-lightDir, normal); */
+            /* float cosAlpha_ts   = clamp( dot( eye_ts, reflection_ts ), 0, 1 ); */
+            /* diffLight       =  * diffLight * lights[i].Color; */
+            /* diffLight = intDiff * lights[i].Color; */
+
+            // specular
+            /* vec3 halfwayDir = normalize(lightDir + viewDir); */
+            /* float spec      = pow(max(dot(normal, halfwayDir), 0.0), 16.0); */
+            /* vec3 specular   = lights[i].Color * spec * specularFactor; */
+
+            // attenuation
+            /* float attenuation = 1.0 / (1.0 + lights[i].Linear * distance + lights[i].Quadratic * distance * distance); */
+
+            // Resulting light / color
+            /* diffLight   *= attenuation; */
+            /* specular    *= attenuation; */
+            /* resColor    += diffLight + specular; */
+
         }
     }
 
-    // Based on which of the 1-5 keys we pressed, show final result or intermediate g-buffer textures
-    color = vec4(lighting, 1.0);
-    /* color = vec4(FragPos, 1.0); */
-    /* color = vec4(Normal, 1.0); */
-    /* color = vec4(Diffuse, 1.0); */
-    /* color = vec4(vec3(Specular), 1.0); */
+    /* color = vec4(resColor, 1.0); */
+    /* color = vec4(screenPos_cs, 1.0); */
+    /* color = vec4(normal, 1.0); */
+    /* color = vec4(diffBase, 1.0); */
+    color = vec4(diffLight, 1.0);
+    /* color = vec4(vec3(depth), 1.0); */
+    /* color = vec4(vec3(occlusionFactor), 1.0); */
 }

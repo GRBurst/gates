@@ -5,7 +5,7 @@ Camera::Camera() :
     mPos(glm::vec3(0.0f, 1.0f, 0.0f))
     , mViewDir(glm::vec3(0.0f, 0.0f, -1.0f))
     , mNearPlane(0.1f)
-    , mFarPlane(1000.0f)
+    , mFarPlane(100.0f)
     , mHFoV(45.0f)
     , mAspectRatio(16.0/9.0f)
     , mHorizontalAngle(3.14f)

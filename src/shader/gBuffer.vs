@@ -6,6 +6,7 @@ layout (location = 3) in vec3 vBitangent;
 layout (location = 4) in vec2 vUV;
 
 out vec3 wPos;
+out vec4 fPos;
 out vec2 fUV;
 out vec3 fNormal;
 out mat3 fTBN;
@@ -26,11 +27,12 @@ mat3 calcTBN()
 //                bitangent_ws,
 //                normal_ws
 //                );
-    tangent_cs = normalize(mat3(uVMatrix) * vTangent);
-    bitangent_cs = normalize(mat3(uVMatrix) * vBitangent);
-    normal_cs = normalize(mat3(uVMatrix) * vNormal);
+    vec3 tangent_cs = normalize(mat3(uVMatrix) * vTangent);
+    vec3 bitangent_cs = normalize(mat3(uVMatrix) * vBitangent);
+    vec3 normal_cs = normalize(mat3(uVMatrix) * vNormal);
+    fNormal = normal_cs;
 
-    mat3 TBN = transpose(mat3(
+    return transpose(mat3(
                 tangent_cs,
                 bitangent_cs,
                 normal_cs
@@ -41,9 +43,13 @@ mat3 calcTBN()
 void main()
 {
     wPos = vPosition;
+    fPos = uVMatrix * vec4(vPosition, 1.0);
     fUV = vUV;
     fNormal = vNormal;
+    //fNormal = mat3(uVMatrix) * vNormal;
     gl_Position = uVPMatrix * vec4(vPosition, 1.0);
+    //gl_Position = uVMatrix * vec4(vPosition, 1.0);
 
-    //mat3 fTBN = calcTBN();
+    fTBN = mat3(1.0);
+    //fTBN = calcTBN();
 }

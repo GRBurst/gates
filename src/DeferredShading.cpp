@@ -9,8 +9,9 @@ DeferredShading::DeferredShading(const GLint& gBufferProgram, const GLint& defer
     , mGPosition()
     , mGNormal()
     , mGAlbedo()
-    , mResolutionX(1278)
-    , mResolutionY(986)
+    , mResolutionX(1280)
+    , mResolutionY(1024)
+    , mNumLights(32)
 {
     this->mCamera = camera;
     /* std::vector<glm::vec3> lightPositions; */
@@ -28,7 +29,7 @@ void DeferredShading::init()
 
     mGPosition.bind();
     mGPosition.setResolution(mResolutionX, mResolutionY);
-    mGPosition.loadGPositionOptions();
+    mGPosition.loadGDepthPositionOptions();
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mGPosition.getTexture(), 0);
 
     mGNormal.bind();
@@ -86,7 +87,7 @@ void DeferredShading::initRandomLights()
     {
         // Calculate slightly random offsets
         GLfloat xPos = ((rand() % 50)) - 25.0;
-        GLfloat yPos = 1.0;
+        GLfloat yPos = 10.0;
         GLfloat zPos = ((rand() % 50)) - 25.0;
         lightPositions.push_back(glm::vec3(xPos, yPos, zPos));
         // Also calculate random color
@@ -109,29 +110,39 @@ void DeferredShading::bindTextures()
     mGAlbedo.bind();
 }
 
-void DeferredShading::loadUniforms(const GLint& shader)
+void DeferredShading::loadUniforms(Terrain *const terrain)
 {
-        // Also send light relevant uniforms
-        for (GLuint i = 0; i < lightPositions.size(); i++)
-        {
-            glUniform3fv(glGetUniformLocation(shader, ("lights[" + std::to_string(i) + "].Position").c_str()), 1, &lightPositions[i][0]);
-            glUniform3fv(glGetUniformLocation(shader, ("lights[" + std::to_string(i) + "].Color").c_str()), 1, &lightColors[i][0]);
-            // Update attenuation parameters and calculate radius
-            const GLfloat constant = 1.0; // Note that we don't send this to the shader, we assume it is always 1.0 (in our case)
-            const GLfloat linear = 0.7;
-            const GLfloat quadratic = 1.8;
-            glUniform1f(glGetUniformLocation(shader, ("lights[" + std::to_string(i) + "].Linear").c_str()), linear);
-            glUniform1f(glGetUniformLocation(shader, ("lights[" + std::to_string(i) + "].Quadratic").c_str()), quadratic);
-            // Then calculate radius of light volume/sphere
-            const GLfloat lightThreshold = 5.0; // 5 / 256
-            const GLfloat maxBrightness = std::fmaxf(std::fmaxf(lightColors[i].r, lightColors[i].g), lightColors[i].b);
-            GLfloat radius = (-linear + static_cast<float>(std::sqrt(linear * linear - 4 * quadratic * (constant - (256.0 / lightThreshold) * maxBrightness)))) / (2 * quadratic);
-            glUniform1f(glGetUniformLocation(shader, ("lights[" + std::to_string(i) + "].Radius").c_str()), radius);
-        }
+    loadUniforms(mGBufferProgram, terrain);
+}
 
-        /* glUniform3fv(glGetUniformLocation(shader, "uCamPos"), 1, &(mCamera->getPosition()[0])); */
-        glm::vec3 camPos = mCamera->getPosition();
-        glUniform3f(glGetUniformLocation(shader, "uCamPos"), camPos.x, camPos.y, camPos.z);
+void DeferredShading::loadUniforms(const GLint& shader, Terrain *const terrain)
+{
+    glUseProgram(shader);
+    // Also send light relevant uniforms
+    for (GLuint i = 0; i < lightPositions.size(); i++)
+    {
+        glUniform3fv(glGetUniformLocation(shader, ("lights[" + std::to_string(i) + "].Position").c_str()), 1, &lightPositions[i][0]);
+        glUniform3fv(glGetUniformLocation(shader, ("lights[" + std::to_string(i) + "].Color").c_str()), 1, &lightColors[i][0]);
+        // Update attenuation parameters and calculate radius
+        const GLfloat constant = 1.0; // Note that we don't send this to the shader, we assume it is always 1.0 (in our case)
+        const GLfloat linear = 0.7;
+        const GLfloat quadratic = 1.8;
+        glUniform1f(glGetUniformLocation(shader, ("lights[" + std::to_string(i) + "].Linear").c_str()), linear);
+        glUniform1f(glGetUniformLocation(shader, ("lights[" + std::to_string(i) + "].Quadratic").c_str()), quadratic);
+        // Then calculate radius of light volume/sphere
+        const GLfloat lightThreshold = 5.0; // 5 / 256
+        const GLfloat maxBrightness = std::fmaxf(std::fmaxf(lightColors[i].r, lightColors[i].g), lightColors[i].b);
+        GLfloat radius = (-linear + static_cast<float>(std::sqrt(linear * linear - 4 * quadratic * (constant - (256.0 / lightThreshold) * maxBrightness)))) / (2 * quadratic);
+        glUniform1f(glGetUniformLocation(shader, ("lights[" + std::to_string(i) + "].Radius").c_str()), radius);
+    }
+
+    glUniform3fv(glGetUniformLocation(shader, "uCamPos"), 1, &(mCamera->getPosition()[0]));
+    glUniform3fv(glGetUniformLocation(shader, "uRayTerrainIntersection"), 1, &(terrain->getRayTerrainIntersection()[0]));
+    glUniform1f(glGetUniformLocation(shader, "uNearPlane"), mCamera->getNearPlane());
+    glUniform1f(glGetUniformLocation(shader, "uFarPlane"), mCamera->getFarPlane());
+    glUniform1f(glGetUniformLocation(shader, "uEditMode"), terrain->getEditMode());
+    glUniform1f(glGetUniformLocation(shader, "uModifyRadius"), terrain->getModifyRadius());
+    terrain->loadGBufferMaps(shader);
 
 }
 
@@ -139,6 +150,6 @@ void DeferredShading::copyDepthBuffer(const GLuint& destinationFBO)
 {
         // 2.5. Copy content of geometry's depth buffer to default framebuffer's depth buffer
         glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, destinationFBO);
         glBlitFramebuffer(0, 0, mResolutionX, mResolutionY, 0, 0, mResolutionX, mResolutionY, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 }

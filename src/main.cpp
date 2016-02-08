@@ -5,6 +5,7 @@
 #include <chrono>
 
 /* #include "inputCallback.h" */
+#include "AmbientOcclusion.h"
 #include "Camera.h"
 #include "Clouds.h"
 #include "DeferredShading.h"
@@ -43,7 +44,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_callback(GLFWwindow* window, double mouseXPosition, double mouseYPosition);
 bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pNextNoise, Terrain*& pActiveTerrain, Terrain*& pNextTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, Grass& grass, const GLint& terrainShaderProgram, const GLint& defaultShaderProgram);
-void RenderQuad();
 
 void debugCallback(GLenum source, GLenum type, GLuint id,
                    GLenum severity, GLsizei length,
@@ -293,7 +293,7 @@ int main()
     Shader terrainShader;
     terrainShader.loadShader("../src/shader/terrain.vs", Shader::VERTEX);
     terrainShader.loadShader("../src/shader/terrain.tcs", Shader::TESS_CONTROL);
-	terrainShader.loadShader("../src/shader/terrain.tes", Shader::TESS_EVAL);
+    terrainShader.loadShader("../src/shader/terrain.tes", Shader::TESS_EVAL);
     terrainShader.loadShader("../src/shader/terrain.fs", Shader::FRAGMENT);
     GLint terrainShaderProgram = terrainShader.linkShaders();
 
@@ -308,6 +308,18 @@ int main()
     deferredShadingShader.loadShader("../src/shader/deferredShading.vs", Shader::VERTEX);
     deferredShadingShader.loadShader("../src/shader/deferredShading.fs", Shader::FRAGMENT);
     GLint deferredShadingShaderProgram = deferredShadingShader.linkShaders();
+
+    // ambient occlusion
+    Shader ambientOcclusionShader;
+    ambientOcclusionShader.loadShader("../src/shader/ambientOcclusion.vs", Shader::VERTEX);
+    ambientOcclusionShader.loadShader("../src/shader/ambientOcclusion.fs", Shader::FRAGMENT);
+    GLint ambientOcclusionShaderProgram = ambientOcclusionShader.linkShaders();
+
+    // ambient blur
+    Shader ambientBlurShader;
+    ambientBlurShader.loadShader("../src/shader/ambientBlur.vs", Shader::VERTEX);
+    ambientBlurShader.loadShader("../src/shader/ambientBlur.fs", Shader::FRAGMENT);
+    GLint ambientBlurShaderProgram = ambientBlurShader.linkShaders();
 
     // Skydom
     Shader skydomeShader;
@@ -357,9 +369,9 @@ int main()
 
     SimplexNoise* noiseWater3D = new SimplexNoise(noiseDimX * 2, noiseDimY * 2, 16, seed);
     noiseWater3D->setOctavesFreqAmp(4, 128, 1);
-	noiseWater3D->setScale(true);
-	noiseWater3D->generateTileableNoiseImage(2);
-	noiseWater3D->calculateNormalMap();
+    noiseWater3D->setScale(true);
+    noiseWater3D->generateTileableNoiseImage(2);
+    noiseWater3D->calculateNormalMap();
 
     pActiveTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pActiveNoise);
     /* pActiveTerrain->enableNormals(); */
@@ -371,9 +383,9 @@ int main()
     pActiveTerrain->saveNoiseToFile("Terrain1.tga");
     pActiveTerrain->linkHeightMapTexture(defaultShaderProgram);
     //Setup Water Noise in Terrain
-	pActiveTerrain->loadWater3DNoise(noiseWater3D);
-	pActiveTerrain->loadWaterNormal3DNoise(noiseWater3D);
-	// Setup initial terrain
+    pActiveTerrain->loadWater3DNoise(noiseWater3D);
+    pActiveTerrain->loadWaterNormal3DNoise(noiseWater3D);
+    // Setup initial terrain
     /* pActiveTerrain->debug(); */
 
     // Setup worled (cell) noise for second terrain
@@ -383,7 +395,7 @@ int main()
 
     // Setup initial inactive terrain (in portal)
     pNextTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pNextNoise);
-//    pNextTerrain->enableNormals();
+    //    pNextTerrain->enableNormals();
     pNextTerrain->enableNormalMap();
     pNextTerrain->computeTerrain();
     pNextTerrain->build();
@@ -430,13 +442,13 @@ int main()
     // Skydome 2 initialization
     Skydome skydome2(skydomeShaderProgram, &camera);
     skydome2.generateGeometry(noiseDimX / 3 - 5, 32, 32);
-    skydome2.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
+    skydome2.loadTexture(noise3D->getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
     skydome2.setBuffers();
 
     // Skydome 3 initialization
     Skydome skydome3(skydomeShaderProgram, &camera);
     skydome3.generateGeometry(noiseDimX / 3 - 10, 32, 32);
-    skydome3.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
+    skydome3.loadTexture(noise3D->getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
     skydome3.setBuffers();
 
     // Clouds initialization
@@ -463,14 +475,23 @@ int main()
     /*
      * MRT for deferred shading
      */
-    /* DeferredShading deferredShading(gBufferShaderProgram, deferredShadingShaderProgram, &camera); */
+    /* DeferredShading deferredShading(gBufferShaderProgram, deferredShadingShaderProgram, &camera ); */
     /* deferredShading.linkTextures(); */
     /* deferredShading.initRandomLights(); */
     /* deferredShading.bindFBO(); */
-    /* pActiveTerrain->loadGBufferMaps(gBufferShaderProgram); */
     /* deferredShading.init(); */
+    /* deferredShading.loadUniforms(pActiveTerrain); */
+
+    /* AmbientOcclusion ambientOcclusion(ambientOcclusionShaderProgram, ambientBlurShaderProgram, &deferredShading, &camera); */
+    /* ambientOcclusion.linkTextures(); */
+    /* ambientOcclusion.linkBlurredTexture(deferredShadingShaderProgram); */
+    /* ambientOcclusion.init(); */
+    /* ambientOcclusion.initRandomSamples(); */
+    /* ambientOcclusion.loadUniforms(); */
 
 
+    /* Quad quad; */
+    /* quad.init(); */
 
 
 
@@ -543,7 +564,7 @@ int main()
 
     waterReflectionTexture.linkTexture(terrainShaderProgram, "sReflectionMap");
     Quad quad;
-	quad.init();
+    quad.init();
 
     // Main (frame) loop
     float oldTime, newTime;
@@ -591,14 +612,16 @@ int main()
          * Start rendering
          ***************************************************/
 
+        /* pActivePortal->enableStencil(); */
+
         /***************************************************
          * Deferred shading preparitions
          ***************************************************/
         /* glBindFramebuffer(GL_FRAMEBUFFER, 0); */
         /* glBindFramebuffer(GL_FRAMEBUFFER, gBuffer); */
-        deferredShading.bindFBO();
-        glViewport(0,0,wWidth,wHeight);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        /* deferredShading.bindFBO(); */
+        /* glViewport(0,0,wWidth,wHeight); */
+        /* glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); */
 
         // Portal
         /* pActivePortal->drawPortal(); */
@@ -614,26 +637,74 @@ int main()
         /* pActiveTerrain->setGrid(gDrawGrid); */
         /* pActiveTerrain->draw(gBufferShaderProgram); */
 
-        glBindFramebuffer(GL_FRAMEBUFFER, waterFrameBufferLoc);
-        waterReflectionTexture.bind();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glDisable(GL_DEPTH_TEST);
+        /* glBindFramebuffer(GL_FRAMEBUFFER, waterFrameBufferLoc); */
+        /* waterReflectionTexture.bind(); */
+        /* glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); */
+        /* glDisable(GL_DEPTH_TEST); */
 
-        glFrontFace(GL_CW);
-        skydome3.drawReflection();
-        pActiveTerrain->setGrid(gDrawGrid);
-		pActiveTerrain->drawReflection();
-        glFrontFace(GL_CCW);
+        /* glFrontFace(GL_CW); */
+        /* skydome3.drawReflection(); */
+        /* deferredShading.loadUniforms(pActiveTerrain); */
+        /* pActiveTerrain->setGrid(gDrawGrid); */
+        /* pActiveTerrain->drawReflection(); */
+        /* glFrontFace(GL_CCW); */
 
-        glEnable(GL_DEPTH_TEST);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        /* glEnable(GL_DEPTH_TEST); */
+        /* glBindFramebuffer(GL_FRAMEBUFFER, 0); */
         // Active terrain
-        pActiveTerrain->setGrid(gDrawGrid);
-        pActiveTerrain->draw();
-//        quad.render(waterReflectionTexture);
+        /* pActiveTerrain->setGrid(gDrawGrid); */
+        /* pActiveTerrain->draw(); */
+        //        quad.render(waterReflectionTexture);
         // Grass
         /* grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix()); */
         /* grass.draw(); */
+
+
+        /* // Ambient occlusion */
+        /* ambientOcclusion.bindColorFBO(); */
+        /* glUseProgram(ambientOcclusionShaderProgram); */
+        /* ambientOcclusion.bindNoiseTexture(); */
+        /* ambientOcclusion.bindDeferredTextures(); */
+        /* ambientOcclusion.loadUniforms(); */
+        /* quad.render(); */
+
+        /* // Ambient blur */
+        /* ambientOcclusion.bindBlurFBO(); */
+        /* glClear(GL_COLOR_BUFFER_BIT); */
+        /* glUseProgram(ambientBlurShaderProgram); */
+        /* ambientOcclusion.bindColorTexture(); */
+        /* quad.render(); */
+
+
+
+        // Debug with quad
+        /* glBindFramebuffer(GL_FRAMEBUFFER, 0); */
+        /* glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); */
+        /* glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); */
+        /* quad.render(deferredShading.getPositionTexture()); */
+        /* quad.render(deferredShading.getNormalTexture()); */
+        /* quad.render(deferredShading.getAlbedoTexture()); */
+        /* quad.setDim(1); quad.render(ambientOcclusion.getColorTexture()); */
+        /* quad.setDim(1); quad.render(ambientOcclusion.getBlurTexture()); */
+
+
+
+        // Final deferred rendering step
+        /* glBindFramebuffer(GL_FRAMEBUFFER, 0); */
+        /* glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); */
+        /* glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); */
+
+        /* glUseProgram(deferredShadingShaderProgram); */
+        /* deferredShading.bindTextures(); */
+        /* ambientOcclusion.bindBlurredTexture(); */
+        /* deferredShading.loadUniforms(deferredShadingShaderProgram, pActiveTerrain); */
+
+        /* quad.render(); */
+
+
+
+
+
 
 
 
@@ -657,26 +728,28 @@ int main()
 
 
         // 2. Lighting Pass: calculate lighting by iterating over a screen filled quad pixel-by-pixel using the gbuffer's content.
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        /* glBindFramebuffer(GL_FRAMEBUFFER, 0); */
+        /* glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); */
+        /* glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); */
 
-        glUseProgram(deferredShadingShaderProgram);
-        deferredShading.bindTextures();
-        deferredShading.loadUniforms(deferredShadingShaderProgram);
+        /* glUseProgram(deferredShadingShaderProgram); */
+        /* deferredShading.bindTextures(); */
+        /* ambientOcclusion.bindBlurredTexture(); */
+        /* deferredShading.loadUniforms(deferredShadingShaderProgram, pActiveTerrain); */
 
-        RenderQuad();
+        /* /1* quad.render(deferredShading.getAlbedoTexture()); *1/ */
+        /* quad.render(); */
 
 
-        deferredShading.copyDepthBuffer();
+        /* deferredShading.copyDepthBuffer(); */
         // 2.5. Copy content of geometry's depth buffer to default framebuffer's depth buffer
         /* glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer); */
         /* glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // Write to default framebuffer */
         /* glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST); */
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
 
+        /* glBindFramebuffer(GL_FRAMEBUFFER, 0); */
         // 3. Render lights on top of scene, by blitting
         /* shaderLightBox.Use(); */
         /* glUniformMatrix4fv(glGetUniformLocation(shaderLightBox.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection)); */
@@ -701,89 +774,99 @@ int main()
 
 
 
+        /***************************************************
+         * Start rendering
+         ***************************************************/
+
+        pActivePortal->enableStencil();
 
         /***************************************************
          * Draw main scene
          ***************************************************/
-        /* glBindFramebuffer(GL_FRAMEBUFFER, 0); */
-        /* glStencilMask(0xFF); */
-        /* glClearStencil(0); */
-        /* glClearColor(0.0, 0.0, 0.0, 1.0); */
-        /* glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); */
+        pActivePortal->renderOutside();
 
-        /* pActivePortal->enableStencil(); */
-        /* pActivePortal->renderOutside(); */
-
-        /* // Portal */
-        /* pActivePortal->drawPortal(); */
-        /* pInactivePortal->drawPortal(); */
-
-        /* // Sphere */
-        /* model.setProjection(camera.getProjectionMatrix()); */
-        /* model.setView(camera.getViewMatrix()); */
-        /* model.draw(); */
-
-        /* // Active terrain */
-        /* pActiveTerrain->setGrid(gDrawGrid); */
-        /* pActiveTerrain->draw(); */
-
-        /* // Grass */
-        /* grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix()); */
-        /* /1* grass.draw(); *1/ */
-
-        /* // Skydome */
-        /* glEnable(GL_BLEND); */
-        /* glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); */
-        /* skydome.draw(); */
-        /* skydome2.draw(); */
-        /* skydome3.draw(); */
-        /* glDisable(GL_BLEND); */
-
-
-        /* // Draw in stencil pattern (in portal) */
-
-
-        /***************************************************
-         * Draw inside portal.
-         ***************************************************/
-        /* pActivePortal->renderInside(); */
-
-        /* // Portal */
-        /* pActivePortal->drawPortal(); */
-        /* pInactivePortal->drawPortal(); */
-
+        // Portal
+        pActivePortal->drawPortal();
+        pInactivePortal->drawPortal();
 
         // Sphere
         model.setProjection(camera.getProjectionMatrix());
         model.setView(camera.getViewMatrix());
         model.draw();
 
-        /* // Inactive or next terrain */
-        /* pNextTerrain->setGrid(gDrawGrid); */
-        /* pNextTerrain->draw(); */
+        glBindFramebuffer(GL_FRAMEBUFFER, waterFrameBufferLoc);
+        waterReflectionTexture.bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
 
-        /* // Grass */
-        /* grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix()); */
-        /* /1* grass.draw(); *1/ */
+        glFrontFace(GL_CW);
+        skydome3.drawReflection();
+        pActiveTerrain->setGrid(gDrawGrid);
+        pActiveTerrain->drawReflection();
+        glFrontFace(GL_CCW);
 
-        /* // Skydome */
-        /* glEnable(GL_BLEND); */
-        /* glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); */
-        /* skydome.draw(); */
-        /* skydome2.draw(); */
-        /* skydome3.draw(); */
-        /* glDisable(GL_BLEND); */
+        glEnable(GL_DEPTH_TEST);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        // Active terrain
+        pActiveTerrain->setGrid(gDrawGrid);
+        pActiveTerrain->draw();
+        //        quad.render(waterReflectionTexture);
+        // Grass
+        grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
+        grass.draw();
+
+        // Skydome
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        skydome.draw();
+        skydome2.draw();
+        skydome3.draw();
+        glDisable(GL_BLEND);
 
 
-        /* // Disable stencil test */
+        // Draw in stencil pattern (in portal)
+
+
+        /***************************************************
+         * Draw inside portal.
+         ***************************************************/
+        pActivePortal->renderInside();
+
+        // Portal
+        pActivePortal->drawPortal();
+        pInactivePortal->drawPortal();
+
+        //
+
+        // Sphere
+        model.setProjection(camera.getProjectionMatrix());
+        model.setView(camera.getViewMatrix());
+        model.draw();
+
+        // Inactive or next terrain
+        pNextTerrain->setGrid(gDrawGrid);
+        pNextTerrain->draw();
+
+        // Grass
+        grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
+        grass.draw();
+
+        // Skydome
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        skydome.draw();
+        skydome2.draw();
+        skydome3.draw();
+        glDisable(GL_BLEND);
+
+
+        // Disable stencil test
 
 
         /***************************************************
          * Disable stencil test and reset camera
          ***************************************************/
-        /* pActivePortal->disableStencil(); */
-
-
+        pActivePortal->disableStencil();
 
 
 
@@ -842,35 +925,6 @@ int main()
     glDeleteProgram(skydomeShaderProgram);
     glDeleteProgram(cloudsShaderProgram);
 
-}
-
-GLuint quadVAO = 0;
-GLuint quadVBO;
-void RenderQuad()
-{
-    if (quadVAO == 0)
-    {
-        GLfloat quadVertices[] = {
-            // Positions        // Texture Coords
-            -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-            1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-            1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-        };
-        // Setup plane VAO
-        glGenVertexArrays(1, &quadVAO);
-        glGenBuffers(1, &quadVBO);
-        glBindVertexArray(quadVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    }
-    glBindVertexArray(quadVAO);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glBindVertexArray(0);
 }
 
 bool portalIntersection(Camera& camera, Noise*& pActiveNoise, Noise*& pNextNoise, Terrain*& pActiveTerrain, Terrain*& pNextTerrain, Portal*& pActivePortal, Portal*& pInactivePortal, Grass& grass, const GLint& terrainShaderProgram, const GLint& defaultShaderProgram)

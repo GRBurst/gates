@@ -3,8 +3,10 @@
 
 #include <GL/glew.h>
 //#include <SOIL/SOIL.h>
-#include<FreeImage.h>
+#include <FreeImage.h>
 #include <iostream>
+#include <glm/glm.hpp>
+#include <vector>
 
 /*
  * Texture class. Use in the following order:
@@ -24,12 +26,14 @@ class Texture
         ~Texture();
 
         GLuint getTexture();
-        GLuint getTextureLoc();
 
-        void linkTexture(GLint shaderProgram, const char *texture_name);
+        void linkTexture(GLint shaderProgram, const char *texture_name) const;
         void setData(unsigned char* data, int width, int height);
         void setData(float* data, int width, int height, int depth = 1);
         void setResolution(int width, int height) { this->width = width; this->height = height; };
+        void loadAmbientOptions();
+        void loadAmbientNoiseOptions(std::vector<glm::vec3>& noiseSamples);
+        void loadGDepthPositionOptions();
         void loadGPositionOptions();
         void loadGNormalOptions();
         void loadGAlbedoOptions();
@@ -49,7 +53,6 @@ class Texture
     private:
         static int idGenerator;
         GLuint texture;
-        GLuint textureLocation;
         GLint location;
 
         int width, height, depth;
