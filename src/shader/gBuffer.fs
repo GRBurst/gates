@@ -7,7 +7,7 @@ layout (location = 2) out vec3 gAlbedo;
 in vec2 fUV;
 in vec3 fNormal;
 in vec3 wPos;
-in vec3 fPos;
+in vec4 fPos;
 in mat3 fTBN;
 
 uniform sampler2D sNormalMap;
@@ -22,6 +22,7 @@ float getLineareDepth( float depth )
 {
     float z = depth * 2.0 - 1.0; // Back to NDC 
     return (2.0 * uNearPlane * uFarPlane) / (uFarPlane + uNearPlane - z * (uFarPlane - uNearPlane));	
+    /* return (2.0 * 0.1 * 1000.0) / (1000.0 + 0.1 - z * (1000.0 - 0.1)); */	
 }
 
 bool doHighLight()
@@ -37,9 +38,14 @@ bool doHighLight()
 
 void main()
 {
-    gPosition.xyz   = fPos;
+    gPosition.xyz   = vec3(fPos);
+    /* gPosition.w     = 0.1; */
     gPosition.w     = getLineareDepth(gl_FragCoord.z);
+    /* gPosition.w     = getLineareDepth(fPos.w); */
+    /* gPosition.w     = fPos.z / uFarPlane; */
+    /* gPosition.w     = fPos.w; */
     gNormal         = normalize(fNormal);
+    /* gNormal         = vec3(gNormal.x * 0.5 + 0.5, gNormal.y * 0.5 + 0.5, gNormal.z * 0.5 + 0.5); */
 
     if(doHighLight()) gAlbedo = vec3(uEditMode, 1.0-uEditMode, 1.0-uEditMode);
     else

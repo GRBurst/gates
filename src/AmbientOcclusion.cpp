@@ -7,7 +7,7 @@ AmbientOcclusion::AmbientOcclusion(const GLint& occlusionProgram, const GLint& b
     , mBlurTexture()
     , mResolutionX(1280)
     , mResolutionY(1024)
-    , mKernelSize(64)
+    , mKernelSize(128)
 {
     this->mDeferredShading = deferredShading;
     this->mCamera = camera;
