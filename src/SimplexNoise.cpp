@@ -124,49 +124,11 @@ void SimplexNoise::generateTileableNoiseImage(int dimensions){
 	switch (dimensions){
 	case 1:
 		mNoiseValues.resize(mXDim * mYDim * mZDim);
-		break;
-	case 2:
-		mNoiseValues.resize(mXDim * mYDim * mZDim);
-		break;
-	case 3:
-		mNoiseValues.resize(mXDim * mYDim * mZDim);
-		break;
-	}
-	if (mUDim > 1){
-		for(int z = 0; z < mZDim; z++){
-			for(int y = 0; y < mYDim; y++){
-				for(int x = 0; x < mXDim; x++){
-					float value = static_cast<float>(fbm(static_cast<double>(x), static_cast<double>(y), static_cast<double>(z)));
-					//value = value -floor(value);
-					mNoiseValues[z * mYDim * mXDim + y * mXDim + x] = value;
-	//				std::cout << value << std::endl;
-					if (value < mMin)
-						mMin = value;
-					if (value > mMax)
-						mMax = value;
-				}
-			}
-		}
-		if (mScaleZeroToOne){
-			mMax = mMax - mMin;
-			if (mMax != 0)
-			for(int z = 0; z < mZDim; z++){
-				for(int y = 0; y < mYDim; y++){
-					for(int x = 0; x < mXDim; x++){
-						mNoiseValues[z * mYDim * mXDim + y * mXDim + x] = (mNoiseValues[z * mYDim * mXDim + y * mXDim + x] - mMin) / mMax;
-					}
-				}
-			}
-		}
-	}
-	else
-	{
 		for(int z = 0; z < mZDim; z++){
 			for(int y = 0; y < mYDim; y++){
 				for(int x = 0; x < mXDim; x++){
 					float value = static_cast<float>(fbmTileableX(static_cast<double>(x), static_cast<double>(y), static_cast<double>(z)));
-					if (dimensions == 1)
-						mNoiseValues[z * mYDim * mXDim + y * mXDim + x] = value;
+					mNoiseValues[z * mYDim * mXDim + y * mXDim + x] = value;
 					if (value < mMin)
 						mMin = value;
 					if (value > mMax)
@@ -189,8 +151,47 @@ void SimplexNoise::generateTileableNoiseImage(int dimensions){
 					}
 				}
 
+		}
+
+
+		break;
+	case 2:
+		mNoiseValues.resize(mXDim * mYDim * mZDim);
+		for(int z = 0; z < mZDim; z++){
+			for(int y = 0; y < mYDim; y++){
+				for(int x = 0; x < mXDim; x++){
+					float value = static_cast<float>(fbmTileableZ(static_cast<double>(x), static_cast<double>(y), static_cast<double>(z)));
+					mNoiseValues[z * mYDim * mXDim + y * mXDim + x] = value;
+					if (value < mMin)
+						mMin = value;
+					if (value > mMax)
+						mMax = value;
+
+				}
 			}
 		}
+
+
+		if (mScaleZeroToOne){
+			mMax = mMax - mMin;
+			if (mMax != 0)
+				for(int z = 0; z < mZDim; z++){
+					for(int y = 0; y < mYDim; y++){
+						for(int x = 0; x < mXDim; x++){
+							mNoiseValues[z * mYDim * mXDim + y * mXDim + x] = (mNoiseValues[z * mYDim * mXDim + y * mXDim + x] - mMin) / mMax;
+
+						}
+					}
+				}
+
+		}
+
+		break;
+	case 3:
+		mNoiseValues.resize(mXDim * mYDim * mZDim);
+		break;
+	}
+
 
 }
 
@@ -381,9 +382,27 @@ double SimplexNoise::fbmTileableX(double x, double y, double z){
 	float multiplier = 1.0f / ( 2.0f * glm::pi<double>() );
 	for(int i = 0; i < mOctaves; i++){
 		result += calculateNoiseValue((std::cos(x * glm::pi<double>()))*frequency, (std::cos(y * 2.0 * glm::pi<double>()) * multiplier)*frequency, (std::sin(y * 2.0 * glm::pi<double>()) * multiplier) * frequency, z) * amp;
+		frequency *= 2.0;
+		amp *= 0.5;
+	}
+	return result;
+}
 
+double SimplexNoise::fbmTileableZ(double x, double y, double z){
+	double result = 0.0;
+	double amp = mAmplitude;
+	x = x / (double)mXDim;
+	y = y / (double)mYDim;
+	z = z / (double)mZDim;
+	float frequency = mFrequency;
+	x*= frequency;
+	y*= frequency;
+	float multiplier = 1.0f / ( 2.0f * glm::pi<double>() );
+	for(int i = 0; i < mOctaves; i++){
+		result += calculateNoiseValue((std::cos(z * 2.0 * glm::pi<double>()) * multiplier), y, (std::sin(z * 2.0 * glm::pi<double>()) * multiplier), x) * amp;
 
-		z *= 2.0;
+		x *= 2;
+		y *= 2;
 		frequency *= 2.0;
 		amp *= 0.5;
 	}
@@ -432,5 +451,32 @@ double SimplexNoise::fbm(double x, double y, double z){
 	result = result / 2.0 + 1/2.0;
 	return result / mAmplitude;
 }
+
+void SimplexNoise::calculateNormalMap()
+{
+	float mask[9] ={};
+	mNormalMap = std::vector<glm::vec3>(mXDim * mYDim * mZDim, glm::vec3(0.5f));
+	for (int z = 0; z < mZDim; z++)
+		for (int y = 0; y < mYDim; y++)
+			for (int x = 1; x < mXDim; x++)
+			{
+				mask[0] = mNoiseValues[z * mYDim * mXDim + clamp((y - 1), 0, mYDim) * mXDim + clamp((x - 1), 0, mXDim)];
+				mask[1] = mNoiseValues[z * mYDim * mXDim + clamp((y - 1), 0, mYDim) * mXDim + x];
+				mask[2] = mNoiseValues[z * mYDim * mXDim + clamp((y - 1) ,0, mYDim) * mXDim + clamp((x + 1), 0, mXDim)];
+				mask[3] = mNoiseValues[z * mYDim * mXDim + y * mXDim + clamp((x - 1), 0, mXDim)];
+				mask[5] = mNoiseValues[z * mYDim * mXDim + y * mXDim + clamp((x + 1), 0, mXDim)];
+				mask[6] = mNoiseValues[z * mYDim * mXDim + clamp((y + 1), 0, mYDim) * mXDim + clamp((x - 1), 0, mXDim)];
+				mask[7] = mNoiseValues[z * mYDim * mXDim + clamp((y + 1), 0, mYDim) * mXDim + x];
+				mask[8] = mNoiseValues[z * mYDim * mXDim + clamp((y + 1), 0, mYDim) * mXDim + clamp((x + 1), 0, mXDim)];
+				float dX = (mask[2] + 2.0f * mask[5] + mask[8]) - (mask[0] + 2.0f * mask[3] + mask[6]);
+				float dY = (mask[6] + 2.0f * mask[7] + mask[8]) - (mask[0] + 2.0f * mask[1] + mask[2]);
+				float dZ = 1.0f;
+				glm::vec3 normal(dX, dY, dZ);
+				normal = glm::normalize(normal);
+
+				mNormalMap[z * mYDim * mXDim + y * mXDim + x] = normal;
+			}
+}
+
 
 

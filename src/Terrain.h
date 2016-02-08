@@ -40,6 +40,7 @@ class Terrain {
         void draw(const GLint& shader);
         void loadGBufferMaps(const GLint& shader);
 
+        void drawReflection();
         // Getters / setters
         unsigned int getWidth() const { return mXDim; };
         unsigned int getHeight() const { return mZDim; };
@@ -67,7 +68,8 @@ class Terrain {
 
         void setGrid(int mode) { mDrawGrid = mode; };
         void saveNoiseToFile(const char* filename = "terrainNoise.tga") const;
-
+        void loadWater3DNoise( Noise* noise);
+        void loadWaterNormal3DNoise( Noise* noise);
         void debug();
 
     private:
@@ -137,6 +139,7 @@ class Terrain {
         glm::mat4 mVPMatrix;
         GLuint muVLocation;
         glm::mat4 mVMatrix;
+        glm::mat4 mMMatrix;
         GLuint muInvViewLocation;
         glm::mat3 mInvViewMatrix;
         GLint muHeightMapTerrainRatioLocation;

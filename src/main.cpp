@@ -13,6 +13,7 @@
 #include "ModelLoader.h"
 #include "PerlinNoise.h"
 #include "Portal.h"
+#include "Quad.h"
 #include "Shader.h"
 #include "SimplexNoise.h"
 #include "Skydome.h"
@@ -339,7 +340,7 @@ int main()
      */
 
     // Common parameters
-    int noiseDimX = 256, noiseDimY = 256, noiseDimZ = 1;
+    int noiseDimX = 256, noiseDimY = 256;
     int seed = 42, octaves = 16;
     double frequency = 8.0, amplitude = 4.0;
 
@@ -354,8 +355,12 @@ int main()
     pActiveNoise2->generateNoiseImage();
     pActiveNoise2->saveToFile("WorleyNoise.tga");
 
+    SimplexNoise* noiseWater3D = new SimplexNoise(noiseDimX * 2, noiseDimY * 2, 16, seed);
+    noiseWater3D->setOctavesFreqAmp(4, 128, 1);
+	noiseWater3D->setScale(true);
+	noiseWater3D->generateTileableNoiseImage(2);
+	noiseWater3D->calculateNormalMap();
 
-    // Setup initial terrain
     pActiveTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pActiveNoise);
     /* pActiveTerrain->enableNormals(); */
     pActiveTerrain->enableNormalMap();
@@ -365,6 +370,10 @@ int main()
     pActiveTerrain->genHeightMapTexture();
     pActiveTerrain->saveNoiseToFile("Terrain1.tga");
     pActiveTerrain->linkHeightMapTexture(defaultShaderProgram);
+    //Setup Water Noise in Terrain
+	pActiveTerrain->loadWater3DNoise(noiseWater3D);
+	pActiveTerrain->loadWaterNormal3DNoise(noiseWater3D);
+	// Setup initial terrain
     /* pActiveTerrain->debug(); */
 
     // Setup worled (cell) noise for second terrain
@@ -407,15 +416,15 @@ int main()
     seed = 245, octaves = 4, frequency = 4.0, amplitude = 1;
 
     // Setup noise for clouds
-    SimplexNoise pNoise3D(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
-    pNoise3D.setOctavesFreqAmp(octaves, frequency, amplitude);
-    pNoise3D.setScale(true);
-    pNoise3D.generateTileableNoiseImage(1);
+    SimplexNoise* noise3D = new SimplexNoise(noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ, seed);
+    noise3D->setOctavesFreqAmp(octaves, frequency, amplitude);
+    noise3D->setScale(true);
+    noise3D->generateTileableNoiseImage(1);
 
     // Skydome initialization
     Skydome skydome(skydomeShaderProgram, &camera);
     skydome.generateGeometry(noiseDimX / 3, 32, 32);
-    skydome.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
+    skydome.loadTexture(noise3D->getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
     skydome.setBuffers();
 
     // Skydome 2 initialization
@@ -433,7 +442,7 @@ int main()
     // Clouds initialization
     Clouds clouds(cloudsShaderProgram, skydome.getCloudNumber(), skydome.getCloudAttributes(), &camera);
     clouds.setBuffers();
-    clouds.loadTexture(pNoise3D.getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
+    clouds.loadTexture(noise3D->getTextureData(), noiseSkyDimX, noiseSkyDimY, noiseSkyDimZ);
     skydome.setClouds(&clouds);
 
     // Grass
@@ -454,12 +463,12 @@ int main()
     /*
      * MRT for deferred shading
      */
-    DeferredShading deferredShading(gBufferShaderProgram, deferredShadingShaderProgram, &camera);
-    deferredShading.linkTextures();
-    deferredShading.initRandomLights();
-    deferredShading.bindFBO();
-    pActiveTerrain->loadGBufferMaps(gBufferShaderProgram);
-    deferredShading.init();
+    /* DeferredShading deferredShading(gBufferShaderProgram, deferredShadingShaderProgram, &camera); */
+    /* deferredShading.linkTextures(); */
+    /* deferredShading.initRandomLights(); */
+    /* deferredShading.bindFBO(); */
+    /* pActiveTerrain->loadGBufferMaps(gBufferShaderProgram); */
+    /* deferredShading.init(); */
 
 
 
@@ -508,6 +517,33 @@ int main()
 
 
 
+
+    GLuint waterFrameBufferLoc;
+    glGenFramebuffers(1, &waterFrameBufferLoc);
+    glBindFramebuffer(GL_FRAMEBUFFER, waterFrameBufferLoc);
+
+    Texture waterReflectionTexture;
+    waterReflectionTexture.bind();
+    waterReflectionTexture.setResolution(1024, 768);
+    waterReflectionTexture.loadWaterOptions();
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, waterReflectionTexture.getTexture(), 0);
+
+    GLuint DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+    glDrawBuffers(1, DrawBuffers);
+
+    GLuint depthRenderBufferLoc;
+    glGenRenderbuffers(1, &depthRenderBufferLoc);
+    glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBufferLoc);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1024, 768);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBufferLoc);
+
+    glBindRenderbuffer(GL_RENDERBUFFER,0);
+    glBindFramebuffer(GL_FRAMEBUFFER,0);
+
+    waterReflectionTexture.linkTexture(terrainShaderProgram, "sReflectionMap");
+    Quad quad;
+	quad.init();
 
     // Main (frame) loop
     float oldTime, newTime;
@@ -575,9 +611,26 @@ int main()
         /* glUseProgram(gBufferShaderProgram); */
 
         /* // Active terrain */
-        pActiveTerrain->setGrid(gDrawGrid);
-        pActiveTerrain->draw(gBufferShaderProgram);
+        /* pActiveTerrain->setGrid(gDrawGrid); */
+        /* pActiveTerrain->draw(gBufferShaderProgram); */
 
+        glBindFramebuffer(GL_FRAMEBUFFER, waterFrameBufferLoc);
+        waterReflectionTexture.bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
+
+        glFrontFace(GL_CW);
+        skydome3.drawReflection();
+        pActiveTerrain->setGrid(gDrawGrid);
+		pActiveTerrain->drawReflection();
+        glFrontFace(GL_CCW);
+
+        glEnable(GL_DEPTH_TEST);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        // Active terrain
+        pActiveTerrain->setGrid(gDrawGrid);
+        pActiveTerrain->draw();
+//        quad.render(waterReflectionTexture);
         // Grass
         /* grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix()); */
         /* grass.draw(); */
@@ -699,10 +752,11 @@ int main()
         /* pActivePortal->drawPortal(); */
         /* pInactivePortal->drawPortal(); */
 
-        /* // Sphere */
-        /* model.setProjection(camera.getProjectionMatrix()); */
-        /* model.setView(camera.getViewMatrix()); */
-        /* model.draw(); */
+
+        // Sphere
+        model.setProjection(camera.getProjectionMatrix());
+        model.setView(camera.getViewMatrix());
+        model.draw();
 
         /* // Inactive or next terrain */
         /* pNextTerrain->setGrid(gDrawGrid); */
@@ -761,7 +815,6 @@ int main()
 
 
         // Do post rendering stuff (maybe shadowmaps etc. if enough spare time)
-
 
 
         glfwSwapBuffers( window );

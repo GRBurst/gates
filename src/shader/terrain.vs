@@ -23,11 +23,18 @@ void main()
 
 
     vUVCS = vUV;
-    vNormalCS = vNormal;
-    //fHeight = getHightScale() * vPosition.y;
+    
+    float vHeight = vPosition.y;
+	if (vHeight/3.1 < 0.06) 
+	{
+		vHeight = 0.06*3.1;
+		vNormalCS = vec3(0, 1, 0);
+	}
+	else
+		vNormalCS = vNormal;
+        
 
-
-    vPositionCS = vPosition;
+    vPositionCS = vec3(vPosition.x, vHeight, vPosition.z);
     vTangentCS = vTangent;
     vBitangentCS = vBitangent;
     

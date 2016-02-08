@@ -49,6 +49,23 @@ Terrain::~Terrain()
  * Public control functions
  */
 /* void Terrain::addNoise(std::vector<float> noiseValues) */
+void Terrain::loadWater3DNoise( Noise* noise){
+	Texture* texture = new Texture();
+	texture->setData(noise->getInverseTextureData(), noise->getXDim(), noise->getYDim(), noise->getZDim());
+	texture->linkTexture(mShaderProgram, "sTextureWaterDisp");
+	texture->bind3D();
+	texture->loadSkydome3DOptions();
+}
+
+void Terrain::loadWaterNormal3DNoise(Noise* noise)
+{
+	Texture* texture = new Texture();
+	texture->setData(noise->getNormalMap(), noise->getXDim(), noise->getYDim(), noise->getZDim());
+	texture->linkTexture(mShaderProgram, "sTextureWaterNormal");
+	texture->bind3D();
+	texture->loadWaterNormalOptions();
+}
+
 void Terrain::addNoise(const std::vector<float>& noiseValues)
 {
     for(unsigned int i = 0; i < mNoiseValues.size(); i++)
@@ -151,8 +168,41 @@ void Terrain::draw(const GLint& shader)
     glBindVertexArray(0);
 }
 
+void Terrain::drawReflection()
+{
+    glm::mat4 mMMatrix = glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, -1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f);
+    mVMatrix = mCamera->getViewMatrix();
+    mVPMatrix = mCamera->getVPMatrix();
+    mInvViewMatrix = mCamera->getInvViewMatrix();
+    mCamPos = mCamera->getPosition();
+    glUseProgram(mShaderProgram);
+    glUniformMatrix4fv(muVPLocation, 1, GL_FALSE, value_ptr(mVPMatrix));
+    glUniformMatrix4fv(muVLocation, 1, GL_FALSE, value_ptr(mVMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(mShaderProgram, "uMMatrix"), 1, GL_FALSE, value_ptr(mMMatrix));
+    glUniformMatrix3fv(muInvViewLocation, 1, GL_FALSE, value_ptr(mInvViewMatrix));
+    glUniform1i(muHeightMapTerrainRatioLocation, mHeightMapTerrainRatio);
+    glUniform1i(muDrawGridLocation, mDrawGrid);
+    glUniform3f(muRayTerrainIntersectionLocation, mRayTerrainIntersection.x, mRayTerrainIntersection.y, mRayTerrainIntersection.z);
+    glUniform3f(muCamPosLocation, mCamPos.x, mCamPos.y, mCamPos.z);
+    glUniform3f(muLightPosLocation, mLightPos.x, mLightPos.y, mLightPos.z);
+    glUniform1f(muEditLocation, mEditMode);
+    glUniform1f(muModifyRadius, mModifyRadius);
+    glUniform1f(muTimeLocation, glfwGetTime());
+    // Bind Attributes
+    glBindVertexArray(mVao);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glUniform1i(muDrawGridLocation, mDrawGrid);
+    /* glDrawElements(GL_TRIANGLE_STRIP, mTotalIndices, GL_UNSIGNED_INT, 0); */
+    glDrawElements(GL_PATCHES, mTotalIndices, GL_UNSIGNED_INT, 0);
+
+}
+
 void Terrain::draw()
 {
+	glm::mat4 mMMatrix = glm::mat4(1.0f);
     mVMatrix = mCamera->getViewMatrix();
     mVPMatrix = mCamera->getVPMatrix();
     mInvViewMatrix = mCamera->getInvViewMatrix();
@@ -161,6 +211,7 @@ void Terrain::draw()
     glUniformMatrix4fv(muVPLocation, 1, GL_FALSE, value_ptr(mVPMatrix));
     glUniformMatrix4fv(muVLocation, 1, GL_FALSE, value_ptr(mVMatrix));
     glUniformMatrix3fv(muInvViewLocation, 1, GL_FALSE, value_ptr(mInvViewMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(mShaderProgram, "uMMatrix"), 1, GL_FALSE, value_ptr(mMMatrix));
     glUniform1i(muHeightMapTerrainRatioLocation, mHeightMapTerrainRatio);
     glUniform1i(muDrawGridLocation, mDrawGrid);
     glUniform3f(muRayTerrainIntersectionLocation, mRayTerrainIntersection.x, mRayTerrainIntersection.y, mRayTerrainIntersection.z);

@@ -5,6 +5,7 @@ out vec2 fUV;
 
 uniform float uTime;
 uniform mat4 uVPMatrix;
+uniform mat4 uMMatrix;
 mat4 rotationMatrixY(float angle){
 	float sinVal = sin(angle);
 	float cosVal = cos(angle);
@@ -17,5 +18,5 @@ mat4 rotationMatrixY(float angle){
 }
 void main(){
 	fUV = vUV;
-    gl_Position = uVPMatrix * rotationMatrixY(uTime / 60) * vec4(vPosition, 1.0);
+    gl_Position = uVPMatrix * rotationMatrixY(uTime / 60) * uMMatrix * vec4(vPosition, 1.0);
 }

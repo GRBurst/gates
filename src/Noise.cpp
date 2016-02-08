@@ -153,3 +153,9 @@ bool Noise::saveToFile(const char* filename){
     return true;
 
 }
+
+float* Noise::getNormalMap()
+{
+	return &(mNormalMap.front().x);
+}
+

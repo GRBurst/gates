@@ -38,6 +38,8 @@ class Texture
         void loadSkydome3DOptions();
         void loadHeightmapOptions();
         void loadNormalMapOptions();
+        void loadWaterOptions();
+        void loadWaterNormalOptions();
         void bind();
         void bind3D();
         void unbind();

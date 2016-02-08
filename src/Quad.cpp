@@ -1,6 +1,11 @@
 #include "Quad.h"
 
 Quad::Quad()
+    : quadVAO(0)
+    , quadVBO(0)
+    , mQuadProgram()
+    , mFirstCall(1)
+    , mDim(3)
 {
     Shader mQuadShader;
     mQuadShader.loadShader("../src/shader/quad.vs", Shader::VERTEX);
@@ -54,6 +59,8 @@ void Quad::render(const GLint& shader, Texture& texture)
         mFirstCall = 0;
     }
     texture.bind();
+    //texture.bind();
+    glUniform1i(glGetUniformLocation(shader, "uDim"), mDim);
     glBindVertexArray(quadVAO);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);

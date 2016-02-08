@@ -33,11 +33,14 @@ public:
 	double calculateNoiseValue(double x, double y);
 	double calculateNoiseValue(double x, double y, double z);
 	double calculateNoiseValue(double x, double y, double z, double w);
+	void calculateNormalMap();
+
 private:
 
 	double fbm(double x, double y, double z);
 	double fbm(double x, double y, double z, double u);
 	double fbmTileableX(double x, double y, double z);
+	double fbmTileableZ(double x, double y, double z);
 	void initPermutationTable();
 	int mSampleSize = 256;
 	int N = 4096;
@@ -72,6 +75,7 @@ private:
 	double F5 = (sqrt(6) - 1) / 5.0;
 	double G5 = (6 - sqrt(6)) / 30.0;
 	int cnt = 0;
+
 };
 
 #endif /* SRC_SIMPLEXNOISE_H_ */
