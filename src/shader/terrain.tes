@@ -34,6 +34,8 @@ out vec3 bitangent_cs;
 out vec3 normal_cs;
 out mat3 invTBN;
 out vec3 eyeDir_ws;
+out vec4 ndsPos;
+out float timeScaleFactor;
 
 vec2 interpolate2D(vec2 v0, vec2 v1, vec2 v2)
 {
@@ -73,22 +75,25 @@ void calcTBN()
 }
 void main()
 {
-	
+	timeScaleFactor =10;
 	fUV = interpolate2D(vUVES[0], vUVES[1], vUVES[2]);
 	fNormal = interpolate3D(vNormalES[0], vNormalES[1], vNormalES[2]);
 	fNormal = normalize(fNormal);
 	fPos = interpolate3D(vPositionES[0], vPositionES[1], vPositionES[2]);
+	if(uMMatrix[1][1] == -1)
+		fPos.y -= 0.06*3.1 *2;
 	float displacement = texture(sWhiteNoise, 4*fUV).r;
 	calcTBN();
     if (fPos.y > 0.06*3.9)
-    	fPos += fNormal * displacement*0.02;
+  		fPos += fNormal * displacement*0.02;
 	else {
-		displacement = 2*texture(sTextureWaterDisp, vec3(fUV / 4, uTime/10)).r-1;
-		displacement += 2*texture(sTextureWaterDisp, vec3(fUV / 2, uTime/10)).r-1;
-		displacement += 2*texture(sTextureWaterDisp, vec3(fUV, uTime/10)).r-1;
-		displacement += 2*texture(sTextureWaterDisp, vec3(fUV * 2, uTime/10)).r-1;
-		fPos += fNormal * displacement*0.015;
+		displacement = 2*texture(sTextureWaterDisp, vec3(fUV * 4, uTime/timeScaleFactor)).r-1;
+		displacement += 2*texture(sTextureWaterDisp, vec3(fUV * 2, uTime/timeScaleFactor)).r-1;
+		displacement += 2*texture(sTextureWaterDisp, vec3(fUV, uTime/timeScaleFactor)).r-1;
+		displacement += 2*texture(sTextureWaterDisp, vec3(fUV, uTime/timeScaleFactor*2)).r-1;
+		fPos += fNormal * displacement*0.01;
 	}
 	wPos = fPos;
-    gl_Position = uVPMatrix * uMMatrix * vec4(fPos, 1.0);
+	ndsPos = uVPMatrix * uMMatrix * vec4(fPos, 1.0);
+    gl_Position = ndsPos;
 }

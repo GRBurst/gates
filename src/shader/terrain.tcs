@@ -30,13 +30,13 @@ float setTessLevel(float dist0, float dist1, float height)
 	    }
 	else
 	    if (avg <= 2.0) {
-	        return 15.0;
-	    }
-	    else if (avg <= 5.0) {
 	        return 8.0;
 	    }
-	    else {
+	    else if (avg <= 5.0) {
 	        return 5.0;
+	    }
+	    else {
+	        return 3.0;
 	    }
 	
 }

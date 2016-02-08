@@ -12,6 +12,8 @@ in vec3 bitangent_cs;
 in vec3 normal_cs;
 in vec3 eyeDir_ws;
 in mat3 invTBN;
+in vec4 ndsPos;
+in float timeScaleFactor;
 
 uniform sampler2D sHeightMap;
 uniform sampler2D sNormalMap;
@@ -68,7 +70,7 @@ void main()
 	if(doHighLight()) color = vec4(uEditMode, 1.0-uEditMode, 1.0-uEditMode, 1.0);
     else
     {
-    	
+    	vec2 waterUV = ndsPos.xy / ndsPos.w * 0.5 + vec2(0.5, 0.5);
         /******************************
         ******* Diffuse lighting ******
         *******************************/
@@ -85,11 +87,14 @@ void main()
         vec3 normal_ts      = texture(sNormalMap, 2*fUV).rgb * 2.0f - 1.0f;
         vec3 light_ts       = normalize(fLightDir1_ts);
         float cosTheta_ts   = clamp(dot (normal_ts, light_ts), 0, 1);
-		vec3 waternormal_ts      = texture(sTextureWaterNormal, vec3( fUV / 4 , uTime/10)).rgb;
-		waternormal_ts      += texture(sTextureWaterNormal, vec3( fUV / 2, uTime/10)).rgb;
+		vec3 waternormal_ts      = texture(sTextureWaterNormal, vec3( fUV * 4 , uTime/timeScaleFactor)).rgb;
+		waternormal_ts      += texture(sTextureWaterNormal, vec3( fUV * 2, uTime/timeScaleFactor)).rgb;
 		waternormal_ts      = normalize(waternormal_ts);
-		waternormal_ts      += texture(sTextureWaterNormal, vec3( fUV, uTime/10)).rgb;
+		waternormal_ts      += texture(sTextureWaterNormal, vec3( fUV, uTime/timeScaleFactor)).rgb;
 		waternormal_ts      = normalize(waternormal_ts);
+		waternormal_ts      += texture(sTextureWaterNormal, vec3( fUV, uTime/timeScaleFactor*  2)).rgb;
+		waternormal_ts      = normalize(waternormal_ts);
+		//waternormal_ts      = vec3(0,1,0);
 		//float intWaterDif_ts     = max(dot(light_ts, normal_ts), 0.0);
         /******************************
         ****** Specular lighting ******
@@ -144,8 +149,8 @@ void main()
         float waterIntensity    = clamp(terrainHeight, 0.0, 0.2) + 0.8;
         vec3 waterColor1        = ( mix( waterBaseColor2, waterBaseColor1, smoothstep( 0.01, 0.08, ( terrainHeight ) )));
         vec3 waterColor2        = ( mix( waterColor1, waterBaseColor1, smoothstep( 0.05, 0.12, ( terrainHeight ) )));
-        waterColor1             = watercosAlpha_ts * waterSpecColor * texture(sReflectionMap, fUV).rgb + waterColor1 * waterDiffLight;
-        waterColor2             = watercosAlpha_ts * waterSpecColor * texture(sReflectionMap, fUV).rgb + waterColor2 * waterDiffLight;
+        waterColor1             = watercosAlpha_ts * waterSpecColor * texture(sReflectionMap, waterUV + waternormal_ts.xy ).rgb + waterColor1 * waterDiffLight;
+        waterColor2             = watercosAlpha_ts * waterSpecColor * texture(sReflectionMap, waterUV + waternormal_ts.xy ).rgb + waterColor2 * waterDiffLight;
 
         // grass
         float grassIntensity    = (1.0 - terrainHeight) ;
@@ -178,7 +183,7 @@ void main()
         resColor        = mix( resColor,    rockColor1,     smoothstep( 0.10,   0.12,    (terrainHeight*1.1)*(1-yNormal)           ));
         resColor        = mix( resColor,    snowColor1,     smoothstep( 0.4,    0.7,    terrainHeight*yNormal   ));
         resColor        = mix( resColor,    snowColor2,     smoothstep( 0.7,    1.0,    terrainHeight*yNormal   ));
-        color = vec4(texture(sReflectionMap, vec2(fUV.x / 1024, fUV.y/768)).rgb, 1.0);
+        color = vec4(resColor, 1.0);
         /* color = vec4(diffLight * resColor, 1.0); */
         /* color = vec4((resColor * lightCol) * light1Power * (cosTheta_ts / (dist_ws * dist_ws)), 1.0); */
 

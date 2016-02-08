@@ -27,6 +27,7 @@ public:
 	Skydome(GLint shaderProgram, Camera* cam);
 	virtual ~Skydome();
 	void draw();
+	void drawReflection();
 	void generateGeometry(float r, int azimuths, int meridians);
 	void setBuffers();
 	void setCloud(GLint cloudShader, double probabilty);

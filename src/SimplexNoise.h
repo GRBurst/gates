@@ -40,6 +40,7 @@ private:
 	double fbm(double x, double y, double z);
 	double fbm(double x, double y, double z, double u);
 	double fbmTileableX(double x, double y, double z);
+	double fbmTileableZ(double x, double y, double z);
 	void initPermutationTable();
 	int mSampleSize = 256;
 	int N = 4096;

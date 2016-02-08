@@ -341,10 +341,10 @@ int main()
     pActiveNoise2->generateNoiseImage();
     pActiveNoise2->saveToFile("WorleyNoise.tga");
 
-    SimplexNoise* noiseWater3D = new SimplexNoise(noiseDimX, noiseDimX, 64, seed);
-    noiseWater3D->setOctavesFreqAmp(8, 16, 1);
+    SimplexNoise* noiseWater3D = new SimplexNoise(noiseDimX * 2, noiseDimY * 2, 16, seed);
+    noiseWater3D->setOctavesFreqAmp(4, 128, 1);
 	noiseWater3D->setScale(true);
-	noiseWater3D->generateTileableNoiseImage(1);
+	noiseWater3D->generateTileableNoiseImage(2);
 	noiseWater3D->calculateNormalMap();
 
     pActiveTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pActiveNoise);
@@ -452,7 +452,7 @@ int main()
 
     Texture waterReflectionTexture;
     waterReflectionTexture.bind();
-    waterReflectionTexture.setResolution(512, 512);
+    waterReflectionTexture.setResolution(1024, 768);
     waterReflectionTexture.loadWaterOptions();
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, waterReflectionTexture.getTexture(), 0);
@@ -463,7 +463,7 @@ int main()
     GLuint depthRenderBufferLoc;
     glGenRenderbuffers(1, &depthRenderBufferLoc);
     glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBufferLoc);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 512, 512);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1024, 768);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBufferLoc);
 
     glBindRenderbuffer(GL_RENDERBUFFER,0);
@@ -540,7 +540,9 @@ int main()
         glDisable(GL_DEPTH_TEST);
 
         glFrontFace(GL_CW);
-        pActiveTerrain->drawReflection();
+        skydome3.drawReflection();
+        pActiveTerrain->setGrid(gDrawGrid);
+		pActiveTerrain->drawReflection();
         glFrontFace(GL_CCW);
 
         glEnable(GL_DEPTH_TEST);
@@ -548,7 +550,7 @@ int main()
         // Active terrain
         pActiveTerrain->setGrid(gDrawGrid);
         pActiveTerrain->draw();
-
+//        quad.render(waterReflectionTexture);
         // Grass
         grass.setViewAndProjectionMatrix(camera.getViewMatrix(), camera.getProjectionMatrix());
         grass.draw();
@@ -561,7 +563,7 @@ int main()
         skydome3.draw();
         glDisable(GL_BLEND);
 
-        quad.render(waterReflectionTexture);
+
         // Draw in stencil pattern (in portal)
 
 
@@ -607,7 +609,6 @@ int main()
         pActivePortal->disableStencil();
 
         // Do post rendering stuff (maybe shadowmaps etc. if enough spare time)
-
 
 
         glfwSwapBuffers( window );

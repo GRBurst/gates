@@ -25,7 +25,7 @@ void main()
     vUVCS = vUV;
     
     float vHeight = vPosition.y;
-	if (vHeight/3.8 < 0.06) 
+	if (vHeight/3.1 < 0.06) 
 	{
 		vHeight = 0.06*3.1;
 		vNormalCS = vec3(0, 1, 0);

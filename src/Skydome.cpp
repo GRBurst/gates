@@ -38,14 +38,30 @@ void Skydome::loadTexture(float* textureData, int width, int height){
 	texture->bind();
 	texture->loadSkydomeOptions();
 }
-
-void Skydome::draw()
+void Skydome::drawReflection()
 {
+	glm::mat4 mMMatrix = glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+								0.0f, -1.0f, 0.0f, 0.0f,
+								0.0f, 0.0f, 1.0f, 0.0f,
+								0.0f, 0.0f, 0.0f, 1.0f);
 	glUseProgram(mShaderProgram);
-
 	glUniformMatrix4fv(muVPLocation, 1, GL_FALSE, value_ptr(camera->getVPMatrix()));
 	glUniform1f(muTime, glfwGetTime());
 	glUniform1f(muRadius, mRadius);
+	glUniformMatrix4fv(glGetUniformLocation(mShaderProgram, "uMMatrix"), 1, GL_FALSE, value_ptr(mMMatrix));
+	glBindVertexArray(mVao);
+	glDrawArrays(GL_TRIANGLES, 0, verticesNumber );
+	glBindVertexArray(0);
+
+}
+void Skydome::draw()
+{
+	glm::mat4 mMMatrix = glm::mat4(1.0f);
+	glUseProgram(mShaderProgram);
+	glUniformMatrix4fv(muVPLocation, 1, GL_FALSE, value_ptr(camera->getVPMatrix()));
+	glUniform1f(muTime, glfwGetTime());
+	glUniform1f(muRadius, mRadius);
+	glUniformMatrix4fv(glGetUniformLocation(mShaderProgram, "uMMatrix"), 1, GL_FALSE, value_ptr(mMMatrix));
 	glBindVertexArray(mVao);
 	glDrawArrays(GL_TRIANGLES, 0, verticesNumber );
 	glBindVertexArray(0);
