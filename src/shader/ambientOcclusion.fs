@@ -1,55 +1,61 @@
-#version 330 core
-out float FragColor;
+#version 410 core
 in vec2 fUV;
 
 uniform sampler2D uGPosition;
 uniform sampler2D uGNormal;
 uniform sampler2D uNoiseSamples;
+/* uniform vec3 probes[64]; */
+uniform int kernelSize = 64;
+uniform vec3 uProbes[64];
 
-uniform vec3 samples[64];
+layout(location=0) out float color;
 
 // parameters (you'd probably want to use them as uniforms to more easily tweak the effect)
-int kernelSize = 64;
 float radius = 1.0;
 
 // tile noise texture over screen based on screen dimensions divided by noise size
-const vec2 noiseScale = vec2(800.0f/4.0f, 600.0f/4.0f); 
+const vec2 noiseScale = vec2(1280.0f/4.0f, 1024.0f/4.0f); 
 
 uniform mat4 uPMatrix;
 
 void main()
 {
-    vec2 TexCoords = fUV;
-    // Get input for SSAO algorithm
-    vec3 fragPos = texture(uGPosition, TexCoords).xyz;
-    vec3 normal = texture(uGNormal, TexCoords).rgb;
-    vec3 randomVec = texture(uNoiseSamples, TexCoords * noiseScale).xyz;
-    // Create TBN change-of-basis matrix: from tangent-space to view-space
-    vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
-    vec3 bitangent = cross(normal, tangent);
-    mat3 TBN = mat3(tangent, bitangent, normal);
-    // Iterate over the sample kernel and calculate occlusion factor
-    float occlusion = 0.0;
-    for(int i = 0; i < kernelSize; ++i)
+
+    vec3 screenPos  = texture(uGPosition, fUV).xyz;
+    vec3 normal     = texture(uGNormal, fUV).rgb;
+    vec3 randVec    = texture(uNoiseSamples, fUV * noiseScale).xyz;
+
+    // Compute tangents
+    vec3 tangent    = normalize(randVec - normal * dot(randVec, normal));
+    vec3 bitangent  = cross(normal, tangent);
+    mat3 TBN        = mat3(tangent, bitangent, normal);
+
+    // Compute occlusion factor
+    float probeDepth, rangeCheck, occlusion = 0.0;
+    vec3 probe;
+    vec4 offset;
+    // Sample in hemisphere
+    for(int i = 0; i < kernelSize; i++)
     {
-        // get sample position
-        vec3 sample = TBN * samples[i]; // From tangent to view-space
-        sample = fragPos + sample * radius; 
-        
-        // project sample position (to sample texture) (to get position on screen/texture)
-        vec4 offset = vec4(sample, 1.0);
-        offset = uPMatrix * offset; // from view to clip-space
-        offset.xyz /= offset.w; // perspective divide
-        offset.xyz = offset.xyz * 0.5 + 0.5; // transform to range 0.0 - 1.0
-        
-        // get sample depth
-        float sampleDepth = -texture(uGPosition, offset.xy).w; // Get depth value of kernel sample
-        
+        probe = TBN * uProbes[i];
+        probe = screenPos + probe * radius; 
+
+        // project probe position (to probe texture) (to get position on screen/texture)
+        offset = uPMatrix * vec4(probe, 1.0);
+        offset.xy /= offset.w;
+        offset.xy = offset.xy * 0.5 + 0.5;
+
+        // get probe depth
+        probeDepth = -texture(uGPosition, offset.xy).w; // Get depth value of kernel probe
+
         // range check & accumulate
-        float rangeCheck = smoothstep(0.0, 1.0, radius / abs(fragPos.z - sampleDepth ));
-        occlusion += (sampleDepth >= sample.z ? 1.0 : 0.0) * rangeCheck;           
+        rangeCheck = smoothstep(0.0, 1.0, radius / abs(screenPos.z - probeDepth ));
+        occlusion += (probeDepth >= probe.z ? 1.0 : 0.0) * rangeCheck;
+        /* occlusion += step(probeDepth, probe.z) * rangeCheck; */
     }
     occlusion = 1.0 - (occlusion / kernelSize);
-    
-    FragColor = occlusion;
+
+    /* color = occlusion; */
+    color = occlusion*occlusion;
+    /* color = 0.5*occlusion; */
 }

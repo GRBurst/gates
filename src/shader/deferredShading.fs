@@ -23,50 +23,49 @@ uniform int draw_mode;
 
 void main()
 {
-    vec2 TexCoords = fUV;
-    //vec3 viewPos = uCamPos;
     // Retrieve data from gbuffer
-    vec3 FragPos = texture(uGPosition, TexCoords).rgb;
-    vec3 Normal = texture(uGNormal, TexCoords).rgb;
-    vec3 Diffuse = texture(uGAlbedo, TexCoords).rgb;
-    float Depth = texture(uGPosition, TexCoords).a;
-    float Specular = 0.3;//texture(gAlbedoSpec, TexCoords).a;
-    float AmbientOcclusion = texture(uAmbientBlur, TexCoords).r;
+    vec3 screenPos  = texture(uGPosition, fUV).rgb;
+    vec3 normal     = texture(uGNormal, fUV).rgb;
+    float depth     = texture(uGPosition, fUV).a;
+
+    vec3 diffLight          = texture(uGAlbedo, fUV).rgb;
+    float occlusionFactor   = texture(uAmbientBlur, fUV).r;
+    float specularFactor    = 0.3;//texture(gAlbedoSpec, fUV).a;
 
     // Then calculate lighting as usual
-    vec3 ambient = vec3(0.3 * AmbientOcclusion);
-    /* vec3 lighting  = Diffuse * 0.3; // hard-coded ambient component */
-    vec3 lighting  = ambient;
-    /* vec3 viewDir  = normalize(viewPos - FragPos); */
-    vec3 viewDir  = normalize(-FragPos);
+    vec3 resColor   = vec3(occlusionFactor * 0.3);
+    vec3 viewDir    = normalize(uCamPos-screenPos);
 
-    // Lights
+    // Compute lights
     for(int i = 0; i < NR_LIGHTS; ++i)
     {
-        // Calculate distance between light source and current fragment
-        float distance = length(lights[i].Position - FragPos);
+        float distance = length(lights[i].Position - screenPos);
+
         if(distance < lights[i].Radius)
         {
-            // Diffuse
-            vec3 lightDir = normalize(lights[i].Position - FragPos);
-            vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * lights[i].Color;
-            // Specular
+            // diffuse
+            vec3 lightDir   = normalize(lights[i].Position - screenPos);
+            diffLight       = max(dot(normal, lightDir), 0.0) * diffLight * lights[i].Color;
+
+            // specular
             vec3 halfwayDir = normalize(lightDir + viewDir);
-            float spec = pow(max(dot(Normal, halfwayDir), 0.0), 16.0);
-            /* vec3 specular = lights[i].Color * spec * Specular; */
-            vec3 specular = lights[i].Color * spec;
-            // Attenuation
+            float spec      = pow(max(dot(normal, halfwayDir), 0.0), 16.0);
+            vec3 specular   = lights[i].Color * spec * specularFactor;
+
+            // attenuation
             float attenuation = 1.0 / (1.0 + lights[i].Linear * distance + lights[i].Quadratic * distance * distance);
-            diffuse *= attenuation;
-            specular *= attenuation;
-            lighting += diffuse + specular;
+
+            // Resulting light / color
+            diffLight   *= attenuation;
+            specular    *= attenuation;
+            resColor    += diffLight + specular;
+
         }
     }
 
-    // Based on which of the 1-5 keys we pressed, show final result or intermediate g-buffer textures
-    color = vec4(lighting, 1.0);
-    /* color = vec4(FragPos, 1.0); */
-    /* color = vec4(Normal, 1.0); */
-    /* color = vec4(Diffuse, 1.0); */
-    /* color = vec4(vec3(Specular), 1.0); */
+    color = vec4(resColor, 1.0);
+    /* color = vec4(screenPos, 1.0); */
+    /* color = vec4(normal, 1.0); */
+    /* color = vec4(diffLight, 1.0); */
+    /* color = vec4(vec3(occlusionFactor), 1.0); */
 }

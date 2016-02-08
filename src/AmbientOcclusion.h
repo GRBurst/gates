@@ -52,6 +52,7 @@ class AmbientOcclusion {
         GLuint mColorFBO, mBlurFBO;
         Texture mColorTexture, mBlurTexture, mNoiseTexture;
         int mResolutionX, mResolutionY;
+        GLuint mKernelSize;
 
         std::vector<glm::vec3> mRandSamples;
         std::vector<glm::vec3> mNoiseSamples;

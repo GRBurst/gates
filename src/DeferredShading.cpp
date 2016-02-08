@@ -9,8 +9,8 @@ DeferredShading::DeferredShading(const GLint& gBufferProgram, const GLint& defer
     , mGPosition()
     , mGNormal()
     , mGAlbedo()
-    , mResolutionX(1278)
-    , mResolutionY(986)
+    , mResolutionX(1280)
+    , mResolutionY(1024)
     , mNumLights(32)
 {
     this->mCamera = camera;
@@ -87,7 +87,7 @@ void DeferredShading::initRandomLights()
     {
         // Calculate slightly random offsets
         GLfloat xPos = ((rand() % 50)) - 25.0;
-        GLfloat yPos = 1.0;
+        GLfloat yPos = 10.0;
         GLfloat zPos = ((rand() % 50)) - 25.0;
         lightPositions.push_back(glm::vec3(xPos, yPos, zPos));
         // Also calculate random color
@@ -136,11 +136,12 @@ void DeferredShading::loadUniforms(const GLint& shader, Terrain *const terrain)
         glUniform1f(glGetUniformLocation(shader, ("lights[" + std::to_string(i) + "].Radius").c_str()), radius);
     }
 
-    /* glUniform3fv(glGetUniformLocation(shader, "uCamPos"), 1, &(mCamera->getPosition()[0])); */
-    glm::vec3 camPos = mCamera->getPosition();
-    glUniform3f(glGetUniformLocation(shader, "uCamPos"), camPos.x, camPos.y, camPos.z);
+    glUniform3fv(glGetUniformLocation(shader, "uCamPos"), 1, &(mCamera->getPosition()[0]));
+    glUniform3fv(glGetUniformLocation(shader, "uRayTerrainIntersection"), 1, &(terrain->getRayTerrainIntersection()[0]));
     glUniform1f(glGetUniformLocation(shader, "uNearPlane"), mCamera->getNearPlane());
     glUniform1f(glGetUniformLocation(shader, "uFarPlane"), mCamera->getFarPlane());
+    glUniform1f(glGetUniformLocation(shader, "uEditMode"), terrain->getEditMode());
+    glUniform1f(glGetUniformLocation(shader, "uModifyRadius"), terrain->getModifyRadius());
     terrain->loadGBufferMaps(shader);
 
 }

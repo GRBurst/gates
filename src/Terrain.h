@@ -53,6 +53,9 @@ class Terrain {
         glm::vec3 getTerrainPosition(const glm::ivec2& coordinate) const;
         glm::vec2 getIndexCordFromTerrain(const glm::vec3& position) const;
         float getHeightOfPosition(const glm::vec3& position) const;
+        glm::vec3 getRayTerrainIntersection() const { return this->mRayTerrainIntersection; };
+        float getEditMode() const { return this->mEditMode; };
+        float getModifyRadius() const { return this->mModifyRadius; };
 
         glm::vec3 computePosition(unsigned int x, unsigned int y) const;
         void modifyHeight();

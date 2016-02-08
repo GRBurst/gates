@@ -5,8 +5,9 @@ AmbientOcclusion::AmbientOcclusion(const GLint& occlusionProgram, const GLint& b
     , mBlurProgram(blurProgram)
     , mColorTexture()
     , mBlurTexture()
-    , mResolutionX(1278)
-    , mResolutionY(986)
+    , mResolutionX(1280)
+    , mResolutionY(1024)
+    , mKernelSize(64)
 {
     this->mDeferredShading = deferredShading;
     this->mCamera = camera;
@@ -70,7 +71,7 @@ void AmbientOcclusion::initRandomSamples()
 {
     std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0); // generates random floats between 0.0 and 1.0
     std::default_random_engine generator;
-    for (GLuint i = 0; i < 64; ++i)
+    for (GLuint i = 0; i < mKernelSize; ++i)
     {
         glm::vec3 sample(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, randomFloats(generator));
         sample = glm::normalize(sample);
@@ -142,8 +143,11 @@ void AmbientOcclusion::loadUniforms()
 
 void AmbientOcclusion::loadUniforms(const GLint& shader)
 {
-    for (GLuint i = 0; i < 64; ++i)
-        glUniform3fv(glGetUniformLocation(shader, ("samples[" + std::to_string(i) + "]").c_str()), 1, &mRandSamples[i][0]);
+    /* for (GLuint i = 0; i < 64; ++i) */
+    /*     glUniform3fv(glGetUniformLocation(shader, ("samples[" + std::to_string(i) + "]").c_str()), 1, &mRandSamples[i][0]); */
+    glUniform3fv(glGetUniformLocation(shader, "uProbes"), mKernelSize, glm::value_ptr(mRandSamples.data()[0]));
+    glUniform1i(glGetUniformLocation(shader, "uKernelSize"), mKernelSize);
+
 
     glUniformMatrix4fv(glGetUniformLocation(shader, "uPMatrix"), 1, GL_FALSE, glm::value_ptr(mCamera->getProjectionMatrix()));
 }

@@ -30,16 +30,17 @@ uniform float uTime;
 vec3 lightCol       = vec3( 1.0, 1.0, 0.95 );
 vec3 gLightPos2_ws  = vec3( 0.0, 10.0, 3.0 );
 out vec4 color;
-mat4 rotationMatrix(vec3 axis, float angle){
-	axis = normalize(axis);
-	float sinVal = sin(angle);
-	float cosVal = cos(angle);
-	float cosToOne = 1.0f -cosVal;
-	
-	return mat4(cosVal + axis.x * axis.x * cosToOne,		axis.x * axis.y * cosToOne - axis.z * sinVal, 		axis.z * axis.x * cosToOne + axis.y * sinVal, 	0.0f,
-				axis.x * axis.y * cosToOne + axis.z*sinVal,	cosVal + axis.y * axis.y * cosToOne,		 		axis.y * axis.z * cosToOne - axis.x * sinVal, 	0.0f,
-				axis.z * axis.x * cosToOne - axis.y*sinVal,	axis.z * axis.y * cosToOne + axis.x * sinVal, 		cosVal + axis.z * axis.z  * cosToOne,	 		0.0f,
-				0.0f,										0.0f,												0.0f,											1.0f);
+mat4 rotationMatrix(vec3 axis, float angle)
+{
+    axis = normalize(axis);
+    float sinVal = sin(angle);
+    float cosVal = cos(angle);
+    float cosToOne = 1.0f -cosVal;
+
+    return mat4(cosVal + axis.x * axis.x * cosToOne,		axis.x * axis.y * cosToOne - axis.z * sinVal, 		axis.z * axis.x * cosToOne + axis.y * sinVal, 	0.0f,
+            axis.x * axis.y * cosToOne + axis.z*sinVal,	cosVal + axis.y * axis.y * cosToOne,		 		axis.y * axis.z * cosToOne - axis.x * sinVal, 	0.0f,
+            axis.z * axis.x * cosToOne - axis.y*sinVal,	axis.z * axis.y * cosToOne + axis.x * sinVal, 		cosVal + axis.z * axis.z  * cosToOne,	 		0.0f,
+            0.0f,										0.0f,												0.0f,											1.0f);
 }
 bool doHighLight()
 {

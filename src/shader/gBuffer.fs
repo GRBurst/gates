@@ -12,36 +12,38 @@ in mat3 fTBN;
 
 uniform sampler2D sNormalMap;
 uniform sampler2D sWhiteNoise;
+uniform vec3 uRayTerrainIntersection;
 uniform float uNearPlane;
 uniform float uFarPlane;
+uniform float uEditMode;
+uniform float uModifyRadius;
 
-/* bool doHighLight() */
-/* { */
-/*     if(uEditMode < 2.0) */
-/*     { */
-/*         float radius = length(vec2(uRayTerrainIntersection.x - wPos.x, uRayTerrainIntersection.z - wPos.z)); */
-/*         if((radius < uModifyRadius + 0.1) && (radius > uModifyRadius )) return true; */
-/*     } */
-
-/*     return false; */
-/* } */
-float LinearizeDepth(float depth)
+float getLineareDepth( float depth )
 {
     float z = depth * 2.0 - 1.0; // Back to NDC 
     return (2.0 * uNearPlane * uFarPlane) / (uFarPlane + uNearPlane - z * (uFarPlane - uNearPlane));	
 }
 
+bool doHighLight()
+{
+    if(uEditMode < 2.0)
+    {
+        float radius = length(vec2(uRayTerrainIntersection.x - wPos.x, uRayTerrainIntersection.z - wPos.z));
+        if((radius < uModifyRadius + 0.1) && (radius > uModifyRadius )) return true;
+    }
+
+    return false;
+}
+
 void main()
 {
     gPosition.xyz   = fPos;
-    gPosition.w     = LinearizeDepth(gl_FragCoord.z);
+    gPosition.w     = getLineareDepth(gl_FragCoord.z);
     gNormal         = normalize(fNormal);
 
-    /* if(doHighLight()) gAlbedo = vec3(uEditMode, 1.0-uEditMode, 1.0-uEditMode); */
-    /* else */
-    if(true)
+    if(doHighLight()) gAlbedo = vec3(uEditMode, 1.0-uEditMode, 1.0-uEditMode);
+    else
     {
-
         vec3 normal_ts      = texture2D(sNormalMap, 2*fUV).rgb * 2.0f - 1.0f;
         float terrainHeight = wPos.y/3.8;
         vec3 terrainNormal  = gNormal;
@@ -74,7 +76,6 @@ void main()
         vec3 snowColor1     = ( snowIntensity * mix( snowBaseColor, snowBaseColor*1.1, smoothstep( 0.9, 1.0, (1.0-normalHeight))));
         vec3 snowColor2     = ( snowIntensity * mix( snowColor1, snowColor1*texture2D(sWhiteNoise, fUV*0.14).r, smoothstep( 0.3, 0.7, (1.0-normalHeight))));
 
-        /* vec3 resColor   = mix( waterColor, grassColor, step( 1.1 - waterIntensity, terrainHeight )); */
         vec3 resColor   = mix( waterColor1, waterColor2,    smoothstep( 0.00,   0.06,   terrainHeight           ));
         resColor        = mix( resColor,    grassColor1,    smoothstep( 0.04,   0.08,   terrainHeight  ));
         resColor        = mix( resColor,    grassColor2,    smoothstep( 0.08,   0.12,    terrainHeight*yNormal           ));

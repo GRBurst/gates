@@ -476,6 +476,7 @@ int main()
 
     AmbientOcclusion ambientOcclusion(ambientOcclusionShaderProgram, ambientBlurShaderProgram, &deferredShading, &camera);
     ambientOcclusion.linkTextures();
+    ambientOcclusion.linkBlurredTexture(deferredShadingShaderProgram);
     ambientOcclusion.init();
     ambientOcclusion.initRandomSamples();
     ambientOcclusion.loadUniforms();
@@ -622,21 +623,29 @@ int main()
 
 
 
+        // Debug with quad
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        /* glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); */
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        /* quad.render(deferredShading.getPositionTexture()); */
+        /* quad.render(deferredShading.getNormalTexture()); */
+        /* quad.render(deferredShading.getAlbedoTexture()); */
+        /* quad.setDim(1); quad.render(ambientOcclusion.getColorTexture()); */
+        /* quad.setDim(1); quad.render(ambientOcclusion.getBlurTexture()); */
+
+
+
+        // Final deferred rendering step
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        /* glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        /* glUseProgram(deferredShadingShaderProgram); */
-        /* deferredShading.bindTextures(); */
-        /* deferredShading.loadUniforms(deferredShadingShaderProgram); */
+        glUseProgram(deferredShadingShaderProgram);
+        deferredShading.bindTextures();
+        ambientOcclusion.bindBlurredTexture();
+        deferredShading.loadUniforms(deferredShadingShaderProgram, pActiveTerrain);
 
-        /* quad.render(deferredShading.getPositionTexture()); */
-        quad.setDim(1);
-        quad.render(ambientOcclusion.getBlurTexture());
-
-
-
-
+        quad.render();
 
 
 
@@ -666,13 +675,13 @@ int main()
 
         // 2. Lighting Pass: calculate lighting by iterating over a screen filled quad pixel-by-pixel using the gbuffer's content.
         /* glBindFramebuffer(GL_FRAMEBUFFER, 0); */
-        /* //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); */
+        /* glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); */
         /* glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); */
 
         /* glUseProgram(deferredShadingShaderProgram); */
         /* deferredShading.bindTextures(); */
         /* ambientOcclusion.bindBlurredTexture(); */
-        /* deferredShading.loadUniforms(deferredShadingShaderProgram); */
+        /* deferredShading.loadUniforms(deferredShadingShaderProgram, pActiveTerrain); */
 
         /* /1* quad.render(deferredShading.getAlbedoTexture()); *1/ */
         /* quad.render(); */

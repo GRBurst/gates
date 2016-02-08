@@ -1,21 +1,24 @@
 #version 410 core
 in vec2 fUV;
-out float fragColor;
+out float color;
 
 uniform sampler2D sAmbientColor;
+uniform int uBlurSize = 4;
 
 void main()
 {
-    vec2 TexCoords = fUV;
     vec2 texelSize = 1.0 / vec2(textureSize(sAmbientColor, 0));
+
+    vec2 offset;
     float result = 0.0;
-    for (int x = -2; x < 2; ++x) 
+    int range = uBlurSize / 2;
+    for (int x = -range; x < range; x++)
     {
-        for (int y = -2; y < 2; ++y) 
+        for (int y = -range; y < range; y++) 
         {
-            vec2 offset = vec2(float(x), float(y)) * texelSize;
-            result += texture(sAmbientColor, TexCoords + offset).r;
+            offset = vec2(float(x), float(y)) * texelSize;
+            result += texture(sAmbientColor, fUV + offset).r;
         }
     }
-    fragColor = result / (4.0 * 4.0);
+    color = result / float(uBlurSize*uBlurSize);
 }
