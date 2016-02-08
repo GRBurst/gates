@@ -382,7 +382,6 @@ double SimplexNoise::fbmTileableX(double x, double y, double z){
 	float multiplier = 1.0f / ( 2.0f * glm::pi<double>() );
 	for(int i = 0; i < mOctaves; i++){
 		result += calculateNoiseValue((std::cos(x * glm::pi<double>()))*frequency, (std::cos(y * 2.0 * glm::pi<double>()) * multiplier)*frequency, (std::sin(y * 2.0 * glm::pi<double>()) * multiplier) * frequency, z) * amp;
-
 		frequency *= 2.0;
 		amp *= 0.5;
 	}
