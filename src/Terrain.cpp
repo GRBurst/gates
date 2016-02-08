@@ -208,10 +208,10 @@ void Terrain::draw()
     mInvViewMatrix = mCamera->getInvViewMatrix();
     mCamPos = mCamera->getPosition();
     glUseProgram(mShaderProgram);
-    glUniformMatrix4fv(muVPLocation, 1, GL_FALSE, value_ptr(mVPMatrix));
-    glUniformMatrix4fv(muVLocation, 1, GL_FALSE, value_ptr(mVMatrix));
-    glUniformMatrix3fv(muInvViewLocation, 1, GL_FALSE, value_ptr(mInvViewMatrix));
-    glUniformMatrix4fv(glGetUniformLocation(mShaderProgram, "uMMatrix"), 1, GL_FALSE, value_ptr(mMMatrix));
+    glUniformMatrix4fv(muVPLocation, 1, GL_FALSE, glm::value_ptr(mVPMatrix));
+    glUniformMatrix4fv(muVLocation, 1, GL_FALSE, glm::value_ptr(mVMatrix));
+    glUniformMatrix3fv(muInvViewLocation, 1, GL_FALSE, glm::value_ptr(mInvViewMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(mShaderProgram, "uMMatrix"), 1, GL_FALSE, glm::value_ptr(mMMatrix));
     glUniform1i(muHeightMapTerrainRatioLocation, mHeightMapTerrainRatio);
     glUniform1i(muDrawGridLocation, mDrawGrid);
     glUniform3f(muRayTerrainIntersectionLocation, mRayTerrainIntersection.x, mRayTerrainIntersection.y, mRayTerrainIntersection.z);
@@ -262,8 +262,8 @@ void Terrain::draw()
  */
 float Terrain::getHeightOfPosition(const glm::vec3& position) const
 {
-    glm::ivec2 indexCord0 = floor(getIndexCordFromTerrain(position));   // Bottom left
-    glm::ivec2 indexCord3 = ceil(getIndexCordFromTerrain(position));    // Top right
+    glm::ivec2 indexCord0 = glm::floor(getIndexCordFromTerrain(position));   // Bottom left
+    glm::ivec2 indexCord3 = glm::ceil(getIndexCordFromTerrain(position));    // Top right
     glm::ivec2 indexCord1 = glm::ivec2(indexCord0.x, indexCord3.y);     // Top left
     glm::ivec2 indexCord2 = glm::ivec2(indexCord3.x, indexCord0.y);     // Bottom right
 
