@@ -34,6 +34,7 @@ class PerlinNoise : public Noise
 		double calculateNoiseValue(double x, double y, double z);
 		double calculateNoiseValue(double x, double y, double z, double u);
 		glm::ivec2 getDimension(){ return glm::ivec2(mXDim, mYDim);}
+		float* getNormalMap();
 	protected:
 		glm::dvec4 interpolationPolynomial(glm::dvec4 vec);
 		glm::dvec3 interpolationPolynomial(glm::dvec3 vec);

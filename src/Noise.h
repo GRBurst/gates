@@ -49,6 +49,7 @@ class Noise
 		int getZDim(){ return mZDim;};
 		int getUDim(){ return mUDim;};
 		glm::ivec2 getDimension(){ return glm::ivec2(mXDim, mYDim);}
+		float* getNormalMap();
 	protected:
 		double clamp(double x, double min, double max);
 		int mXDim, mYDim, mZDim, mUDim, mVDim, mWDim, mSeed;
@@ -57,6 +58,7 @@ class Noise
 		bool mTileable;
 		bool mScaleZeroToOne;
         std::vector<float> mNoiseValues;
+        std::vector<glm::vec3> mNormalMap;
 
 };
 

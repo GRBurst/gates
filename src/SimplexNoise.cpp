@@ -433,4 +433,31 @@ double SimplexNoise::fbm(double x, double y, double z){
 	return result / mAmplitude;
 }
 
+void SimplexNoise::calculateNormalMap()
+{
+	float mask[9] ={};
+	mNormalMap = std::vector<glm::vec3>(mXDim * mYDim * mZDim, glm::vec3(0.5f));
+	for (int z = 0; z < mZDim; z++)
+		for (int y = 0; y < mYDim; y++)
+			for (int x = 1; x < mXDim; x++)
+			{
+				mask[0] = mNoiseValues[z * mYDim * mXDim + clamp((y - 1), 0, mYDim) * mXDim + clamp((x - 1), 0, mXDim)];
+				mask[1] = mNoiseValues[z * mYDim * mXDim + clamp((y - 1), 0, mYDim) * mXDim + x];
+				mask[2] = mNoiseValues[z * mYDim * mXDim + clamp((y - 1) ,0, mYDim) * mXDim + clamp((x + 1), 0, mXDim)];
+				mask[3] = mNoiseValues[z * mYDim * mXDim + y * mXDim + clamp((x - 1), 0, mXDim)];
+				mask[5] = mNoiseValues[z * mYDim * mXDim + y * mXDim + clamp((x + 1), 0, mXDim)];
+				mask[6] = mNoiseValues[z * mYDim * mXDim + clamp((y + 1), 0, mYDim) * mXDim + clamp((x - 1), 0, mXDim)];
+				mask[7] = mNoiseValues[z * mYDim * mXDim + clamp((y + 1), 0, mYDim) * mXDim + x];
+				mask[8] = mNoiseValues[z * mYDim * mXDim + clamp((y + 1), 0, mYDim) * mXDim + clamp((x + 1), 0, mXDim)];
+				float dX = (mask[2] + 2.0f * mask[5] + mask[8]) - (mask[0] + 2.0f * mask[3] + mask[6]);
+				float dY = (mask[6] + 2.0f * mask[7] + mask[8]) - (mask[0] + 2.0f * mask[1] + mask[2]);
+				float dZ = 1.0f;
+				glm::vec3 normal(dX, dY, dZ);
+				normal = glm::normalize(normal);
+
+				mNormalMap[z * mYDim * mXDim + y * mXDim + x] = normal;
+			}
+}
+
+
 

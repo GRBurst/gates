@@ -12,6 +12,7 @@ Texture::Texture()
     , ddata(0)
 {
     this->location = idGenerator++;
+    std::cout << "texture location = " << this->location << std::endl;
     glGenTextures(1, &texture);
 }
 
@@ -27,6 +28,7 @@ Texture::Texture(const char* imagePath)
 	FreeImage_Initialise();
 	glGenTextures(1, &texture);
 	this->location = idGenerator++;
+    std::cout << "texture location = " << this->location << std::endl;
 
 	FREE_IMAGE_FORMAT fif = FreeImage_GetFileType(imagePath, 0);
 
@@ -100,6 +102,26 @@ void Texture::setData(float* data, int width, int height, int depth)
 	this->depth		= depth;
 }
 
+
+void Texture::loadWaterOptions()
+{
+    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, this->width, this->height,0,GL_RGB, GL_UNSIGNED_BYTE, 0);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+}
+
+void Texture::loadWaterNormalOptions()
+{
+    glTexImage3D(GL_TEXTURE_3D, 0,GL_RGB, this->width, this->height, this->depth,0,GL_RGB, GL_FLOAT, ddata);
+    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+    glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S,  GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T,  GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R,  GL_REPEAT);
+}
 
 void Texture::loadNormalMapOptions()
 {

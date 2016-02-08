@@ -66,7 +66,7 @@ void calcTBN()
                 bitangent_cs,
                 normal_cs
                 ));
-
+	mat3 invTBN = transpose(TBN);
     fLightDir1_ts = TBN * lightDir1_cs;
     fEyeDir_ts = TBN * eyeDir_cs;
 
@@ -83,7 +83,9 @@ void main()
     if (fPos.y > 0.06*3.9)
     	fPos += fNormal * displacement*0.02;
 	else {
-		displacement = 2*texture(sTextureWaterDisp, vec3(fUV * 16, uTime/10)).r-1;
+		displacement = 2*texture(sTextureWaterDisp, vec3(fUV / 4, uTime/10)).r-1;
+		displacement += 2*texture(sTextureWaterDisp, vec3(fUV / 2, uTime/10)).r-1;
+		displacement += 2*texture(sTextureWaterDisp, vec3(fUV, uTime/10)).r-1;
 		displacement += 2*texture(sTextureWaterDisp, vec3(fUV * 2, uTime/10)).r-1;
 		fPos += fNormal * displacement*0.015;
 	}

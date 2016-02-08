@@ -9,6 +9,7 @@
 #include "ModelLoader.h"
 #include "PerlinNoise.h"
 #include "Portal.h"
+#include "Quad.h"
 #include "Shader.h"
 #include "Terrain.h"
 #include "Texture.h"
@@ -325,7 +326,7 @@ int main()
      */
 
     // Common parameters
-    int noiseDimX = 256, noiseDimY = 256, noiseDimZ = 1;
+    int noiseDimX = 256, noiseDimY = 256;
     int seed = 42, octaves = 16;
     double frequency = 8.0, amplitude = 4.0;
 
@@ -340,10 +341,11 @@ int main()
     pActiveNoise2->generateNoiseImage();
     pActiveNoise2->saveToFile("WorleyNoise.tga");
 
-    SimplexNoise* noiseWater3D = new SimplexNoise(noiseDimX/4, noiseDimX/4, 64, seed);
-    noiseWater3D->setOctavesFreqAmp(4, 2, 1);
+    SimplexNoise* noiseWater3D = new SimplexNoise(noiseDimX, noiseDimX, 64, seed);
+    noiseWater3D->setOctavesFreqAmp(8, 16, 1);
 	noiseWater3D->setScale(true);
 	noiseWater3D->generateTileableNoiseImage(1);
+	noiseWater3D->calculateNormalMap();
 
     pActiveTerrain = new Terrain(terrainShaderProgram, noiseDimX, noiseDimY, &camera, pActiveNoise);
     /* pActiveTerrain->enableNormals(); */
@@ -356,6 +358,7 @@ int main()
     pActiveTerrain->linkHeightMapTexture(defaultShaderProgram);
     //Setup Water Noise in Terrain
 	pActiveTerrain->loadWater3DNoise(noiseWater3D);
+	pActiveTerrain->loadWaterNormal3DNoise(noiseWater3D);
 	// Setup initial terrain
     /* pActiveTerrain->debug(); */
 
@@ -442,29 +445,33 @@ int main()
     model.setStandardUniformLocations();
     vec3 sphereTranslation = vec3(0.0, 10.0, 0.0);
     model.translate(sphereTranslation);
+
     GLuint waterFrameBufferLoc;
     glGenFramebuffers(1, &waterFrameBufferLoc);
     glBindFramebuffer(GL_FRAMEBUFFER, waterFrameBufferLoc);
 
-    GLuint waterReflectionTextureLoc;
-    glGenTextures(1, &waterReflectionTextureLoc);
-    glBindTexture(GL_TEXTURE_2D, waterReflectionTextureLoc);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, 512, 512,0,GL_RGB, GL_UNSIGNED_BYTE, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,waterReflectionTextureLoc, 0);
+    Texture waterReflectionTexture;
+    waterReflectionTexture.bind();
+    waterReflectionTexture.setResolution(512, 512);
+    waterReflectionTexture.loadWaterOptions();
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, waterReflectionTexture.getTexture(), 0);
+
+    GLuint DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+    glDrawBuffers(1, DrawBuffers);
+
     GLuint depthRenderBufferLoc;
     glGenRenderbuffers(1, &depthRenderBufferLoc);
     glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBufferLoc);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 512, 512);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBufferLoc);
-    GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-    glDrawBuffers(1, DrawBuffers);
 
     glBindRenderbuffer(GL_RENDERBUFFER,0);
     glBindFramebuffer(GL_FRAMEBUFFER,0);
+
+    waterReflectionTexture.linkTexture(terrainShaderProgram, "sReflectionMap");
+    Quad quad;
+	quad.init();
     // Main (frame) loop
     float oldTime, newTime;
     int loops;
@@ -527,6 +534,17 @@ int main()
         model.setView(camera.getViewMatrix());
         model.draw();
 
+        glBindFramebuffer(GL_FRAMEBUFFER, waterFrameBufferLoc);
+        waterReflectionTexture.bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
+
+        glFrontFace(GL_CW);
+        pActiveTerrain->drawReflection();
+        glFrontFace(GL_CCW);
+
+        glEnable(GL_DEPTH_TEST);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         // Active terrain
         pActiveTerrain->setGrid(gDrawGrid);
         pActiveTerrain->draw();
@@ -543,7 +561,7 @@ int main()
         skydome3.draw();
         glDisable(GL_BLEND);
 
-
+        quad.render(waterReflectionTexture);
         // Draw in stencil pattern (in portal)
 
 

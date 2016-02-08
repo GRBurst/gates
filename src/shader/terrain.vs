@@ -23,9 +23,15 @@ void main()
 
 
     vUVCS = vUV;
-    vNormalCS = vNormal;
+    
     float vHeight = vPosition.y;
-	if (vHeight/3.8 < 0.06) vHeight = 0.06*3.1;
+	if (vHeight/3.8 < 0.06) 
+	{
+		vHeight = 0.06*3.1;
+		vNormalCS = vec3(0, 1, 0);
+	}
+	else
+		vNormalCS = vNormal;
         
 
     vPositionCS = vec3(vPosition.x, vHeight, vPosition.z);

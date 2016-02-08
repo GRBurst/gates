@@ -66,7 +66,7 @@ class Terrain {
         void setGrid(int mode) { mDrawGrid = mode; };
         void saveNoiseToFile(const char* filename = "terrainNoise.tga") const;
         void loadWater3DNoise( Noise* noise);
-
+        void loadWaterNormal3DNoise( Noise* noise);
         void debug();
 
     private:

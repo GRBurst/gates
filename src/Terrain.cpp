@@ -57,6 +57,15 @@ void Terrain::loadWater3DNoise( Noise* noise){
 	texture->loadSkydome3DOptions();
 }
 
+void Terrain::loadWaterNormal3DNoise(Noise* noise)
+{
+	Texture* texture = new Texture();
+	texture->setData(noise->getNormalMap(), noise->getXDim(), noise->getYDim(), noise->getZDim());
+	texture->linkTexture(mShaderProgram, "sTextureWaterNormal");
+	texture->bind3D();
+	texture->loadWaterNormalOptions();
+}
+
 void Terrain::addNoise(const std::vector<float>& noiseValues)
 {
     for(unsigned int i = 0; i < mNoiseValues.size(); i++)
