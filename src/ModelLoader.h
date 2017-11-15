@@ -10,7 +10,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <fstream>
-#include <SOIL/SOIL.h>
+#include "../external/SOIL/Simple OpenGL Image Library/src/SOIL.h"
 /* #include "Texture.h" */
 
 using namespace std;

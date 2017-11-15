@@ -11,14 +11,14 @@ if(USE_CLANG)
     SET(CMAKE_CXX_COMPILER  "/usr/bin/clang++")
 endif(USE_CLANG)
 
-add_definitions(-std=c++11 -O2 -Wall -Wextra -pedantic)
+add_definitions(-std=c++14 -O2 -Wall -Wextra -pedantic)
 
 # OpenGL
-find_package(OpenGL REQUIRED)
-if(NOT OPENGL_FOUND)
-    message(FATAL_ERROR "OpenGL not found!")
-endif(NOT OPENGL_FOUND)
-include_directories(${OPENGL_INCLUDE_DIR})
+#find_package(OpenGL REQUIRED)
+#if(NOT OPENGL_FOUND)
+#    message(FATAL_ERROR "OpenGL not found!")
+#endif(NOT OPENGL_FOUND)
+#include_directories(${OPENGL_INCLUDE_DIR})
 #target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES})
 
 
