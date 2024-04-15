@@ -18,7 +18,7 @@ in float timeScaleFactor;
 uniform sampler2D sHeightMap;
 uniform sampler2D sNormalMap;
 uniform sampler2D sWhiteNoise;
-uniform sampler2D sTextureWaterDisp;
+uniform sampler3D sTextureWaterDisp;
 uniform sampler2D sReflectionMap;
 uniform sampler3D sTextureWaterNormal;
 uniform mat4 uVMatrix;
